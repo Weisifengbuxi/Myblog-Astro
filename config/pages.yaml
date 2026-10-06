@@ -1,0 +1,132 @@
+# =============================================================================
+# Custom pages data
+# 自定义页面数据（相册 / 装备 / 即刻短文）
+# =============================================================================
+# 从原 Hexo 博客的 source/_data/{album,equipment,essay}.yml 迁移而来。
+# 修改这里即可更新对应页面，无需改组件。
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 相册 / 图片集
+# -----------------------------------------------------------------------------
+# id:          页面路径片段，同时也是页面 slug（/album、/wordScenery ...）
+# cover:       相册集列表页的封面
+# category:    true 表示这是「相册集」入口（出现在 /album 汇总页）
+# items[].date: 建议写成 YYYY-MM-DD，便于排序
+# -----------------------------------------------------------------------------
+albums:
+  - id: wordScenery
+    name: 世界各地风景
+    description: 记录各地的夕阳与风景🌇
+    cover: https://upload-bbs.miyoushe.com/upload/2025/06/13/125766904/2cf2b6aea07bba089d0d17c4fea72d1b_5366629137934368264.png
+    category: true
+    items:
+      - date: '2022-10-26'
+        content: 湘潭的一角。
+        address: 湖南湘潭
+        from: 再吃一口就减肥
+        images:
+          - https://bu.dusays.com/2023/04/09/64329399db122.webp
+      - date: '2022-10-25'
+        content: 洛阳暴雨后的天空。
+        address: 河南洛阳
+        from: 紫菜卷
+        images:
+          - https://bu.dusays.com/2023/04/09/64329399db122.webp
+          - https://bu.dusays.com/2023/04/09/64329399db2e1.webp
+
+  - id: dailyPhoto
+    name: 我的日常
+    description: 有关我自己的一些沙雕生活与有趣的事情
+    cover: https://bu.dusays.com/2023/04/09/64329399cea5a.webp
+    category: true
+    items:
+      - date: '2022-10-24'
+        content: 老妹的画
+        images:
+          - https://bu.dusays.com/2023/04/09/643293997b92b.jpeg
+
+  - id: gamePhotos
+    name: 游戏荣誉
+    description: 操作永无上限
+    cover: https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/rongyu1.jpg
+    category: true
+    items:
+      - date: '2025-08-09'
+        content: 辅助单排从星耀四连胜上王者
+        images:
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wzjt2.jpg
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wzjt1.jpg
+      - date: '2025-09-24'
+        content: 赛季最后一天圆了荣耀梦
+        images:
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/rongyu1.jpg
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/rongyu.jpg
+      - date: '2025-10-03'
+        content: 和高手对决总能提升自己
+        images:
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wz3.jpg
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wz4.jpg
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wz5.jpg
+      - date: '2025-10-08'
+        content: 王者荣耀逆天匹配机制（幸好最后赢了）
+        images:
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wz6.jpg
+          - https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wz7.jpg
+
+# -----------------------------------------------------------------------------
+# 我的装备
+# -----------------------------------------------------------------------------
+equipment:
+  intro: 跟 未似风不息 一起享受科技带来的乐趣
+  groups:
+    - title: 生产力
+      description: 提升自己生产效率的硬件设备
+      items:
+        - name: Legion Y7000P IRX9 (2024款)
+          specification: 月蚀灰 / 1TB
+          description: 屏幕显示效果好、色彩准确、对比度强、性能强劲、可以用来开发和设计
+          image: https://s21.ax1x.com/2025/08/23/pVDjcfP.jpg
+          link: https://item.lenovo.com.cn/product/1046448.html
+        - name: HUAWEI MatePad Pro
+          specification: 曜金黑 / 256G
+          description: 事事玩得转，就是皮套模式的判定很奇怪
+          image: https://s21.ax1x.com/2025/08/23/pVDj2Sf.jpg
+          link: https://www.vmall.com/product/comdetail/index.html?prdId=10086139444943
+        - name: HUAWEI nova 14 Ultra
+          specification: 曜金黑 / 256G
+          description: 6.81 英寸 1.5K 分辨率 OLED 全等深微曲屏，支持 1-120Hz LTPO 3.0 自适应刷新率，动态画面流畅显示，以及 5500mAh 电池无敌续航
+          image: https://s21.ax1x.com/2025/08/23/pVDjW6S.jpg
+          link: https://consumer.huawei.com/cn/phones/nova14-ultra/specs/
+        - name: HUAWEI FreeBuds 5
+          specification: 星河蓝
+          description: 运动耳机各方面都可以，就是佩戴时消息、电话提示很难听到，还有接通电话很麻烦
+          image: https://s21.ax1x.com/2025/08/23/pVDjfOg.jpg
+          link: https://consumer.huawei.com/cn/headphones/freebuds5/specs/
+
+# -----------------------------------------------------------------------------
+# 即刻短文
+# -----------------------------------------------------------------------------
+# items 按 date 倒序渲染。
+# -----------------------------------------------------------------------------
+essay:
+  subTitle: 咸鱼的日常生活
+  tips: 随时随地，分享生活
+  items:
+    - date: '2025-11-01'
+      content: 嘻嘻，考完了，我将开启 9 天假期~
+    - date: '2025-08-03'
+      content: 终于上完雅思了
+      images:
+        - https://images.weserv.nl/?url=https://raw.githubusercontent.com/Weisifengbuxi/tuchuang/main/img/jiangzhuang111.jpg
+        - https://images.weserv.nl/?url=https://raw.githubusercontent.com/Weisifengbuxi/tuchuang/main/img/jiangzhuang222.jpg
+    - date: '2025-07-29'
+      content: 过生日鸭
+    - date: '2025-07-28'
+      content: 牢弟集训一周的结果
+      link: https://www.bilibili.com/video/BV1iKY1zQEJs?t=17.4
+    - date: '2025-07-28'
+      content: 按下 shift + ? 组合键以查看快捷键选项
+    - date: '2023-09-09'
+      content: 安知鱼主题指南
+      link: https://docs.anheyu.com/

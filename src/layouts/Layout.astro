@@ -67,6 +67,18 @@ const isPostPage = stripLocaleFromPath(Astro.url.pathname).startsWith('/post/');
 </html>
 
 <style is:global>
+  /* 纪念日/哀悼日变灰（config/site.yaml -> mourn）
+   * 类名由 BootScripts 在首屏前打到 <html> 上，且**只在首页**打。
+   * 做成 CSS 而非内联 filter，是为了让 <html> 保持可被子元素样式覆盖，
+   * 也避免污染滚动条等固定 UI。
+   *   affect: 'cover' 首页整页去色（默认）；'page' 所有页面都整页去色 */
+  html[data-mourn='cover'],
+  html[data-mourn='page'] {
+    filter: grayscale(1);
+  }
+
+  /* 只给头图去色的用法（如需）：html[data-mourn='cover'] .cover-hero { filter: grayscale(1); } */
+
   /* Progressive enhancement: scroll-state is experimental, browsers that don't support it will just not show the feather mask */
   @supports (container-type: scroll-state) {
     .scroll-feather-mask {

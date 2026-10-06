@@ -1,0 +1,147 @@
+---
+import { equipmentGroups, equipmentIntro } from '@lib/pages';
+/**
+ * "我的装备" — hardware showcase grouped by purpose.
+ */
+import { Icon } from 'astro-icon/components';
+
+const groups = equipmentGroups;
+---
+
+<div class="equipment">
+  {equipmentIntro && <p class="equipment-intro">{equipmentIntro}</p>}
+
+  {
+    groups.map((group) => (
+      <section class="equipment-group">
+        <header class="equipment-group-head">
+          <h2 class="equipment-group-title">{group.title}</h2>
+          {group.description && <p class="equipment-group-desc">{group.description}</p>}
+        </header>
+
+        <div class="equipment-list">
+          {group.items.map((item) => {
+            const Card = item.link ? 'a' : 'div';
+            return (
+              <Card
+                class="equipment-item"
+                {...(item.link
+                  ? { href: item.link, target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+              >
+                {item.image && (
+                  <span class="equipment-thumb" style={`background-image:url('${item.image}')`} />
+                )}
+                <span class="equipment-body">
+                  <span class="equipment-name">
+                    {item.name}
+                    {item.link && <Icon name="ri:external-link-line" class="equipment-ext" />}
+                  </span>
+                  {item.specification && <span class="equipment-spec">{item.specification}</span>}
+                  {item.description && <span class="equipment-desc">{item.description}</span>}
+                </span>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .equipment-intro {
+    opacity: 0.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .equipment-group + .equipment-group {
+    margin-top: 2.25rem;
+  }
+
+  .equipment-group-head {
+    margin-bottom: 0.85rem;
+  }
+
+  .equipment-group-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .equipment-group-desc {
+    font-size: 0.85rem;
+    opacity: 0.65;
+    margin: 0.15rem 0 0;
+  }
+
+  .equipment-list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .equipment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    border-radius: 0.7rem;
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  a.equipment-item:hover {
+    border-color: color-mix(in oklab, currentColor 30%, transparent);
+    transform: translateX(3px);
+  }
+
+  .equipment-thumb {
+    flex: 0 0 auto;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 0.5rem;
+    background-size: cover;
+    background-position: center;
+    background-color: color-mix(in oklab, currentColor 6%, transparent);
+  }
+
+  .equipment-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  .equipment-name {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 600;
+  }
+
+  .equipment-ext {
+    font-size: 0.9rem;
+    opacity: 0.45;
+  }
+
+  .equipment-spec {
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+
+  .equipment-desc {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 640px) {
+    .equipment-thumb {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+  }
+</style>

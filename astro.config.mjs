@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { unified } from '@astrojs/markdown-remark';
+import mdx from '@astrojs/mdx';
 import node from '@astrojs/node';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
@@ -53,6 +54,28 @@ function loadConfigForAstro() {
 
 const yamlConfig = loadConfigForAstro();
 const editorConfig = normalizeEditorConfig(yamlConfig.editor);
+
+// ---------------------------------------------------------------------------
+// Legacy URL redirects (Hexo migration)
+// ---------------------------------------------------------------------------
+// The Hexo blog used the permalink `posts/:abbrlink.html`, e.g.
+// `/posts/e4925c7a.html`. astro-koharu serves posts at `/post/<slug>`, so every
+// old URL is 301-redirected to keep existing links and search rankings alive.
+// The slug list is produced by `.migration/migrate-hexo.mjs`.
+//
+// Draft posts are filtered out of production builds, so their old URLs are
+// redirected to the home page instead of a non-existent article.
+function loadLegacyRedirects() {
+  const manifestPath = path.join(process.cwd(), '.migration', 'manifest.json');
+  if (!fs.existsSync(manifestPath)) return {};
+  const { posts = [] } = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  return Object.fromEntries(
+    posts.flatMap((p) =>
+      (p.oldUrls ?? []).map((old) => [old, p.draft === true ? '/' : p.newUrl])
+    )
+  );
+}
+const legacyRedirects = loadLegacyRedirects();
 
 // Bundle analysis mode: ANALYZE=true pnpm build
 // Use loadEnv to read .env file (astro.config.mjs runs before Vite loads .env)
@@ -225,6 +248,7 @@ export default defineConfig({
   site: yamlConfig.site.url,
   output: 'static',
   compressHTML: true,
+  redirects: legacyRedirects,
   markdown: {
     processor: unified({
       gfm: true,
@@ -242,6 +266,9 @@ export default defineConfig({
   },
   integrations: [
     ...(editorConfig.enabled ? [editorIntegration()] : []),
+    // MDX lets custom pages (相册 / 装备 / 即刻短文 ...) embed Astro components.
+    // Pinned to 7.x: @astrojs/mdx 8 requires astro >= 7.2.6, this repo pins 7.1.3.
+    mdx(),
     react(),
     sitemap(),
     icon({

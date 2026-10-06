@@ -1,34 +1,46 @@
 ---
 layout: ../layouts/PageLayout.astro
-title: "About"
-coverTitle: "关于我"
-date: 2025-01-03 01:01:33
-description: "关于我？"
+title: "关于本人"
+coverTitle: "关于本人"
+date: 2025-07-26 15:57:51
+updated: 2026-07-05 13:02:05
+description: "关于未似风不息：一名就读于北师香港浸会大学计算机科学与技术专业的学生，这里是记录生活、分享兴趣与沉淀知识的地方。"
+comments: false
 ---
 
-## 你好，这里是余弦
+欢迎来到我的博客！这是我用来**记录生活**、**分享兴趣**和**沉淀知识**的地方，也希望它能成为一个能帮助更多人的空间。
 
-[![github badge](https://img.shields.io/badge/dynamic/json?color=blue&label=Github&query=%24.data.totalSubs&url=https%3A%2F%2Fapi.spencerwoo.com%2Fsubstats%2F%3Fsource%3Dgithub%26queryKey%3Dyusixian)](https://github.com/yusixian)
+### 为什么创建这个网站？
 
-cosine = 余弦 = cos
+大一下在为建模比赛做准备，无意间看到一个论文模板的作者把他的个人博客也写到简介里了。为了解决一些问题，我进入他的博客寻找答案。他的博客页面新奇而又功能完备，给了我极大的震撼。博主在上面分享自己的生活，让我大开眼界，加上我这几年很少发朋友圈，于是萌生了做一个跟他类似网站的想法，作为一个**另类的朋友圈**。
 
-愿热情永存，愿热爱不灭，愿生活无憾
+当然我觉得做这个网站~~可以让我的代码能力有所提升~~!!（用来装逼十分合适）!!
 
-> 我们 都只是无名之辈 \
-> 做你自己最喜欢的事 \
-> 像花一样 肆意绽放 \
-> 不去管 有没有人欣赏
+我想借用这个博客分享一些我的生活日常，巩固记录我平日所学知识，希望这个博客能够在他人遇到困难之时能够提供一些**解决方案和思路**。
 
-### 找到我
+因为专业问题，以后我可能更多的发布一些代码方面的内容。但我深知这个专业是**壁垒极厚**的，因此我会尽力把文章写的通俗易懂，其中会用更多非专业的术语来解释，以达到让不了解计算机的人也能理解的程度，希望您能理解。
 
-个人 Telegram 前端频道：日常碎碎念，偶尔掉落优质前端博文推荐、学习资源等
+### 关于我
 
-https://t.me/cosine_front_end
+目前就读于北师香港浸会大学的计算机科学与技术专业
 
-Gitbook 前端学习记录
+- [x] 在读废物摆烂大学生
+- [x] 致力于成为一个编程开发颠佬
+- [x] 又菜又爱玩⌨️ ctrl + C、ctrl + V 高级 CV 工程师
+- [x] 熟练 Windows、Linux、Mac、Android、IOS 等系统的开关机
+- [x] 精通 Deepseek 编程，豆包编程，面向 ChatGPT 编程
 
-https://book.cosine.ren/
+### To do list
 
-[![GitHub State](https://git-stats.cosine.ren/api?username=yusixian&theme=dark&show_icons=true&hide_border=true)](https://github.com/anuraghazra/github-readme-stats)
+- [x] 四级
+- [x] 六级
+- [x] 建模比赛
+- [ ] 雅思
 
-[![GitHub Streak](https://github-readme-streak-stats-rust-tau.vercel.app?user=yusixian&theme=dark&date_format=%5BY%20%5DM%20&hide_border=true)](https://git.io/streak-stats)
+### 关于本站
+
+创建这个站的时候，我想要的就是有一个能够**积累知识，积累兴趣**的地方，和他人分享，这样可以让知识成为真正的**积累和沉淀**。如果能够帮助到更多的人，解决更多问题，那一定是非常棒的事情。
+
+这里大多是**技术向**的文章，可能不会有很多人看，就当是自我记录吧。一般我研究什么、发现了什么都会分享在这里。当然，如果某篇文章能够帮助到你，我也会感到很开心。
+
+这些就是创建这个小站的本意，也是我**分享生活**的方式。有幸能和你相遇在这里，相信我们能共同留下一段**美好的记忆**。

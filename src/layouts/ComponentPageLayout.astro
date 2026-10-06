@@ -1,0 +1,77 @@
+---
+/**
+ * Page shell for `.mdx` custom pages.
+ *
+ * `PageLayout.astro` wraps every `.md` page's content in `CustomContent` +
+ * `prose`, which is right for prose but wrong for pages that embed component
+ * trees (相册 / 装备 / 即刻短文 / 统计) — the prose typography fights the
+ * component's own layout and margins.
+ *
+ * This shell keeps the same chrome (Layout, Cover, HomeSider, shadow box,
+ * optional comments) but lets a page choose whether its content is prose.
+ *
+ * Usage from an `.mdx` page:
+ *   ---
+ *   layout: ../layouts/ComponentPageLayout.astro
+ *   title: "相册集"
+ *   prose: false
+ *   comments: false
+ *   ---
+ *
+ * Note: `.mdx` files in this project must not contain `<style>` blocks — the
+ * theme's custom markdown processor fails to parse them. Put styles inside the
+ * components you import instead.
+ */
+import CustomContent from '@components/common/CustomContent.astro';
+import HomeSider from '@components/layout/HomeSider.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { CONTENT_PADDING } from '@constants/layout';
+import { seoConfig } from '@constants/site-config';
+import { cn } from '@lib/utils';
+import { Comment } from '@/components/comment';
+import Layout from './Layout.astro';
+import TwoColumnLayout from './TwoColumnLayout.astro';
+
+export interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+    coverTitle?: string;
+    comments?: boolean;
+    /** Wrap the content in `prose` styling. Defaults to true. */
+    prose?: boolean;
+  };
+}
+
+const { frontmatter } = Astro.props;
+const showComments = frontmatter.comments ?? true;
+const isProse = frontmatter.prose ?? true;
+---
+
+<Layout title={`${frontmatter.title} | ${seoConfig.title}`} description={frontmatter.description}>
+  <TwoColumnLayout>
+    <Cover slot="cover" title={frontmatter.coverTitle ?? frontmatter.title} />
+    <HomeSider slot="sider" />
+    <div
+      class={cn(
+        'shadow-box bg-gradient-start mx-0 flex min-w-0 w-full max-w-full flex-col gap-8 overflow-x-clip',
+        CONTENT_PADDING.standard
+      )}
+    >
+      {
+        isProse ? (
+          <div class="prose dark:prose-invert" data-pagefind-body>
+            <CustomContent>
+              <slot />
+            </CustomContent>
+          </div>
+        ) : (
+          <div data-pagefind-body>
+            <slot />
+          </div>
+        )
+      }
+      {showComments && <Comment />}
+    </div>
+  </TwoColumnLayout>
+</Layout>

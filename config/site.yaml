@@ -11,32 +11,34 @@
 # Site Basic Information
 # =============================================================================
 site:
-  title: 余弦の博客 # 网站名称
-  alternate: cosine # 网站英文名称 用于页脚、Logo、@ handle 等
-  subtitle: WA 的一声就哭了 # 网站副标题
-  name: cos # 作者名称 - 请修改为你的名字
-  description: 一个基于 Astro 的现代化博客主题 # 网站描述
-  avatar: /img/avatar.webp # 网站头像
-  showLogo: false # 是否显示图形 Logo；默认显示站点名称，启用后可替换 src/assets/svg/logo.svg
-  author: Author # 作者名称 - 请修改为你的名字
-  url: https://koharu.cosine.ren # 站点 URL 用于 RSS 和 SEO
-  defaultOgImage: /img/avatar.webp # 默认 Open Graph 图片
-  startYear: 2024 # 建站年份
-  timezone: Asia/Shanghai # 时区配置 (IANA 格式)，用于日期显示和处理
+  title: 未似风不息 # 网站名称
+  alternate: Weisifengbuxi # 网站英文名称 用于页脚、Logo、@ handle 等
+  subtitle: 学习技术 分享生活 # 网站副标题
+  name: 未似风不息 # 作者名称
+  description: 未似风不息的个人技术博客，分享计算机组成原理、数据结构与算法、数学建模等学习笔记，以及生活感悟与博客搭建教程。 # 网站描述
+  avatar: /img/avatar.jpg # 网站头像
+  showLogo: false # false = 页头显示站点名称文字（alternate）；true = 显示 src/assets/svg/logo.svg（主题作者的 Cosine logo，需自行替换）
+  author: 未似风不息 # 作者名称
+  url: https://www.weisifengbuxi.top # 站点 URL 用于 RSS 和 SEO
+  defaultOgImage: /img/avatar.jpg # 默认 Open Graph 图片
+  startYear: 2025 # 建站年份
+  timezone: Asia/Shanghai # 时区配置 (IANA 格式)
   keywords: # SEO 关键词 (全局)
     - 博客
-    - Astro
-    - 技术
-    - 前端
-    # 请根据你的网站内容添加关键词
+    - 学习笔记
+    - 计算机组成原理
+    - 数据结构
+    - 算法
+    - 数学建模
+    - AStro
+    - 个人博客
   # breadcrumbHome: 首页  # 面包屑导航中首页的显示名称（默认: '首页'）
-  # icp:                         # ICP 备案号（可自定义链接）
-  #   text: "粤ICP备xxxxxxxxxx号"
-  #   link: "https://beian.miit.gov.cn/"
+  icp: # ICP 备案号（主题原生字段，显示在页脚版权行下方）
+    text: '晋ICP备-2025067606号'
+    link: 'https://beian.miit.gov.cn/'
   # Enable slug transliteration (converts CJK characters to pinyin/romaji)
   # Note: enabling this will break existing CJK URLs. Run `pnpm save-slugs` first to save old slugs into frontmatter.link
   # enableSlugTransliteration: true
-
 # =============================================================================
 # Internationalization (i18n)
 # 国际化配置 - 控制多语言支持
@@ -51,33 +53,45 @@ i18n:
   locales:
     - code: zh
       label: 中文
-    - code: en
-      label: English
-      # enabled: false  # 内容存在但暂时禁用（保留内容但不生成路由）
-    - code: ja
-      label: 日本語
-    - code: ko
-      label: 한국어
-
+    # 多语言支持已关闭：内容与 UI 翻译尚未提供。
+    # 注意：astro.config.mjs 依据本列表是否有多于一种语言来决定是否生成
+    # /en、/ja 等带前缀的路由，因此这里必须只保留一种语言；
+    # 否则站点会生成 /en/post/... 之类的空路由，并可能被搜索引擎判为重复内容。
+    # 如需启用英文站点：
+    #   1. 在 src/i18n/translations/ 下新增 <code>.ts 并在 index.ts 注册
+    #   2. 将翻译文章放入 src/content/blog/<code>/
+    #   3. 在下方重新加入对应的 code
 # =============================================================================
 # Category Map
 # Maps Chinese category names to URL-friendly English slugs
 # Example: '随笔' category URL becomes /categories/life
 # =============================================================================
 categoryMap:
-  # Primary categories
-  随笔: life
-  笔记: note
+  # 分类名 -> URL 段（只能是「一段」路径，不能写成 a/b）。
+  # astro-koharu 的层级来自文章 frontmatter 里的分类名数组，
+  # 例如 categories: [[学习笔记, 代码学习]] 会依次映射成
+  # /categories/note 与 /categories/note/code —— 父级前缀由主题自动拼接，
+  # 所以这里的值千万不要再写成 "note/code"，否则会变成 note/note/code。
+  #
+  # 一级分类
+  生活日常: life
+  学习笔记: note
   工具: tools
-  周刊: weekly
-  # Secondary categories (for nested paths)
+  # 学习笔记的二级分类
+  代码学习: code
+  理论学习: theory
+  排序: algorithm
+  比赛: contest
+  美化: beautify
+  数学建模: modeling
+  # 前端分类，保留以备后续使用 -> /categories/note/front-end
   前端: front-end
-  # Add more as needed:
+  # 其他
+  教程: tools
+  福利: tools
+  # 可按需继续添加（不要在值里写斜杠）：
   # 书摘: reading
-  # 后端: back-end
-  # 算法: algorithm
   # 项目: project
-
 # =============================================================================
 # Featured Categories (Homepage)
 # 首页精选分类 - 在首页以卡片形式展示的分类入口
@@ -89,23 +103,26 @@ categoryMap:
 #   description: 分类描述文字，显示在卡片上
 # -----------------------------------------------------------------------------
 featuredCategories:
-  - link: life # 对应 categoryMap 中 随笔: life
-    label: 随笔
-    image: /img/cover/2.webp
-    description: 生活记录、随想随笔
-  - link: note # 对应 categoryMap 中 笔记: note
-    label: 笔记
+  - link: note
+    label: 学习笔记
     image: /img/cover/4.webp
-    description: 技术笔记、学习笔记
-  - link: note/front-end # 嵌套分类：笔记/前端
-    label: 前端
+    description: 计算机组成原理、数据结构与算法等课程笔记
+  - link: note/code
+    label: 代码学习
     image: /img/cover/1.webp
-    description: 前端技术相关
-  - link: tools # 对应 categoryMap 中 工具: tools
+    description: Java 数据结构、链表栈队列与递归
+  - link: note/theory
+    label: 理论学习
+    image: /img/cover/7.webp
+    description: 逻辑门电路、计算机组成原理等理论笔记
+  - link: tools
     label: 工具
     image: /img/cover/11.webp
-    description: 工具使用、效率提升
-
+    description: 博客美化、CDN 加速与效率工具
+  - link: life
+    label: 生活日常
+    image: /img/cover/2.webp
+    description: 生活记录、随想与见闻
 # =============================================================================
 # Featured Series
 # 精选系列功能 - 用于展示定期更新的系列内容（支持多个系列）
@@ -124,32 +141,17 @@ featuredCategories:
 #   links: 相关链接配置（可选）
 # -----------------------------------------------------------------------------
 featuredSeries:
-  - slug: weekly # URL 路径: /weekly
-    categoryName: 周刊 # 必须与 categoryMap 中的分类名匹配
-    label: 我的周刊 # 简短名称
-    fullName: 我的技术周刊 # 完整名称
-    description: | # 支持多行 Markdown
+  # 暂未启用系列文章功能。
+  # 如需启用，取消下面的注释并按需修改（slug 不能与 about/categories/tags/friends/posts/archives 等保留路由冲突）：
+  - slug: weekly
+    categoryName: 学习笔记
+    label: 我的周刊
+    fullName: 我的技术周刊
+    description: |
       这是周刊/系列文章功能的示例配置。
-      你可以用它来发布定期更新的系列内容，如技术周刊、读书笔记系列等。
-      设置 enabled: false 可以关闭此功能。
-    cover: /img/weekly_header.webp # 系列页面头图
-    enabled: true # 启用此系列
-    icon: ri:newspaper-line # 导航图标
-    links: # 相关链接（可选）
-      github: https://github.com/your-username/your-repo # (可选) GitHub 仓库
-      rss: /rss.xml # (可选) RSS 订阅链接
-      # chrome: https://chromewebstore.google.com/detail/your-extension-id # (可选) 浏览器插件
-      # docs: https://your-docs-url # (可选) 文档链接
-  # 示例：添加第二个系列（取消注释启用）
-  # - slug: reading # URL 路径: /reading
-  #   categoryName: 书摘
-  #   label: 读书笔记
-  #   fullName: 我的读书笔记
-  #   description: 阅读记录与读后感
-  #   cover: /img/weekly_header.webp # 记得添加，我这里就是个示例
-  #   enabled: true
-  #   icon: ri:book-read-line
-
+    cover: /img/weekly_header.webp
+    enabled: false
+    icon: ri:newspaper-line
 # =============================================================================
 # Social Links
 # 社交链接 - 显示在页脚和个人信息区域
@@ -164,37 +166,21 @@ featuredSeries:
 # -----------------------------------------------------------------------------
 social:
   github:
-    url: https://github.com/your-username # 替换为你的 GitHub 链接
-    icon: ri:github-fill # Remix Icon 的 GitHub 图标
-    color: '#191717' # (可选) 图标颜色
+    url: https://github.com/Weisifengbuxi
+    icon: ri:github-fill
+    color: '#191717'
   email:
-    url: mailto:your@email.com # 替换为你的邮箱，需加 mailto: 前缀
+    url: mailto:sun060729@qq.com
     icon: ri:mail-line
     color: '#55acd5'
   rss:
-    url: /rss.xml # 站内 RSS 订阅地址
+    url: /rss.xml
     icon: ri:rss-line
     color: '#ff6600'
-  # -------------------------------------------------------------------------
-  # 以下是更多可选的社交平台配置示例，取消注释并修改即可启用：
-  # -------------------------------------------------------------------------
-  # twitter:
-  #   url: https://x.com/your-handle
-  #   icon: ri:twitter-fill
-  #   color: '#4b9ae4'
   # bilibili:
-  #   url: https://space.bilibili.com/your-id
+  #   url: https://space.bilibili.com/451525062
   #   icon: ri:bilibili-fill
   #   color: '#da708a'
-  # zhihu:
-  #   url: https://www.zhihu.com/people/your-id
-  #   icon: ri:zhihu-fill
-  #   color: '#1e88e5'
-  # music:
-  #   url: https://music.163.com/#/user/home?id=your-id
-  #   icon: ri:netease-cloud-music-line
-  #   color: '#e60026'
-
 # =============================================================================
 # Friends Links
 # 友情链接页面配置 - 展示友链列表和申请说明
@@ -215,43 +201,123 @@ social:
 # -----------------------------------------------------------------------------
 friends:
   intro:
-    title: 友情链接 # 页面标题
-    subtitle: 欢迎交换友链！ # 页面副标题
-    applyTitle: 申请友链 # 申请区块标题
-    applyDesc: 请在本页留言，格式如下 # 申请说明
-    exampleYaml: | # 申请格式示例，会显示在页面上
+    title: 友情链接
+    subtitle: 欢迎交换友链！
+    applyTitle: 申请友链
+    applyDesc: 请在本页留言，格式如下
+    exampleYaml: |
       - site: 你的博客名称 # 站点名称
         url: https://your-blog.com/ # 站点网址
         owner: 你的昵称 # 昵称
         desc: 站点简介 # 站点简介
         image: https://your-blog.com/avatar.jpg # 头像链接
         color: "#ffc0cb" # 主题色（可选）
-  data: # 友链列表
-    - site: 余弦の博客
-      url: https://blog.cosine.ren
-      owner: cos
-      desc: FE / ACG / 手工 / 深色模式强迫症 / INFP / 兴趣广泛养两只猫的老宅女 / remote
-      image: https://blog.cosine.ren/img/avatar.webp
-      color: '#ed788b'
-    - site: 示例博客 A
-      url: https://example-a.com
-      owner: Alice
-      desc: 一个热爱技术的开发者
-      image: https://api.dicebear.com/7.x/avataaars/svg?seed=Alice
+  data:
+    # —— 框架 ——
+    - site: Hexo
+      url: https://hexo.io/zh-tw/
+      owner: Hexo
+      desc: 快速、简单且强大的网站框架
+      image: https://d33wubrfki0l68.cloudfront.net/6657ba50e702d84afb32fe846bed54fba1a77add/827ae/logo.svg
+      color: '#0e83cd'
+    - site: anzhiyu主题
+      url: https://blog.anheyu.com/
+      owner: 安知鱼
+      desc: 生活明朗，万物可爱
+      image: https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg
+      color: '#425aef'
+    # —— 推荐博客 ——
+    - site: 小嗷犬的技术小站
+      url: https://blog.marquis.eu.org/
+      owner: 小嗷犬
+      desc: 为天地立心，为生民立命，为往圣继绝学，为万世开太平
+      image: https://blog.marquis.eu.org/img/avatar/2.png
       color: '#BEDCFF'
-    - site: 示例博客 B
-      url: https://example-b.com
-      owner: Bob
-      desc: 分享生活与技术的小站
-      image: https://api.dicebear.com/7.x/avataaars/svg?seed=Bob
+    - site: Akilarの糖果屋
+      url: https://akilar.top/
+      owner: Akilar
+      desc: 欢迎光临糖果屋
+      image: https://npm.elemecdn.com/akilar-friends@latest/avatar/akilar.top.jpg
       color: '#FBC1CC'
-    - site: 示例博客 C
-      url: https://example-c.com
-      owner: Carol
-      desc: 记录学习与成长的地方
-      image: https://api.dicebear.com/7.x/avataaars/svg?seed=Carol
+    - site: 青桔气球
+      url: https://blog.qjqq.cn/
+      owner: 青桔气球
+      desc: 分享网络安全与科技生活
+      image: https://q2.qlogo.cn/headimg_dl?dst_uin=1645253&spec=640
       color: '#ABDCFF'
-
+    - site: 张洪Heo
+      url: https://blog.zhheo.com/
+      owner: 张洪Heo
+      desc: 分享设计与科技生活
+      image: https://img.zhheo.com/i/67d8fa75943e4.webp
+      color: '#6ec6ff'
+    - site: 山岳库博
+      url: https://kmar.top/
+      owner: 山岳库博
+      desc: 开发学习启发性二刺螈
+      image: https://s21.ax1x.com/2025/09/01/pVcHzGt.png
+      color: '#ffb3c1'
+    - site: 梦爱吃鱼
+      url: https://blog.bsgun.cn/
+      owner: 梦爱吃鱼
+      desc: 不负心灵，不负今生
+      image: https://oss-cdn.bsgun.cn/logo/avatar.256.png
+      color: '#a0e7e5'
+    - site: 周润发
+      url: https://blog.zrf.me/
+      owner: 周润发
+      desc: 收录开源，好用的互联网项目
+      image: https://blog.zrf.me/img/logo.webp
+      color: '#ffd6a5'
+    - site: 清羽飞扬
+      url: https://blog.liushen.fun/
+      owner: 清羽飞扬
+      desc: 柳影曳曳，清酒孤灯，扬笔撒墨，心境如霜
+      image: https://blog.liushen.fun/info/avatar.ico
+      color: '#cdb4db'
+    - site: 杜老师说
+      url: https://dusays.com
+      owner: 杜老师
+      desc: 师者，传道，受业，解惑！
+      image: https://cdn.dusays.com/favicon.ico
+      color: '#bde0fe'
+    # —— 小伙伴 ——
+    - site: 谢大大
+      url: https://xiedada.net/
+      owner: 谢大大
+      desc: 现实中的技术大佬
+      image: https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/youlian1.jpg
+      color: '#ffc8dd'
+    - site: 洛元の小屋
+      url: https://blog.dimeta.top/
+      owner: 洛元
+      desc: 科技，游戏，生活
+      image: https://blog.dimeta.top/upload/avatar.jpg
+      color: '#b8e0d2'
+    - site: 碧水荡漾
+      url: https://blog.yvyang.top
+      owner: 碧水荡漾
+      desc: 澄空碧山 绿水余漾
+      image: https://blog.yvyang.top/favicon.webp
+      color: '#c7f9cc'
+    - site: Lifeline
+      url: https://lifelinest.github.io/
+      owner: Lifeline
+      desc: 经世致用 自强不息
+      image: http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130
+      color: '#d0f4de'
+    - site: 辰渊尘の个人博客
+      url: https://blog.mcxiaochen.top/
+      owner: 辰渊尘
+      desc: 偏技术
+      image: https://blog.mcxiaochen.top/favicon.ico
+      color: '#e4c1f9'
+    - site: KangQi の Blog
+      url: https://www.kangqiovo.com
+      owner: KangQi
+      desc: 惟有忍耐到底的，必然得救
+      image: https://www.kangqiovo.com/wp-content/uploads/2025/10/KangQi-.png
+      color: '#fcf6bd'
 # =============================================================================
 # Announcements
 # 公告系统 - 在页面顶部显示重要通知
@@ -371,8 +437,60 @@ content:
 # -----------------------------------------------------------------------------
 motion:
   level: lively
-  heroPetals: true
+  heroPetals: false
   clickBurst: true
+
+# =============================================================================
+# Universe / Meteor Background Effect
+# 星空 · 流星背景特效（移植自原 Hexo 博客 anzhiyu 主题的 universe 效果）
+# =============================================================================
+# 字段说明：
+#   enabled:  总开关
+#   density:  粒子密度系数，粒子数 = ceil(density × 视口宽度)。默认 0.216
+#             想更稀疏用 0.1 左右，想更密集用 0.35 左右
+#   onlyDark: 是否只在深色模式显示。原主题即仅深色模式，默认 true
+#
+# 说明：
+#   - 星点用 mix-blend-mode: screen 叠加，只会加亮，不会遮挡正文
+#   - 系统开启「减少动态效果」或站点动效等级为 reduced 时自动不渲染
+#   - 标签页切到后台时自动暂停
+# -----------------------------------------------------------------------------
+universe:
+  enabled: true
+  density: 0.216
+  onlyDark: true
+
+# =============================================================================
+# Mourning Day Grayscale
+# 纪念日 / 哀悼日变灰（迁移自原 Hexo 博客 anzhiyu 主题的 mourn）
+# =============================================================================
+# 字段说明：
+#   enabled: 总开关
+#   affect:  'cover' 首页整页变黑白（默认）
+#            'page'  首页 + 其它页面都变黑白
+#   days:    日期列表，格式 'M-D'（月-日，不加前导零）
+#
+# 生效范围（重要）：
+#   「首页」= 只判断路径是否为 /。进入文章、分类、归档等任何其它页面都会恢复彩色，
+#   与原 Hexo 博客 `is_home_first_page()` 的行为一致。
+#   首页范围内是**整页**去色（导航 / 头图 / 正文 / 侧边栏 / 页脚），不只是头图。
+#   affect: cover 中的 cover 指的是「只在首页这个封面页生效」，不是「只处理头图」。
+#
+# 刷新时机：判断在浏览器端、用访客本地时间。静态站点不会自动重建，
+#   因此到日子无需重新部署，当天首次打开首页即生效。
+#
+# 建议给日期加引号（'4-5'）：js-yaml / yaml 都会解析成字符串，加引号是为了
+#   避免日后换成其它 YAML 解析器时被当成表达式。
+# -----------------------------------------------------------------------------
+mourn:
+  enabled: true
+  affect: cover
+  days:
+    - '4-5' # 清明
+    - '5-12' # 汶川地震
+    - '7-7' # 七七事变
+    - '9-18' # 九一八
+    - '12-13' # 南京大屠杀死难者国家公祭日
 
 # =============================================================================
 # Moments Archive (optional)
@@ -419,23 +537,14 @@ editor:
 #   - Remix Icon: https://icon-sets.iconify.design/ri/
 # -----------------------------------------------------------------------------
 navigation:
-  - name: 首页 # 菜单显示名称（nameKey 不存在时的回退文本）
-    nameKey: nav.home # i18n 翻译 key
-    path: / # 链接路径
-    icon: ri:home-heart-fill # 图标
-  # - name: 书摘
-  #   path: /reading
-  - name: 周刊
-    nameKey: nav.weekly
-    path: /weekly
-    icon: ri:newspaper-line
-  # Optional explicit Moments position. When omitted, enabled Moments is inserted after Archives.
-  # - feature: moments
-  #   icon: ri:chat-smile-3-fill
-  - name: 文章 # 有子菜单时，path 可省略
+  - name: 首页
+    nameKey: nav.home
+    path: /
+    icon: ri:home-heart-fill
+  - name: 文章
     nameKey: nav.posts
     icon: ri:quill-pen-ai-fill
-    children: # 子菜单列表
+    children:
       - name: 分类
         nameKey: nav.categories
         path: /categories
@@ -460,30 +569,75 @@ navigation:
     nameKey: nav.music
     path: /music
     icon: ri:music-2-fill
-  - name: 写作室
-    path: /editor
-    localeIndependent: true
-    icon: ri:edit-box-line
+  - name: 装备
+    nameKey: nav.equipment
+    path: /equipment
+    icon: ri:device-line
 
 # =============================================================================
-# Christmas/Seasonal Features
-# 圣诞/季节性装饰功能 - 节日期间的特殊视觉效果 后续考虑新增 theme.yaml 来管理
+# Footer Links
+# 页脚链接 - 每个页面底部显示的一排小页面入口（类似原 Hexo 博客的页脚导航）
 # =============================================================================
-# enabled: 总开关，设为 false 关闭所有节日效果
-# features: 各功能独立开关
-#   snowfall: 飘雪动画效果
-#   christmasColorScheme: 圣诞主题配色
-#   christmasCoverDecoration: 封面圣诞装饰
-#   christmasHat: 头像添加圣诞帽
-#   readingTimeSnow: 阅读时间旁显示雪花图标
-# snowfall: 飘雪效果参数（影响性能，移动端建议降低）
-#   speed: 下落速度 (0-1)，越大越快
-#   intensity: 雪花密度 (0-1)，越大越密
-#   mobileIntensity: 移动端密度，建议低于桌面端
-#   maxLayers: 最大层数，影响立体感
-#   maxIterations: 最大迭代次数，影响雪花数量
-#   mobileMaxLayers: 移动端最大层数
-#   mobileMaxIterations: 移动端最大迭代次数
+# 字段说明：
+#   name: 显示名称
+#   path: 站内路径（以 / 开头）或完整外链
+# 置空（footerLinks: []）即可隐藏这一排链接。
+# -----------------------------------------------------------------------------
+footerLinks:
+  - name: 关于本人
+    path: /about
+  - name: 友链申请
+    path: /link
+  - name: 最新评论
+    path: /messages
+  - name: 相册集
+    path: /album
+  - name: 我的日常
+    path: /dailyPhoto
+  - name: 世界各地风景
+    path: /wordScenery
+  - name: 游戏荣誉
+    path: /gamePhotos
+  - name: 我的装备
+    path: /equipment
+  - name: 即刻短文
+    path: /essay
+  - name: 网站统计
+    path: /charts
+  - name: 小空调
+    path: /air-conditioner
+  - name: Cookies政策
+    path: /cookies
+  - name: 隐私政策
+    path: /privacy
+  - name: 版权协议
+    path: /copyright
+  - name: 公众号说明
+    path: /wechat
+
+# =============================================================================
+# Footer Filings / Badges
+# 页脚备案信息与徽章（迁移自原 Hexo 博客 footer.linkList）
+# =============================================================================
+# 说明：
+#   site.icp         —— 主题原生字段，ICP 备案号（已在上面 site: 段配置）
+#   filings          —— 额外备案条目，如公安网安备，渲染为一行文字链接
+#   badges           —— 图片徽章，如萌ICP；有 image 时显示图片，否则显示文字
+#
+# 字段：
+#   text:  显示文字（也是徽章的 alt / title）
+#   link:  点击跳转地址（可选）
+#   image: 徽章图片地址，仅 badges 使用（可选）
+# 置空（filings: [] / badges: []）即可隐藏对应一行。
+# -----------------------------------------------------------------------------
+filings:
+  - text: 晋公网安备14010502990310号
+    link: https://beian.mps.gov.cn/#/
+
+badges:
+  - text: 萌ICP备20250740号
+    link: https://icp.gov.moe/?keyword=20250740
+    image: https://img.shields.io/badge/%E8%90%8CICP%E5%A4%87-20250740-FF69B4.svg
 
 
 # =============================================================================
@@ -549,63 +703,23 @@ navigation:
     # path: # 用于区分不同文章的自定义 js 路径，如果您的文章路径不是 location.pathname，需传此参数
     # lang: # 语言 (默认: 'zh-CN')
 comment:
-  provider: none  # 'remark42' | 'giscus' | 'waline' | 'twikoo' | 'none'
-  # remark42:
-  #   host: https://comment.example.com/
-  #   siteId: your-site-id
-  # giscus:
-  #   repo: username/repo              # GitHub 仓库名 (owner/repo 格式)
-  #   repoId: R_kgDOxxxxxx             # 仓库 ID (从 giscus.app 获取)
-  #   category: Announcements          # Discussion 分类名称
-  #   categoryId: DIC_kwDOxxxxxx       # 分类 ID (从 giscus.app 获取)
-  #   mapping: pathname                # 映射方式
-  #   reactionsEnabled: '1'            # 启用 reactions ('0' | '1')
-  #   emitMetadata: '0'                # 发送元数据 ('0' | '1')
-  #   inputPosition: top               # 输入框位置 ('top' | 'bottom')
-  #   lang: zh-CN                      # 语言
-
-  # waline:
-  #   serverURL: https://your-waline.vercel.app  # Waline 服务端地址 (必填)
-  #   lang: zh-CN                      # 语言 (默认: 'zh-CN')
-  #   dark: html.dark                  # 暗黑模式 (默认: 'html.dark')
-  #                                    # 可选: true (自适应) | false (禁用) | CSS选择器字符串
-  #   meta:                            # 评论者信息字段 (默认: ['nick', 'mail', 'link'])
-  #     - nick
-  #     - mail
-  #     - link
-  #   requiredMeta:                    # 必填字段 (默认: [])
-  #     - nick
-  #   login: enable                    # 登录模式 ('enable' | 'disable' | 'force', 默认: 'enable')
-  #   wordLimit: 0                     # 评论字数限制 (0 = 无限制, 默认: 0)
-  #                                    # 可选: 单个数字 | [min, max] 数组
-  #   pageSize: 10                     # 每页评论数 (默认: 10)
-  #   imageUploader: false             # 图片上传功能 (默认: false)
-  #   highlighter: true                # 代码高亮 (默认: true)
-  #   texRenderer: false               # LaTeX 渲染 (默认: false)
-  #   search: false                    # 搜索功能 (默认: false)
-  #   reaction: false                  # 文章反应功能 (默认: false)
-  #                                    # 可选: true | false | 字符串数组 (自定义反应图标)
-  #   emoji: true                      # 表情包配置 (默认: ['//unpkg.com/@waline/emojis@1.2.0/weibo'])
-  #                                    # 可选: true | false | 字符串/对象数组
-  #                                    # 预设表情包: '//unpkg.com/@waline/emojis@1.2.0/weibo'
-  #                                    #           '//unpkg.com/@waline/emojis@1.2.0/alus'
-  #                                    #           '//unpkg.com/@waline/emojis@1.2.0/bilibili'
-  #                                    #           '//unpkg.com/@waline/emojis@1.2.0/qq'
-  #                                    #           '//unpkg.com/@waline/emojis@1.2.0/tieba'
-  #                                    #           '//unpkg.com/@waline/emojis@1.2.0/tw-emoji'
-  #   commentSorting: latest           # 评论排序 ('latest' | 'oldest' | 'hottest', 默认: 'latest')
-  #   noCopyright: false               # 隐藏页脚版权信息 (默认: false)
-  #   comment: true                    # 评论数统计 (默认: true)
-  #   pageview: true                   # 页面访问量统计 (默认: true)
-  #   # recaptchaV3Key: ''             # reCAPTCHA v3 Key (可选)
-  #   # turnstileKey: ''               # Cloudflare Turnstile Key (可选)
-  #   # locale:                        # 自定义语言显示 (可选)
-  #   #   placeholder: '请留言...'      # 自定义输入框占位文本
+  provider: twikoo # 'remark42' | 'giscus' | 'waline' | 'twikoo' | 'none'
+  # ⚠️ 待填写：原有 Twikoo 服务 twikoo.weisifengbuxi.top 已无法解析（DNS NXDOMAIN），
+  # 老站评论区同样处于不可用状态。请把下方 envId 换成你重新部署后的 Twikoo 地址。
+  #
+  # 可选方案：
+  #   1. Vercel 重新部署 twikoo 后，填 https://<your-project>.vercel.app
+  #   2. 自有服务器 / 腾讯云环境，填对应地址
+  #   3. 暂时不想用评论：把 provider 改为 none
+  #
+  # 关于旧评论数据：文章的规范地址已由 /posts/<abbrlink>.html 变为 /post/<abbrlink>，
+  # Twikoo 默认以 location.pathname 作为评论归属键，因此旧评论不会自动出现在新地址下。
+  # 若希望延续旧评论，需要在 Twikoo 数据库里把 url 字段整体改写，例如：
+  #   /posts/e4925c7a.html  ->  /post/e4925c7a
+  # 可在 Twikoo 管理面板导出评论后批量替换，再导入。
   twikoo:
-    envId: https://your-twikoo.vercel.app  # Twikoo 环境 ID (腾讯云) 或 Vercel 环境地址 (必填)
-    # region: ap-shanghai              # 环境地域，默认为 ap-shanghai
-    # path: location.pathname          # 用于区分不同文章的自定义 js 路径
-    # lang: zh-CN                     # 语言 (默认: 'zh-CN')
+    envId: https://your-twikoo.example.com # TODO: 替换为你的 Twikoo 地址
+    lang: zh-CN
 
 # =============================================================================
 # Analytics (Umami)
@@ -620,9 +734,12 @@ comment:
 # -----------------------------------------------------------------------------
 analytics:
   umami:
-    enabled: true
-    id: your-umami-id
-    endpoint: https://stats.example.com
+    enabled: false
+    # 未启用统计，因此不配置 id / endpoint。
+    # 留空可避免把占位值 your-umami-id / stats.example.com 打进构建产物。
+    # 需要启用时取消下面两行注释并填写真实值：
+    # id: your-umami-id
+    # endpoint: https://stats.example.com
     # statistics_display:
     #   token: your-umami-share-token
     #   article_page_views: true
@@ -649,19 +766,40 @@ seo:
     # host: true                       # 可选：添加 Host 指令（Yandex）
 
 # =============================================================================
-# Christmas/Seasonal Features
+# Background Music
+# 背景音乐 - 配置 audio 后自动启用
 # =============================================================================
+# metingApi: Meting API 地址，默认为 https://163.hyc.moe/，推荐自部署
+# audio: 歌单列表，每项包含 title 与 list（歌单链接数组）
+# -----------------------------------------------------------------------------
 bgm:
-  enabled: true  # (有 audio 时自动启用，显式 false 可禁用)
-  # metingApi: https://163.hyc.moe/  # Meting API 地址，默认为 https://163.hyc.moe/，推荐自部署
-  audio:
-    - title: 最爱山山
-      list:
-        - https://music.163.com/playlist?id=8676645748
-    - title: Love Vocaloid
-      list:
-        - https://music.163.com/playlist?id=8882890045
+  enabled: false  # 没有配置 audio 时保持关闭
+  # metingApi: https://163.hyc.moe/  # Meting API 地址，推荐自部署
+  # audio:
+  #   - title: 最爱山山
+  #     list:
+  #       - https://music.163.com/playlist?id=8676645748
 
+# =============================================================================
+# Christmas/Seasonal Features
+# 圣诞/季节性装饰功能 - 节日期间的特殊视觉效果 后续考虑新增 theme.yaml 来管理
+# =============================================================================
+# enabled: 总开关，设为 false 关闭所有节日效果
+# features: 各功能独立开关
+#   snowfall: 飘雪动画效果
+#   christmasColorScheme: 圣诞主题配色
+#   christmasCoverDecoration: 封面圣诞装饰
+#   christmasHat: 头像添加圣诞帽
+#   readingTimeSnow: 阅读时间旁显示雪花图标
+# snowfall: 飘雪效果参数（影响性能，移动端建议降低）
+#   speed: 下落速度 (0-1)，越大越快
+#   intensity: 雪花密度 (0-1)，越大越密
+#   mobileIntensity: 移动端密度，建议低于桌面端
+#   maxLayers: 最大层数，影响立体感
+#   maxIterations: 最大迭代次数，影响雪花数量
+#   mobileMaxLayers: 移动端最大层数
+#   mobileMaxIterations: 移动端最大迭代次数
+# -----------------------------------------------------------------------------
 christmas:
   enabled: false # 总开关
   # features: # 各功能独立开关
@@ -688,11 +826,12 @@ christmas:
 #   label: 导航显示名称（可选，默认：追番）
 #   icon: 导航图标，Iconify 格式（可选，默认：ri:bilibili-fill）
 # -----------------------------------------------------------------------------
-bangumi:
-  userId: cosine
-  # label: 追番
-  # icon: ri:bilibili-fill
-
+# 已关闭：原博客并未使用 bangumi 功能。
+# 若要启用，取消下面三行注释并把 userId 换成你的 Bangumi 用户名或数字 ID：
+# bangumi:
+#   userId: your-bangumi-id
+#   label: 追番
+#   icon: ri:bilibili-fill
 # =============================================================================
 # Development Tools (Dev Only)
 # 开发工具配置 - 仅在开发环境（pnpm dev）生效
@@ -708,7 +847,7 @@ bangumi:
 #     - urlTemplate: URL 模板，支持占位符 {path}（文件绝对路径）
 # -----------------------------------------------------------------------------
 dev:
-  localProjectPath: '/Users/yourname/path/to/astro-koharu' # 请修改为你的项目绝对路径
+  localProjectPath: 'D:/myBlog-astro' # 本地项目绝对路径
   contentRelativePath: 'src/content/blog'
   editors:
     - id: vscode

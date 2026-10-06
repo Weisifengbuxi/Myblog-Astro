@@ -1,0 +1,236 @@
+---
+/**
+ * 网站统计 — post / tag / category distributions.
+ *
+ * Replaces the Hexo page that loaded ECharts from a CDN (echarts 4.9.0-rc, ~700KB)
+ * just to draw three bar charts. These are rendered as CSS bars at build time:
+ * no client JS, no third-party dependency, and they inherit the theme's colours
+ * and dark mode automatically.
+ */
+import { getSortedPosts } from '@lib/content';
+import { defaultLocale } from '@/i18n';
+
+interface Props {
+  locale?: string;
+}
+
+const { locale = defaultLocale } = Astro.props;
+const posts = await getSortedPosts(locale);
+
+// ---- posts per month -------------------------------------------------------
+const monthCounts = new Map<string, number>();
+for (const post of posts) {
+  const d = new Date(post.data.date);
+  const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  monthCounts.set(key, (monthCounts.get(key) ?? 0) + 1);
+}
+const monthSeries = [...monthCounts.entries()].sort(([a], [b]) => a.localeCompare(b));
+const maxMonth = Math.max(1, ...monthSeries.map(([, n]) => n));
+const monthTotal = posts.length;
+
+// ---- tag distribution ------------------------------------------------------
+const tagCounts = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of post.data.tags ?? []) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+}
+const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 12);
+const maxTag = Math.max(1, ...topTags.map(([, n]) => n));
+
+// ---- category distribution -------------------------------------------------
+// `categories` is either string[] or string[][]; a chain like
+// [['学习笔记','代码学习']] is shown as "学习笔记 / 代码学习".
+const categoryCounts = new Map<string, number>();
+for (const post of posts) {
+  const raw = post.data.categories;
+  if (!raw?.length) continue;
+  const first = raw[0];
+  const label = Array.isArray(first) ? first.join(' / ') : String(first);
+  if (label) categoryCounts.set(label, (categoryCounts.get(label) ?? 0) + 1);
+}
+const categorySeries = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
+const maxCategory = Math.max(1, ...categorySeries.map(([, n]) => n));
+
+const summary = [
+  { label: '文章总数', value: posts.length },
+  { label: '标签总数', value: tagCounts.size },
+  { label: '分类总数', value: categoryCounts.size },
+  { label: '有记录月份', value: monthSeries.length },
+];
+---
+
+<div class="charts">
+  <div class="charts-summary">
+    {
+      summary.map((item) => (
+        <div class="charts-stat">
+          <span class="charts-stat-value">{item.value}</span>
+          <span class="charts-stat-label">{item.label}</span>
+        </div>
+      ))
+    }
+  </div>
+
+  <section class="charts-block">
+    <h2 class="charts-title">文章发布统计<span class="charts-sub">按月份 · 共 {monthTotal} 篇</span></h2>
+    <div class="charts-bars">
+      {
+        monthSeries.map(([label, count]) => (
+          <div class="charts-row">
+            <span class="charts-label charts-label-month">{label}</span>
+            <span class="charts-track">
+              <span class="charts-fill" style={`width:${(count / maxMonth) * 100}%`} />
+            </span>
+            <span class="charts-count">{count}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="charts-block">
+    <h2 class="charts-title">标签统计<span class="charts-sub">Top {topTags.length}</span></h2>
+    <div class="charts-bars">
+      {
+        topTags.map(([label, count]) => (
+          <div class="charts-row">
+            <span class="charts-label" title={label}>{label}</span>
+            <span class="charts-track">
+              <span class="charts-fill charts-fill-alt" style={`width:${(count / maxTag) * 100}%`} />
+            </span>
+            <span class="charts-count">{count}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="charts-block">
+    <h2 class="charts-title">分类统计</h2>
+    <div class="charts-bars">
+      {
+        categorySeries.map(([label, count]) => (
+          <div class="charts-row">
+            <span class="charts-label" title={label}>{label}</span>
+            <span class="charts-track">
+              <span class="charts-fill charts-fill-cat" style={`width:${(count / maxCategory) * 100}%`} />
+            </span>
+            <span class="charts-count">{count}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</div>
+
+<style>
+  .charts-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .charts-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.9rem 0.5rem;
+    border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    border-radius: 0.7rem;
+  }
+
+  .charts-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .charts-stat-label {
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+
+  .charts-block + .charts-block {
+    margin-top: 2rem;
+  }
+
+  .charts-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 0.85rem;
+  }
+
+  .charts-sub {
+    font-size: 0.75rem;
+    font-weight: 400;
+    opacity: 0.55;
+  }
+
+  .charts-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .charts-row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr 2.25rem;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .charts-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .charts-label-month {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .charts-track {
+    height: 0.85rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, currentColor 8%, transparent);
+    overflow: hidden;
+  }
+
+  .charts-fill {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #e9546b, #ed788c);
+    transition: width 0.6s ease;
+  }
+
+  .charts-fill-alt {
+    background: linear-gradient(90deg, #6aa9e9, #8cc0f0);
+  }
+
+  .charts-fill-cat {
+    background: linear-gradient(90deg, #6ec6a8, #9ad9c3);
+  }
+
+  .charts-count {
+    font-size: 0.8rem;
+    text-align: right;
+    opacity: 0.7;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 640px) {
+    .charts-row {
+      grid-template-columns: 5rem 1fr 1.75rem;
+      gap: 0.4rem;
+    }
+  }
+</style>

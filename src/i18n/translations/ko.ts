@@ -14,6 +14,7 @@ export const uiStrings = {
   'nav.friends': '링크',
   'nav.about': '소개',
   'nav.music': '플레이리스트',
+  'nav.equipment': '장비',
   'nav.weekly': '주간지',
   'nav.bangumi': '감상 기록',
 

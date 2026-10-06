@@ -1,0 +1,41 @@
+---
+/**
+ * Footer navigation links.
+ *
+ * Renders the `footerLinks` list from `config/site.yaml` as a small link row,
+ * mirroring the "小页面" link strip the original Hexo/anzhiyu blog showed in its
+ * footer. Hidden entirely when the list is empty.
+ */
+import { footerLinks } from '@constants/site-config';
+import { getLocaleFromUrl } from '@/i18n';
+
+const locale = getLocaleFromUrl(Astro.url.pathname);
+if (!footerLinks.length) return;
+
+/** Prefix an internal path with the active locale when the site is multilingual. */
+const href = (path: string) => {
+  if (/^[a-z]+:|^\/\//i.test(path)) return path; // absolute URL
+  if (locale === 'zh' || path.startsWith('/' + locale + '/')) return path;
+  return path === '/' ? `/${locale}` : `/${locale}${path}`;
+};
+
+const current = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (path: string) => path.replace(/\/$/, '') === current;
+---
+
+<nav class="text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs" aria-label="页脚导航">
+  {
+    footerLinks.map((item, index) => (
+      <>
+        {index > 0 && <span class="opacity-30" aria-hidden="true">·</span>}
+        <a
+          href={href(item.path)}
+          class:list={['footer-link', { 'footer-link-active': isCurrent(item.path) }]}
+          aria-current={isCurrent(item.path) ? 'page' : undefined}
+        >
+          {item.name}
+        </a>
+      </>
+    ))
+  }
+</nav>

@@ -16,6 +16,7 @@ export const uiStrings: UIStrings = {
   'nav.friends': '友達',
   'nav.about': 'ブログについて',
   'nav.music': '音楽',
+  'nav.equipment': 'ガジェット',
   'nav.weekly': '週刊',
   'nav.bangumi': 'オタ活の記録',
 

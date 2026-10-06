@@ -1,13 +1,14 @@
 ---
 import FooterAnnouncementEntry from '@components/announcement/FooterAnnouncementEntry';
 import { MAX_WIDTH } from '@constants/layout';
-import { icpConfig, siteConfig, umamiSiteStatsConfig } from '@constants/site-config';
+import { footerBadges, footerFilings, icpConfig, siteConfig, umamiSiteStatsConfig } from '@constants/site-config';
 import { getSiteStats } from '@lib/stats';
 import { cn } from '@lib/utils';
 import { Icon } from 'astro-icon/components';
 import UmamiPVSpan from '@/components/umami/UmamiPVSpan';
 import { getLocaleFromUrl, t } from '@/i18n';
 import SakuraSVG from '../svg/SakuraSvg';
+import FooterLinks from './FooterLinks.astro';
 
 interface Props {
   className?: string;
@@ -25,6 +26,9 @@ const startYear = siteConfig?.startYear ?? currentYear;
   <div class={cn('mx-auto flex flex-col items-center gap-3 px-6 md:pb-10 md:px-3', MAX_WIDTH.content)}>
     <!-- Announcements Entry -->
     <FooterAnnouncementEntry client:load />
+
+    <!-- Footer navigation (config/site.yaml -> footerLinks) -->
+    <FooterLinks />
 
     <!-- Site Stats -->
     <div class="text-muted-foreground flex flex-wrap items-center justify-center gap-6 text-sm md:gap-4">
@@ -83,7 +87,7 @@ const startYear = siteConfig?.startYear ?? currentYear;
       </span>
     </div>
 
-    <!-- ICP Filing -->
+    <!-- ICP Filing (theme's original single-entry field) -->
     {icpConfig && (
       <div class="text-muted-foreground/80 text-xs">
         {icpConfig.link ? (
@@ -95,6 +99,58 @@ const startYear = siteConfig?.startYear ?? currentYear;
         )}
       </div>
     )}
+
+    <!-- Additional filings: 公安网安备 etc. (config/site.yaml -> filings) -->
+    {
+      footerFilings.length > 0 && (
+        <div class="text-muted-foreground/80 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
+          {footerFilings.map((filing, index) => (
+            <>
+              {index > 0 && <span class="opacity-30" aria-hidden="true">·</span>}
+              {filing.link ? (
+                <a
+                  href={filing.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="footer-link font-medium"
+                >
+                  {filing.text}
+                </a>
+              ) : (
+                <span class="opacity-75">{filing.text}</span>
+              )}
+            </>
+          ))}
+        </div>
+      )
+    }
+
+    <!-- Badge links: 萌ICP 等 (config/site.yaml -> badges) -->
+    {
+      footerBadges.length > 0 && (
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          {footerBadges.map((badge) =>
+            badge.link ? (
+              <a
+                href={badge.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={badge.text}
+                class="inline-flex transition-opacity duration-300 hover:opacity-80"
+              >
+                {badge.image ? (
+                  <img src={badge.image} alt={badge.text} height="20" loading="lazy" decoding="async" />
+                ) : (
+                  <span class="text-muted-foreground/80 text-xs">{badge.text}</span>
+                )}
+              </a>
+            ) : (
+              <span class="text-muted-foreground/80 text-xs">{badge.text}</span>
+            )
+          )}
+        </div>
+      )
+    }
 
     <!-- Powered By -->
     <div class="text-muted-foreground/80 flex items-center gap-2 text-xs">
@@ -141,6 +197,15 @@ const startYear = siteConfig?.startYear ?? currentYear;
   }
 
   .footer-link:hover::after {
+    width: 100%;
+  }
+
+  .footer-link-active {
+    opacity: 1;
+    font-weight: 500;
+  }
+
+  .footer-link-active::after {
     width: 100%;
   }
 </style>

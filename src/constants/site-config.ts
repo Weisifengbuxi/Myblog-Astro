@@ -37,6 +37,14 @@ export { contentConfig, editorConfig, i18nConfig, motionConfig, siteConfig };
 
 export const socialConfig: SocialConfig = yamlConfig.social ?? {};
 
+/**
+ * Footer navigation links ("小页面" strip shown at the bottom of every page).
+ * Managed through the `footerLinks` list in config/site.yaml.
+ */
+export const footerLinks: { name: string; path: string }[] = Array.isArray(yamlConfig.footerLinks)
+  ? yamlConfig.footerLinks.filter((item): item is { name: string; path: string } => Boolean(item?.name && item?.path))
+  : [];
+
 // ICP filing config — normalize string shorthand to { text } object
 export const icpConfig: { text: string; link?: string } | undefined = (() => {
   const raw = yamlConfig.site.icp;
@@ -44,6 +52,98 @@ export const icpConfig: { text: string; link?: string } | undefined = (() => {
   if (typeof raw === 'string') return { text: raw };
   return raw;
 })();
+
+export interface FooterFiling {
+  text: string;
+  link?: string;
+}
+
+export interface FooterBadge extends FooterFiling {
+  /** Shield image URL; when present the entry renders as an image badge. */
+  image?: string;
+}
+
+/**
+ * Footer filings (ICP / 公安网安备) and badge links.
+ *
+ * `site.icp` above is the theme's own single-entry field and keeps working.
+ * These two carry the rest of what the previous Hexo blog showed at the bottom:
+ * the 公安网安备 entry, and the little shield badges (萌ICP etc.).
+ *
+ * Config shape (config/site.yaml):
+ *   filings:
+ *     - text: 晋ICP备-2025067606号
+ *       link: https://beian.miit.gov.cn/
+ *     - text: 晋公网安备14010502990310号
+ *       link: https://beian.mps.gov.cn/#/
+ *   badges:
+ *     - text: 萌ICP备20250740号
+ *       link: https://icp.gov.moe/?keyword=20250740
+ *       image: https://example.com/shield.svg
+ */
+const rawFilings = (yamlConfig as { filings?: unknown }).filings;
+export const footerFilings: FooterFiling[] = Array.isArray(rawFilings)
+  ? rawFilings.filter((f): f is FooterFiling => Boolean(f && typeof f.text === 'string' && f.text))
+  : [];
+
+const rawBadges = (yamlConfig as { badges?: unknown }).badges;
+export const footerBadges: FooterBadge[] = Array.isArray(rawBadges)
+  ? rawBadges.filter((b): b is FooterBadge => Boolean(b && typeof b.text === 'string' && b.text))
+  : [];
+
+/**
+ * Starfield / meteor background effect (config/site.yaml -> `universe:`).
+ *
+ * Read here rather than imported directly by the component: `config/site.yaml`
+ * values must be normalized in one place, and a component that imports the YAML
+ * root would pull in the theme author's sample values for every other key.
+ */
+export interface UniverseConfig {
+  enabled: boolean;
+  /** Particle count = ceil(density × viewport width). */
+  density: number;
+  /** Restrict the effect to dark mode. */
+  onlyDark: boolean;
+}
+
+const rawUniverse = (yamlConfig as { universe?: { enabled?: unknown; density?: unknown; onlyDark?: unknown } }).universe;
+export const universeConfig: UniverseConfig = {
+  enabled: rawUniverse?.enabled === true,
+  density: typeof rawUniverse?.density === 'number' && rawUniverse.density > 0 ? rawUniverse.density : 0.216,
+  onlyDark: rawUniverse?.onlyDark !== false,
+};
+
+export interface MournConfig {
+  enabled: boolean;
+  /** Dates in `M-D` form, e.g. `['4-5', '5-12']`. Quoting them is recommended. */
+  days: string[];
+  /** `cover` grayscales only the page banner; `page` grayscales the whole page. */
+  affect: 'cover' | 'page';
+}
+
+/**
+ * Mourning-day grayscale (纪念日/哀悼日变灰).
+ *
+ * Ported from the previous Hexo blog's anzhiyu `mourn` option, which ran
+ * `document.documentElement.style.filter = 'grayscale(1)'` on the home page's
+ * first pagination page only (`is_home_first_page()`).
+ *
+ * Two deliberate differences here:
+ *
+ *  1. `affect` selects the scope. `page` (default) reproduces the original
+ *     whole-page filter; `cover` restricts it to the page banner.
+ *  2. The scope is expressed as a class written pre-paint by BootScripts rather
+ *     than an inline `filter` on <html>, so the effect never flashes in colour
+ *     first.
+ */
+const rawMourn = (yamlConfig as { mourn?: { enabled?: boolean; days?: unknown; affect?: unknown } }).mourn;
+export const mournConfig: MournConfig = {
+  enabled: rawMourn?.enabled ?? false,
+  days: Array.isArray(rawMourn?.days)
+    ? rawMourn.days.map((d) => (typeof d === 'string' ? d.trim() : typeof d === 'number' ? String(d) : '')).filter(Boolean)
+    : [],
+  affect: rawMourn?.affect === 'cover' ? 'cover' : 'page',
+};
 
 const { title, alternate, subtitle } = siteConfig;
 

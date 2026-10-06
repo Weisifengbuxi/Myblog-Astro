@@ -7,7 +7,7 @@
  * head parsing. Treat them as frozen: any deferral or refactor reintroduces FOUC.
  */
 
-import { christmasConfig, motionConfig } from '@constants/site-config';
+import { christmasConfig, motionConfig, mournConfig } from '@constants/site-config';
 import { MOTION_LEVELS } from '@lib/config/motion';
 import {
   FONT_PRESETS,
@@ -72,6 +72,72 @@ import {
     var stored = localStorage.getItem('christmas-enabled');
     var enabled = stored !== 'false'; // 默认启用
     document.documentElement.classList.toggle('christmas', enabled);
+  })();
+</script>
+
+<script
+  is:inline
+  define:vars={{ mournEnabled: mournConfig.enabled, mournDays: mournConfig.days, mournAffect: mournConfig.affect }}
+>
+  // 纪念日/哀悼日变灰 —— 必须在首屏前执行，否则会先显示彩色再变灰。
+  // 迁移自原 Hexo 博客 anzhiyu 主题的 mourn：
+  //   document.documentElement.style.filter = "grayscale(1)"
+  // 原版由 `is_home_first_page()` 限制为仅首页，且用内联 style。
+  // 这里改为在 <html> 上打类名，样式交给 CSS。
+  //
+  // 生效范围：**只在首页**（/ ，或多语言下的 /zh）整页去色；进入任何其它页面恢复彩色。
+  (function () {
+    if (!mournEnabled || !mournDays.length) return;
+
+    // 用访客本地时间判断；原版也是本地时间，刻意不用 UTC。
+    function isMournDay() {
+      var now = new Date();
+      return mournDays.indexOf(now.getMonth() + 1 + '-' + now.getDate()) !== -1;
+    }
+
+    /** '/' 与 '/zh'（默认语言无前缀，其它语言有）都算首页。 */
+    function isHomePath(pathname) {
+      var path = String(pathname || '/').replace(/\/+$/, '') || '/';
+      if (path === '/') return true;
+      var segments = path.split('/').filter(Boolean);
+      if (segments.length !== 1) return false;
+      var locale = document.documentElement.getAttribute('data-locale');
+      return Boolean(locale) && segments[0] === locale;
+    }
+
+    function shouldMourn(pathname) {
+      return isMournDay() && isHomePath(pathname);
+    }
+
+    function apply(root, pathname) {
+      if (shouldMourn(pathname)) {
+        root.classList.add('mourn');
+        root.dataset.mourn = mournAffect;
+      } else {
+        root.classList.remove('mourn');
+        delete root.dataset.mourn;
+      }
+    }
+
+    // 首次加载：按当前地址判断，在首屏前完成。
+    apply(document.documentElement, window.location.pathname);
+
+    // View Transition：换页后地址会变（首页 -> 文章页必须恢复彩色），
+    // 所以 before-swap 时要按**目标**地址重算，写入即将成为 <html> 的那个元素，
+    // 否则切到文章页的瞬间会带着灰色绘制一帧。
+    document.addEventListener('astro:before-swap', function (event) {
+      var nextDoc = event.newDocument;
+      var nextPath = nextDoc && nextDoc.defaultView ? nextDoc.defaultView.location.pathname : null;
+      if (nextPath === null) {
+        // 拿不到目标地址时，退化为按当前地址处理，after-swap 会再纠正一次。
+        nextPath = window.location.pathname;
+      }
+      if (nextDoc && nextDoc.documentElement) apply(nextDoc.documentElement, nextPath);
+    });
+
+    document.addEventListener('astro:after-swap', function () {
+      apply(document.documentElement, window.location.pathname);
+    });
   })();
 </script>
 

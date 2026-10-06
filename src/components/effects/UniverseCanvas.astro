@@ -1,0 +1,273 @@
+---
+/**
+ * 星空 / 流星背景特效（移植自原 Hexo 博客 anzhiyu 主题的 `universe` 效果）。
+ *
+ * 原实现在 `themes/anzhiyu/layout/includes/additional-js.pug` 里挂了一个
+ * `<canvas id="universe">`，再异步加载主题作者 CDN 上的
+ * `anzhiyu-theme-static@1.0.0/dark/dark.js` 驱动。这里把那段 canvas 动画算法
+ * 完整移植过来，去掉外部 CDN 依赖。
+ *
+ * 保留的原始观感（粒子三类）：
+ *   - 大星（giant）：半径 2px，蓝白色 rgba(180,184,240)
+ *   - 普通星（star）：黄白色小方块 rgba(226,225,142)，边长 1.1~2.6px
+ *   - 流星（comet）：白色，30 段渐隐拖尾，斜向右上飞过
+ *
+ * 与原实现的差异（都是必要的适配）：
+ *   1. 深色判定用 koharu 的 `html.dark`（原站是 `html[data-theme="dark"]`）
+ *   2. 垂直方向改为**向下**。原实现 dy 为负（向上飞），但 canvas 的 y 轴向下，
+ *      配合它 `y < 0` 的回收条件，粒子实际会被反复重置 —— 这在原站就是一个
+ *      观感 bug。这里改成向下飞并相应调整回收边界，流星才是横穿画面的轨迹。
+ *   3. 向上叠一层 `mix-blend-mode: screen`：canvas 位于内容之上，screen 混合让
+ *      暗色像素完全透明，只有星点会加亮，因此正文始终清晰可读。
+ *   4. 加入动效等级、`prefers-reduced-motion`、标签页可见性与 dpr 支持。
+ *
+ * 配置见 `config/site.yaml` 的 `universe:` 段。
+ */
+import { motionConfig, universeConfig } from '@constants/site-config';
+
+const enabled = universeConfig.enabled;
+const density = universeConfig.density;
+const onlyDark = universeConfig.onlyDark;
+
+// 动效为 reduced 时不渲染，省掉一个 canvas 与 rAF 循环
+const shouldRender = enabled && motionConfig.level !== 'reduced';
+---
+
+{
+  shouldRender && (
+    <universe-canvas
+      class="universe-canvas"
+      data-density={density}
+      data-only-dark={onlyDark ? 'true' : 'false'}
+      aria-hidden="true"
+    >
+      <canvas />
+    </universe-canvas>
+  )
+}
+
+<script>
+  import { readMotionLevel, subscribeMotionLevel } from '@lib/motion-level';
+
+  interface Particle {
+    giant: boolean;
+    comet: boolean;
+    x: number;
+    y: number;
+    r: number;
+    dx: number;
+    dy: number;
+    opacity: number;
+    opacityTresh: number;
+    do: number;
+    fadingIn: boolean;
+    fadingOut: boolean;
+  }
+
+  const COLORS = {
+    giant: '180,184,240',
+    star: '226,225,142',
+    comet: '226,225,224',
+  };
+
+  /** 基础速度系数，与原 dark.js 的 t 一致 */
+  const SPEED = 0.05;
+  /** 流星拖尾段数 */
+  const TAIL = 30;
+
+  const random = (min: number, max: number) => Math.random() * (max - min) + min;
+  /** 原 m(t)：以 t/1000 的概率返回 true */
+  const chance = (percent: number) => Math.floor(1000 * Math.random()) + 1 < 10 * percent;
+
+  class UniverseCanvas extends HTMLElement {
+    private canvas: HTMLCanvasElement | null = null;
+    private ctx: CanvasRenderingContext2D | null = null;
+    private particles: Particle[] = [];
+    private width = 0;
+    private height = 0;
+    private dpr = 1;
+    private frame = 0;
+    private running = false;
+    private resizeObserver: ResizeObserver | null = null;
+    private cleanups: Array<() => void> = [];
+
+    connectedCallback() {
+      this.canvas = this.querySelector('canvas');
+      if (!this.canvas) return;
+      this.ctx = this.canvas.getContext('2d');
+      if (!this.ctx) return;
+
+      const measure = () => {
+        this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.width = this.clientWidth || window.innerWidth;
+        this.height = this.clientHeight || window.innerHeight;
+        if (!this.canvas) return;
+        this.canvas.width = Math.floor(this.width * this.dpr);
+        this.canvas.height = Math.floor(this.height * this.dpr);
+        this.ctx?.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+        this.seed();
+      };
+
+      measure();
+      this.resizeObserver = new ResizeObserver(measure);
+      this.resizeObserver.observe(this);
+
+      const onVisibility = () => this.sync();
+      document.addEventListener('visibilitychange', onVisibility);
+
+      // 深色模式切换（koharu 用 html.dark）
+      const themeObserver = new MutationObserver(() => this.sync());
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+      const unsubscribe = subscribeMotionLevel(() => this.sync());
+
+      this.cleanups = [
+        () => this.resizeObserver?.disconnect(),
+        () => document.removeEventListener('visibilitychange', onVisibility),
+        () => themeObserver.disconnect(),
+        unsubscribe,
+        () => this.stop(),
+      ];
+
+      this.sync();
+    }
+
+    disconnectedCallback() {
+      for (const cleanup of this.cleanups) cleanup();
+      this.cleanups = [];
+      this.resizeObserver = null;
+      this.particles = [];
+      this.canvas = null;
+      this.ctx = null;
+    }
+
+    /** 粒子数量 = ceil(density × 宽度)，与原 i = .216 * n 一致 */
+    private seed() {
+      const density = Number(this.dataset.density) || 0.216;
+      const count = Math.ceil(density * this.width);
+      this.particles = Array.from({ length: count }, () => {
+        const particle = {} as Particle;
+        this.reset(particle);
+        // 初始铺满整屏，避免开场时所有星点挤在下边缘
+        particle.y = random(0, this.height);
+        particle.opacity = random(0.2, particle.opacityTresh);
+        return particle;
+      });
+    }
+
+    private reset(p: Particle) {
+      p.giant = chance(3);
+      p.comet = !p.giant && chance(10);
+      const speedBoost = (Number(p.comet) + 1 - 1) * SPEED;
+      p.x = random(0, Math.max(1, this.width - 10));
+      p.y = 0;
+      p.r = random(1.1, 2.6);
+      // 斜向右下；流星额外乘一个大系数，形成长轨迹
+      p.dx = random(SPEED, 6 * SPEED) + speedBoost * random(50, 120) + 2 * SPEED;
+      p.dy = random(SPEED, 6 * SPEED) + speedBoost * random(50, 120);
+      p.fadingOut = false;
+      p.fadingIn = true;
+      p.opacity = 0;
+      p.opacityTresh = random(0.2, 1 - 0.4 * (Number(p.comet) + 1 - 1));
+      p.do = random(5e-4, 0.002) + 0.001 * (Number(p.comet) + 1 - 1);
+    }
+
+    private draw() {
+      const ctx = this.ctx;
+      if (!ctx) return;
+      ctx.clearRect(0, 0, this.width, this.height);
+
+      for (const p of this.particles) {
+        ctx.beginPath();
+        if (p.giant) {
+          ctx.fillStyle = `rgba(${COLORS.giant},${p.opacity})`;
+          ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI, false);
+        } else if (p.comet) {
+          ctx.fillStyle = `rgba(${COLORS.comet},${p.opacity})`;
+          ctx.arc(p.x, p.y, 1.5, 0, 2 * Math.PI, false);
+          for (let i = 0; i < TAIL; i++) {
+            ctx.fillStyle = `rgba(${COLORS.comet},${p.opacity - (p.opacity / 20) * i})`;
+            ctx.rect(p.x - (p.dx / 4) * i, p.y - (p.dy / 4) * i - 2, 2, 2);
+            ctx.fill();
+          }
+        } else {
+          ctx.fillStyle = `rgba(${COLORS.star},${p.opacity})`;
+          ctx.rect(p.x, p.y, p.r, p.r);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    private tick = () => {
+      if (!this.running) return;
+      for (const p of this.particles) {
+        // 淡入 → 位移 → 出界后淡出并回收
+        if (p.fadingIn) {
+          p.opacity += p.do;
+          if (p.opacity > p.opacityTresh) p.fadingIn = false;
+        }
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.opacity > p.opacityTresh) p.fadingOut = true;
+        if (p.fadingOut) {
+          p.opacity -= p.do / 2;
+          if (p.opacity <= 0) this.reset(p);
+        }
+        const offscreen = p.x > this.width - this.width / 4 || p.y > this.height;
+        if (offscreen) p.fadingOut = true;
+      }
+      this.draw();
+      this.frame = window.requestAnimationFrame(this.tick);
+    };
+
+    private start() {
+      if (this.running) return;
+      this.running = true;
+      this.frame = window.requestAnimationFrame(this.tick);
+    }
+
+    private stop() {
+      this.running = false;
+      window.cancelAnimationFrame(this.frame);
+    }
+
+    private sync() {
+      if (!this.isConnected) return;
+      const onlyDark = this.dataset.onlyDark !== 'false';
+      const dark = document.documentElement.classList.contains('dark');
+      const allowed =
+        readMotionLevel() !== 'reduced' &&
+        document.visibilityState === 'visible' &&
+        (!onlyDark || dark);
+      if (allowed) {
+        // 从浅色切到深色时重新播种，避免星星从上一次的位置继续爬
+        if (this.particles.length === 0) this.seed();
+        this.start();
+      } else {
+        this.stop();
+        this.ctx?.clearRect(0, 0, this.width, this.height);
+      }
+    }
+  }
+
+  if (!customElements.get('universe-canvas')) customElements.define('universe-canvas', UniverseCanvas);
+</script>
+
+<style>
+  .universe-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    /* 只让星点加亮，暗色像素完全透出 —— 正文因此不会被遮挡 */
+    mix-blend-mode: screen;
+    contain: strict;
+  }
+
+  .universe-canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>

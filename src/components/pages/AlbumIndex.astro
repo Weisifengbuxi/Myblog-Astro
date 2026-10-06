@@ -1,0 +1,83 @@
+---
+/**
+ * Album index — the "相册集" landing page.
+ *
+ * Lists every album flagged `category: true` in config/pages.yaml and shows how
+ * many photos each contains.
+ */
+import { albumCategories } from '@lib/pages';
+
+const albums = albumCategories;
+const photoCount = (album: (typeof albums)[number]) => album.items.reduce((n, item) => n + item.images.length, 0);
+---
+
+<div class="album-index">
+  {
+    albums.map((album) => (
+      <a class="album-card" href={`/${album.id}`}>
+        <span class="album-card-cover" style={`background-image:url('${album.cover}')`} />
+        <span class="album-card-body">
+          <span class="album-card-name">{album.name}</span>
+          <span class="album-card-desc">{album.description}</span>
+          <span class="album-card-count">{photoCount(album)} 张照片 · {album.items.length} 条记录</span>
+        </span>
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  .album-index {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+  }
+
+  .album-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    border-radius: 0.75rem;
+    color: inherit;
+    text-decoration: none;
+    transition:
+      transform 0.25s ease,
+      border-color 0.25s ease;
+  }
+
+  .album-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in oklab, currentColor 30%, transparent);
+  }
+
+  .album-card-cover {
+    display: block;
+    aspect-ratio: 16 / 9;
+    background-size: cover;
+    background-position: center;
+    background-color: color-mix(in oklab, currentColor 6%, transparent);
+  }
+
+  .album-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.85rem 1rem 1rem;
+  }
+
+  .album-card-name {
+    font-weight: 600;
+  }
+
+  .album-card-desc {
+    font-size: 0.85rem;
+    opacity: 0.75;
+  }
+
+  .album-card-count {
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    opacity: 0.55;
+  }
+</style>

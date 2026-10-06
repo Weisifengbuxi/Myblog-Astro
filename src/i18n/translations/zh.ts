@@ -15,6 +15,7 @@ export const uiStrings = {
   'nav.friends': '友链',
   'nav.about': '关于',
   'nav.music': '歌单',
+  'nav.equipment': '装备',
   'nav.weekly': '周刊',
   'nav.bangumi': '追番',
 

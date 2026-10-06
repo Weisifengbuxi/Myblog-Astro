@@ -1,3 +1,13 @@
 packages:
   - '.'
   - 'cms'
+
+# Allow these dependencies to run their install/build scripts.
+# Without this, pnpm blocks them and sharp (image processing, required by
+# astro:assets / LQIP generation) fails at build time.
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - onnxruntime-node
+  - protobufjs
+  - re2
