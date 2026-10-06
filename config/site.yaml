@@ -19,7 +19,7 @@ site:
 #  alternate: Weisifengbuxi
   subtitle: 学习技术 分享生活 # 网站副标题
   name: 未似风不息 # 作者名称
-  description: 未似风不息的个人技术博客，分享计算机组成原理、数据结构与算法、数学建模等学习笔记，以及生活感悟与博客搭建教程。 # 网站描述
+  description: 还没想好 # 网站描述
   avatar: /img/avatar.jpg # 网站头像
   showLogo: false # false = 页头显示站点名称文字（alternate）；true = 显示 src/assets/svg/logo.svg（主题作者的 Cosine logo，需自行替换）
   author: 未似风不息 # 作者名称
