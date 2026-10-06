@@ -3,34 +3,33 @@ import { welcomeConfig } from '@/constants/site-config';
 import '@/styles/components/welcome.css';
 
 /**
- * Visitor welcome card — ported from the previous Hexo blog's `card-welcome.js`,
- * which showed:
+ * Visitor welcome card — ported from the previous Hexo blog's `card-welcome.js`:
  *
  *   欢迎来自 <地点> 的朋友
- *   您当前距博主约 <N> 公里！
- *   您的IP地址：<IP>
+ *   您距离博主位置约 <N> 公里！
+ *   您的 IP 地址：<IP>
  *   <时段问候>
  *   Tip：<地域问候>
  *
- * Design notes
- * ------------
- * **Location accuracy.** IP geolocation resolves to the ISP's egress node, so a
- * visitor in 珠海 can be reported as 广州 (measured: exactly that). The browser's
- * own geolocation API is the only accurate source, so it is tried first and the
- * coordinates it returns are reverse-geocoded into a city name. IP geolocation
- * is the fallback when permission is denied or unavailable. Whichever source
- * wins supplies *both* the place name and the distance, so the two can never
- * contradict each other.
+ * Location detection: IP only, no geolocation permission
+ * ------------------------------------------------------
+ * The previous blog never called `navigator.geolocation`; it relied entirely on
+ * an IP database (`https://v1.nsuuu.com/api/ipip?ip=…`, an ipip.net mirror) and
+ * was accurate. The difference is **which database**, not IP vs GPS:
  *
- * **No API key.** The original shipped a hardcoded key belonging to another blog
- * (`IP_CONFIG.API_KEY`, for v1.nsuuu.com). Everything here uses keyless public
- * endpoints with fallback chains.
+ *   For the same Chinese IP (113.76.180.239, China Telecom Guangdong):
+ *     ip-api.com     → 广州市    (wrong: the provincial egress node)
+ *     ipwho.is       → Guangzhou (wrong, same reason)
+ *     api.ip.sb      → 珠海市    (correct — 22.28, 113.57 is Zhuhai)
  *
- * **Flicker.** Only one state transition happens in the whole lifecycle: the
- * place-dependent lines are replaced once, when the lookup settles. The
- * time-of-day greeting renders immediately because it needs no network, and the
- * skeleton stays up until the lookup actually finishes so the card never shrinks
- * from content back to a placeholder.
+ * So `api.ip.sb`, whose database resolves Chinese IPs to the actual city, is
+ * tried first and the international services are the fallback. There is no
+ * permission prompt.
+ *
+ * Those services return English names (`Guangdong` / `Zhuhai`) while the
+ * greeting table is keyed in Chinese, so `CN_REGIONS` / `CN_CITIES` map the
+ * common ones. Anything unmapped still shows the Chinese province (or country)
+ * rather than leaking a Romanized name into the place text.
  *
  * See `.migration/NOTES-welcome-card.md` and `REF-welcome-original.md`.
  */
@@ -44,18 +43,9 @@ interface IpInfo {
   lat: number | null;
 }
 
-/** Names used for both the greeting lookup and the displayed place. */
-interface Place {
-  country: string;
-  province: string;
-  city: string;
-}
-
 type Status = 'loading' | 'ready' | 'unavailable';
 
 const REQUEST_TIMEOUT_MS = 6000;
-const GEO_TIMEOUT_MS = 8000;
-const GEO_MAX_AGE_MS = 10 * 60 * 1000;
 
 const CN_NAMES_BY_CODE: Record<string, string> = {
   CN: '中国',
@@ -67,10 +57,9 @@ const CN_NAMES_BY_CODE: Record<string, string> = {
 /**
  * Canonicalize a country name to the key used by `welcome.greetings`.
  *
- * The services disagree in two ways: ipwho.is returns English (`China`), while
- * BigDataCloud's `localityLanguage=zh` returns the *formal* name
- * (`中华人民共和国`, "People's Republic of China"). Neither matches the table's
- * plain `中国`, so both flavours are folded in here.
+ * Services disagree: ipwho.is/ip.sb return English (`China`), ip-api.com returns
+ * Chinese, and BigDataCloud returns the *formal* name (`中华人民共和国`). The
+ * table key is the plain `中国`, so all flavours are folded in here.
  */
 const COUNTRY_ALIASES: Record<string, string> = {
   中国: '中国',
@@ -90,41 +79,8 @@ const COUNTRY_ALIASES: Record<string, string> = {
   Taiwan: '台湾',
 };
 
-/** `珠海市` → `珠海`, `广东省` → `广东`, `四川省` → `四川` … */
-function stripAdminSuffix(name: string): string {
-  return name.replace(/(特别行政区|维吾尔自治区|壮族自治区|回族自治区|自治区|省|市|县|区)$/u, '');
-}
-
-/**
- * Chinese city name → the key used in the greetings table.
- *
- * BigDataCloud returns official names (`珠海市`) while the table — copied from
- * the previous blog — uses the bare form (`珠海`). Both are accepted, and the
- * table is also probed with the suffix stripped, so an unmapped city still
- * resolves through its province instead of falling straight to `其他`.
- */
-function cityKeyFor(city: string, province: string): string {
-  if (!city) return '';
-  const bare = stripAdminSuffix(city);
-  const provinceEntry = welcomeConfig.greetings['中国'];
-  const table = typeof provinceEntry === 'object' && provinceEntry !== null ? provinceEntry[province] : undefined;
-  if (table && typeof table === 'object') {
-    if (table[city] !== undefined) return city;
-    if (bare && table[bare] !== undefined) return bare;
-  }
-  return bare || city;
-}
-
-/**
- * English country name → the Chinese key used by `welcome.greetings`.
- *
- * ipwho.is returns `country: "China"` / `"United States"`; the greeting table
- * (ported verbatim from the previous blog) is keyed in Chinese, so without this
- * map every visitor would fall through to the generic `其他` line. ipapi.co
- * already returns Chinese names and short-circuits this.
- */
+/** English country name → the Chinese key used by `welcome.greetings`. */
 const COUNTRY_CN: Record<string, string> = {
-  China: '中国',
   'United States': '美国',
   'United States of America': '美国',
   Japan: '日本',
@@ -168,78 +124,179 @@ const COUNTRY_CN: Record<string, string> = {
   Portugal: '葡萄牙',
 };
 
-/** Romanized Chinese province / municipality (ipwho.is style) → 中文名. */
+/**
+ * Region name from any provider → the Chinese name used by the greeting table.
+ *
+ * Covers every provincial-level division, in the short form (`Guangdong`), the
+ * long form ipwho.is prefers (`Guangdong Sheng`), and the Chinese form.
+ */
 const CN_REGIONS: Record<string, string> = {
-  'Guangdong Sheng': '广东',
+  广东: '广东',
+  广东省: '广东',
   Guangdong: '广东',
-  'Beijing Shi': '北京',
+  'Guangdong Sheng': '广东',
+  北京: '北京',
+  北京市: '北京',
   Beijing: '北京',
-  'Shanghai Shi': '上海',
+  'Beijing Shi': '北京',
+  上海: '上海',
+  上海市: '上海',
   Shanghai: '上海',
-  'Tianjin Shi': '天津',
+  'Shanghai Shi': '上海',
+  天津: '天津',
+  天津市: '天津',
   Tianjin: '天津',
-  'Chongqing Shi': '重庆',
+  'Tianjin Shi': '天津',
+  重庆: '重庆',
+  重庆市: '重庆',
   Chongqing: '重庆',
-  'Zhejiang Sheng': '浙江',
+  'Chongqing Shi': '重庆',
+  浙江: '浙江',
+  浙江省: '浙江',
   Zhejiang: '浙江',
-  'Jiangsu Sheng': '江苏',
+  'Zhejiang Sheng': '浙江',
+  江苏: '江苏',
+  江苏省: '江苏',
   Jiangsu: '江苏',
-  'Hunan Sheng': '湖南',
+  'Jiangsu Sheng': '江苏',
+  湖南: '湖南',
+  湖南省: '湖南',
   Hunan: '湖南',
-  'Hubei Sheng': '湖北',
+  'Hunan Sheng': '湖南',
+  湖北: '湖北',
+  湖北省: '湖北',
   Hubei: '湖北',
-  'Sichuan Sheng': '四川',
+  'Hubei Sheng': '湖北',
+  四川: '四川',
+  四川省: '四川',
   Sichuan: '四川',
-  'Fujian Sheng': '福建',
+  'Sichuan Sheng': '四川',
+  福建: '福建',
+  福建省: '福建',
   Fujian: '福建',
-  'Shandong Sheng': '山东',
+  'Fujian Sheng': '福建',
+  山东: '山东',
+  山东省: '山东',
   Shandong: '山东',
-  'Henan Sheng': '河南',
+  'Shandong Sheng': '山东',
+  河南: '河南',
+  河南省: '河南',
   Henan: '河南',
-  'Hebei Sheng': '河北',
+  'Henan Sheng': '河南',
+  河北: '河北',
+  河北省: '河北',
   Hebei: '河北',
-  'Shaanxi Sheng': '陕西',
+  'Hebei Sheng': '河北',
+  陕西: '陕西',
+  陕西省: '陕西',
   Shaanxi: '陕西',
-  'Liaoning Sheng': '辽宁',
+  'Shaanxi Sheng': '陕西',
+  辽宁: '辽宁',
+  辽宁省: '辽宁',
   Liaoning: '辽宁',
-  'Anhui Sheng': '安徽',
+  'Liaoning Sheng': '辽宁',
+  安徽: '安徽',
+  安徽省: '安徽',
   Anhui: '安徽',
-  'Jiangxi Sheng': '江西',
+  'Anhui Sheng': '安徽',
+  江西: '江西',
+  江西省: '江西',
   Jiangxi: '江西',
+  'Jiangxi Sheng': '江西',
+  广西: '广西壮族自治区',
+  广西壮族自治区: '广西壮族自治区',
+  Guangxi: '广西壮族自治区',
   'Guangxi Zhuangzu Zizhiqu': '广西壮族自治区',
-  'Yunnan Sheng': '云南',
+  云南: '云南',
+  云南省: '云南',
   Yunnan: '云南',
-  'Guizhou Sheng': '贵州',
+  'Yunnan Sheng': '云南',
+  贵州: '贵州',
+  贵州省: '贵州',
   Guizhou: '贵州',
-  'Shanxi Sheng': '山西',
+  'Guizhou Sheng': '贵州',
+  山西: '山西',
+  山西省: '山西',
   Shanxi: '山西',
-  'Heilongjiang Sheng': '黑龙江',
+  'Shanxi Sheng': '山西',
+  黑龙江: '黑龙江',
+  黑龙江省: '黑龙江',
   Heilongjiang: '黑龙江',
-  'Jilin Sheng': '吉林',
+  'Heilongjiang Sheng': '黑龙江',
+  吉林: '吉林',
+  吉林省: '吉林',
   Jilin: '吉林',
-  'Hainan Sheng': '海南',
+  'Jilin Sheng': '吉林',
+  海南: '海南',
+  海南省: '海南',
   Hainan: '海南',
-  'Gansu Sheng': '甘肃',
+  'Hainan Sheng': '海南',
+  甘肃: '甘肃',
+  甘肃省: '甘肃',
   Gansu: '甘肃',
+  'Gansu Sheng': '甘肃',
+  内蒙古: '内蒙古自治区',
+  内蒙古自治区: '内蒙古自治区',
+  'Inner Mongolia': '内蒙古自治区',
   'Inner Mongolia Zizhiqu': '内蒙古自治区',
+  宁夏: '宁夏回族自治区',
+  宁夏回族自治区: '宁夏回族自治区',
+  Ningxia: '宁夏回族自治区',
   'Ningxia Huizu Zizhiqu': '宁夏回族自治区',
-  'Qinghai Sheng': '青海',
+  青海: '青海',
+  青海省: '青海',
   Qinghai: '青海',
+  'Qinghai Sheng': '青海',
+  新疆: '新疆维吾尔自治区',
+  新疆维吾尔自治区: '新疆维吾尔自治区',
+  Xinjiang: '新疆维吾尔自治区',
   'Xinjiang Uygur Zizhiqu': '新疆维吾尔自治区',
-  'Xizang Zizhiqu': '西藏自治区',
+  西藏: '西藏自治区',
+  西藏自治区: '西藏自治区',
   Tibet: '西藏自治区',
+  'Xizang Zizhiqu': '西藏自治区',
 };
 
-/** Common Chinese city names as ipwho.is romanizes them → 中文名. */
+/**
+ * City name → the Chinese key used by the greeting table.
+ *
+ * The Chinese IP databases return English city names (`Zhuhai`), and some
+ * Chinese services return the official form (`珠海市`). Guangdong is covered
+ * exhaustively because that is where this blog and most of its audience are; the
+ * rest are the major cities. Lookups also try the 市-stripped form, so a missed
+ * city still resolves through its province entry.
+ */
 const CN_CITIES: Record<string, string> = {
+  // 广东 21 个地级市
   Guangzhou: '广州',
+  广州市: '广州',
   Shenzhen: '深圳',
+  深圳市: '深圳',
   Zhuhai: '珠海',
-  Dongguan: '东莞',
-  Foshan: '佛山',
-  Zhongshan: '中山',
-  Huizhou: '惠州',
+  珠海市: '珠海',
   Shantou: '汕头',
+  汕头市: '汕头',
+  Foshan: '佛山',
+  佛山市: '佛山',
+  Shaoguan: '韶关',
+  Zhanjiang: '湛江',
+  Zhaoqing: '肇庆',
+  Jiangmen: '江门',
+  Maoming: '茂名',
+  Huizhou: '惠州',
+  Meizhou: '梅州',
+  Shanwei: '汕尾',
+  Heyuan: '河源',
+  Yangjiang: '阳江',
+  Qingyuan: '清远',
+  Dongguan: '东莞',
+  东莞市: '东莞',
+  Zhongshan: '中山',
+  中山市: '中山',
+  Chaozhou: '潮州',
+  Jieyang: '揭阳',
+  Yunfu: '云浮',
+  // 其它主要城市
   Beijing: '北京',
   Shanghai: '上海',
   Tianjin: '天津',
@@ -276,10 +333,24 @@ const CN_CITIES: Record<string, string> = {
   Yinchuan: '银川',
   Xining: '西宁',
   Lhasa: '拉萨',
+  'Hong Kong': '香港特别行政区',
+  Macau: '澳门特别行政区',
+  Taipei: '台北',
 };
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+/** `珠海市` → `珠海`, `广东省` → `广东`, `四川省` → `四川` … */
+function stripAdminSuffix(value: string): string {
+  return value.replace(/(特别行政区|维吾尔自治区|壮族自治区|回族自治区|自治区|省|市|县|区)$/u, '');
+}
+
+function canonicalCountry(raw: string, code = ''): string {
+  const upper = code.toUpperCase();
+  if (CN_NAMES_BY_CODE[upper]) return CN_NAMES_BY_CODE[upper];
+  return COUNTRY_ALIASES[raw] ?? COUNTRY_CN[raw] ?? (stripAdminSuffix(raw) || raw);
+}
 
 async function fetchJson(url: string): Promise<Record<string, unknown>> {
   const controller = new AbortController();
@@ -293,18 +364,11 @@ async function fetchJson(url: string): Promise<Record<string, unknown>> {
   }
 }
 
-/** Country name from any provider → the canonical table key. */
-function canonicalCountry(raw: string, code = ''): string {
-  const upper = code.toUpperCase();
-  if (CN_NAMES_BY_CODE[upper]) return CN_NAMES_BY_CODE[upper];
-  return COUNTRY_ALIASES[raw] ?? COUNTRY_CN[raw] ?? (stripAdminSuffix(raw) || raw);
-}
-
 /**
  * Parse a coordinate pair.
  *
- * Providers disagree on shape: ipapi.co/ipwho.is use numeric `longitude`/`lat`,
- * while ipinfo.io packs both into `loc: "23.0180,113.7487"` (lat,lng).
+ * Providers disagree on shape: most use numeric `longitude`/`latitude`, while
+ * ipinfo.io packs both into `loc: "23.0180,113.7487"` (lat,lng).
  */
 function parseCoords(raw: Record<string, unknown>): { lng: number | null; lat: number | null } {
   const direct = { lng: num(raw.longitude ?? raw.lng), lat: num(raw.latitude ?? raw.lat) };
@@ -322,10 +386,10 @@ function parseCoords(raw: Record<string, unknown>): { lng: number | null; lat: n
 
 /** Normalize an IP-geolocation payload from any provider into `IpInfo`. */
 function normalizeIp(raw: Record<string, unknown>, fallbackIp: string): IpInfo {
-  // ipinfo.io puts the ISO code in `country`; others use `country_code` or a name.
+  // ipinfo.io puts the ISO code in `country`; others use `country_code`.
   const rawCountryField = str(raw.country);
   const code = (str(raw.country_code) || (/^[A-Za-z]{2}$/.test(rawCountryField) ? rawCountryField : '')).toUpperCase();
-  const rawRegion = str(raw.region) || str(raw.region_name);
+  const rawRegion = str(raw.region) || str(raw.regionName) || str(raw.region_name);
   const rawCity = str(raw.city);
   const rawCountry = str(raw.country_name) || (/^[A-Za-z]{2}$/.test(rawCountryField) ? '' : rawCountryField);
   const country = canonicalCountry(rawCountry, code);
@@ -336,21 +400,30 @@ function normalizeIp(raw: Record<string, unknown>, fallbackIp: string): IpInfo {
   return {
     ip: str(raw.ip) || fallbackIp,
     country,
-    province: (isCn ? CN_REGIONS[rawRegion] : undefined) ?? (isCn ? stripAdminSuffix(rawRegion) : rawRegion),
-    city: (isCn ? CN_CITIES[rawCity] : undefined) ?? (isCn ? stripAdminSuffix(rawCity) : rawCity),
+    province: isCn ? (CN_REGIONS[rawRegion] ?? stripAdminSuffix(rawRegion)) : rawRegion,
+    city: isCn ? (CN_CITIES[rawCity] ?? stripAdminSuffix(rawCity)) : rawCity,
     ...parseCoords(raw),
   };
 }
 
-/** Keyless IP-geolocation providers, tried in order. */
-async function lookupIp(): Promise<IpInfo> {
-  const providers = [
-    () => fetchJson('https://ipapi.co/json/'),
-    () => fetchJson('https://ipwho.is/'),
-    () => fetchJson('https://ipinfo.io/json'),
-  ];
+/**
+ * Keyless IP-geolocation providers, in priority order.
+ *
+ * `api.ip.sb` first: its database resolves Chinese IPs to the actual city
+ * (Zhuhai), whereas the international services stop at the provincial egress
+ * node (Guangzhou) — the discrepancy the previous blog never had because it too
+ * used a Chinese database. The rest are fallbacks for non-Chinese visitors and
+ * for when ip.sb is unreachable.
+ */
+const IP_PROVIDERS: Array<() => Promise<Record<string, unknown>>> = [
+  () => fetchJson('https://api.ip.sb/geoip'),
+  () => fetchJson('https://ipwho.is/'),
+  () => fetchJson('https://ipapi.co/json/'),
+  () => fetchJson('https://ipinfo.io/json'),
+];
 
-  for (const provider of providers) {
+async function lookupIp(): Promise<IpInfo> {
+  for (const provider of IP_PROVIDERS) {
     try {
       const info = normalizeIp(await provider(), '');
       // A payload with no country cannot drive the greeting table; keep trying.
@@ -360,53 +433,6 @@ async function lookupIp(): Promise<IpInfo> {
     }
   }
   throw new Error('all IP providers failed');
-}
-
-/**
- * Reverse-geocode browser coordinates into a city name.
- *
- * BigDataCloud's client endpoint is keyless and CORS-enabled, which is why it is
- * first. ipwho.is also accepts coordinates and is the fallback. Returns `null`
- * when both fail — the caller then keeps the IP-derived name.
- */
-async function reverseGeocode(lat: number, lng: number): Promise<Place | null> {
-  try {
-    const d = await fetchJson(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`,
-    );
-    const country = canonicalCountry(str(d.countryName));
-    if (country) {
-      const isCn = country === '中国';
-      const province = str(d.principalSubdivision);
-      const city = str(d.city) || str(d.locality);
-      return {
-        country,
-        province: isCn ? stripAdminSuffix(province) : province,
-        city: isCn ? stripAdminSuffix(city) : city,
-      };
-    }
-  } catch {
-    /* try the next service */
-  }
-
-  try {
-    const d = await fetchJson(`https://ipwho.is/${lat},${lng}`);
-    if (d.success !== false) {
-      const country = canonicalCountry(str(d.country), str(d.country_code));
-      const isCn = country === '中国';
-      const region = str(d.region);
-      const city = str(d.city);
-      return {
-        country,
-        province: (isCn ? CN_REGIONS[region] : undefined) ?? (isCn ? stripAdminSuffix(region) : region),
-        city: (isCn ? CN_CITIES[city] : undefined) ?? (isCn ? stripAdminSuffix(city) : city),
-      };
-    }
-  } catch {
-    /* fall through */
-  }
-
-  return null;
 }
 
 /** Haversine distance in whole kilometres — same constants as the original. */
@@ -431,50 +457,56 @@ function timeGreeting(): string {
 }
 
 /**
- * Country → province → city lookup with an `其他` fallback at each level.
+ * Chinese city name → the key used in the greetings table.
  *
- * `cityOnly` matters when the place came from the browser's coordinates but
- * reverse-geocoding failed: without it, `city` would hold a Romanized IP city
- * name that cannot match the Chinese table, so we skip straight to the
- * province-level entry instead of missing it.
+ * The table uses bare names (`珠海`) while some services return the official
+ * form (`珠海市`); the suffix-stripped form is probed too, so an unmapped city
+ * still resolves through its province instead of `其他`.
  */
-function regionalGreeting(place: Place | null, cityOnly = false): string {
-  const table = welcomeConfig.greetings;
-  if (!place) return str(table['其他']);
+function cityKeyFor(city: string, province: string): string {
+  if (!city) return '';
+  const bare = stripAdminSuffix(city);
+  const countryEntry = welcomeConfig.greetings['中国'];
+  const provinceEntry = typeof countryEntry === 'object' && countryEntry !== null ? countryEntry[province] : undefined;
+  if (provinceEntry && typeof provinceEntry === 'object') {
+    if (provinceEntry[city] !== undefined) return city;
+    if (bare && provinceEntry[bare] !== undefined) return bare;
+  }
+  return bare || city;
+}
 
-  const byCountry = table[place.country] ?? table['其他'];
+/** Country → province → city lookup with an `其他` fallback at each level. */
+function regionalGreeting(info: IpInfo): string {
+  const table = welcomeConfig.greetings;
+  const byCountry = table[info.country] ?? table['其他'];
   if (typeof byCountry === 'string') return byCountry;
 
-  const byProvince = byCountry[place.province] ?? byCountry['其他'];
-  if (typeof byProvince === 'string') return byProvince;
-  if (!byProvince) return '';
+  const byProvince = byCountry[info.province] ?? byCountry['其他'];
+  if (typeof byProvince === 'string' || !byProvince) {
+    return typeof byProvince === 'string' ? byProvince : '';
+  }
 
-  const cityKey = cityOnly ? '' : cityKeyFor(place.city, place.province);
-  return byProvince[cityKey] ?? byProvince['其他'] ?? '';
+  return byProvince[cityKeyFor(info.city, info.province)] ?? byProvince['其他'] ?? '';
 }
 
 /**
- * `中国 广东 珠海` → `广东 珠海`; other countries keep their own name.
+ * `广东 珠海` for China; other countries keep their own name.
  *
  * Inside China only already-Chinese names are trusted (`CN_REGIONS` /
- * `CN_CITIES` cover every province and the main cities). If a small city is not
- * mapped we show less rather than mixing `Shantou` into a Chinese place name.
- * `cityOnly` skips the province because a coordinate-derived city has no
- * province attached.
+ * `CN_CITIES`). If a small city is not mapped we show less rather than mixing
+ * `Shantou` into a Chinese place name.
  */
-function formatLocation(place: Place, cityOnly = false): string {
-  if (!place.country) return '神秘地区';
+function formatLocation(info: IpInfo): string {
+  if (!info.country) return '神秘地区';
   const cn = (v: string) => (v && !/[A-Za-z]/.test(v) ? v : '');
-
-  if (place.country === '中国') {
-    const parts = cityOnly ? [cn(place.city)] : [cn(place.province), cn(place.city)];
-    return parts.filter(Boolean).join(' ') || '中国';
+  if (info.country === '中国') {
+    return [cn(info.province), cn(info.city)].filter(Boolean).join(' ') || '中国';
   }
-  return [place.country, place.city].filter(Boolean).join(' · ');
+  return [info.country, info.city].filter(Boolean).join(' · ');
 }
 
 /** Session cache + in-flight de-duplication (the sider mounts two islands). */
-const CACHE_PREFIX = 'welcome-ip-v2:';
+const CACHE_PREFIX = 'welcome-ip-v3:';
 
 let cachedIp: IpInfo | null = null;
 let ipInFlight: Promise<IpInfo> | null = null;
@@ -522,46 +554,9 @@ function resolveIp(): Promise<IpInfo> {
   return ipInFlight;
 }
 
-/**
- * Ask the browser for a precise fix. Resolves `null` when permission is denied,
- * the device has no fix, or it takes longer than `GEO_TIMEOUT_MS` — callers then
- * fall back to IP geolocation, so a refusal never blocks the card.
- */
-function requestGeolocation(): Promise<{ lat: number; lng: number } | null> {
-  if (typeof navigator === 'undefined' || !navigator.geolocation) return Promise.resolve(null);
-
-  return new Promise((resolve) => {
-    let settled = false;
-    const done = (v: { lat: number; lng: number } | null) => {
-      if (settled) return;
-      settled = true;
-      resolve(v);
-    };
-
-    // The API's own `timeout` only starts once a fix is being attempted, so add
-    // an independent deadline for the common "permission prompt ignored" case.
-    const timer = setTimeout(() => done(null), GEO_TIMEOUT_MS + 500);
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        clearTimeout(timer);
-        const { latitude, longitude } = pos.coords;
-        done(Number.isFinite(latitude) && Number.isFinite(longitude) ? { lat: latitude, lng: longitude } : null);
-      },
-      () => {
-        clearTimeout(timer);
-        done(null);
-      },
-      { timeout: GEO_TIMEOUT_MS, maximumAge: GEO_MAX_AGE_MS, enableHighAccuracy: false },
-    );
-  });
-}
-
 export default function WelcomeVisitor() {
   const [status, setStatus] = useState<Status>('loading');
-  const [ip, setIp] = useState<string | null>(null);
-  const [place, setPlace] = useState<Place | null>(null);
-  const [cityOnly, setCityOnly] = useState(false);
+  const [info, setInfo] = useState<IpInfo | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const alive = useRef(true);
 
@@ -574,49 +569,17 @@ export default function WelcomeVisitor() {
 
   const run = useCallback(async () => {
     setStatus('loading');
-    const { lng: blogLng, lat: blogLat } = welcomeConfig.blogLocation;
-
-    // Kick both sources off together: geolocation may sit behind a permission
-    // prompt, and the IP request is needed either way as the fallback.
-    const geoPromise = requestGeolocation();
-    const ipPromise = resolveIp().catch(() => null);
-
-    const [coords, ipInfo] = await Promise.all([geoPromise, ipPromise]);
-    if (!alive.current) return;
-
-    if (ipInfo?.ip) setIp(ipInfo.ip);
-
-    if (coords) {
-      // Precise: use the browser's fix for both the name and the distance.
-      setDistance(distanceKm(coords.lng, coords.lat, blogLng, blogLat));
-
-      const geoPlace = await reverseGeocode(coords.lat, coords.lng);
+    try {
+      const next = await resolveIp();
       if (!alive.current) return;
 
-      if (geoPlace?.city || geoPlace?.province) {
-        setPlace(geoPlace);
-        setCityOnly(!geoPlace.province);
-      } else if (ipInfo) {
-        // Reverse-geocoding failed; keep the accurate distance but reuse the
-        // IP's city name, skipping its city level in the greeting lookup so the
-        // Romanized value cannot miss the Chinese table.
-        setPlace({ country: ipInfo.country, province: ipInfo.province, city: ipInfo.city });
-        setCityOnly(true);
-      }
+      const { lng: blogLng, lat: blogLat } = welcomeConfig.blogLocation;
+      setInfo(next);
+      setDistance(next.lng !== null && next.lat !== null ? distanceKm(next.lng, next.lat, blogLng, blogLat) : null);
       setStatus('ready');
-      return;
+    } catch {
+      if (alive.current) setStatus('unavailable');
     }
-
-    // No permission or no fix: fall back to IP geolocation entirely.
-    if (ipInfo) {
-      setPlace({ country: ipInfo.country, province: ipInfo.province, city: ipInfo.city });
-      setCityOnly(false);
-      setDistance(ipInfo.lng !== null && ipInfo.lat !== null ? distanceKm(ipInfo.lng, ipInfo.lat, blogLng, blogLat) : null);
-      setStatus('ready');
-      return;
-    }
-
-    setStatus('unavailable');
   }, []);
 
   useEffect(() => {
@@ -628,9 +591,9 @@ export default function WelcomeVisitor() {
   return (
     <div className="welcome-card">
       <div className="welcome-body">
-        {status === 'ready' && place && (
+        {status === 'ready' && info && (
           <p className="welcome-line">
-            欢迎来自 <b className="welcome-strong">{formatLocation(place, cityOnly)}</b> 的朋友
+            欢迎来自 <b className="welcome-strong">{formatLocation(info)}</b> 的朋友
           </p>
         )}
 
@@ -640,13 +603,13 @@ export default function WelcomeVisitor() {
           </p>
         )}
 
-        {status === 'ready' && ip && (
+        {status === 'ready' && info?.ip && (
           <p className="welcome-line">
             您的 IP 地址：
             {/* 常态模糊，鼠标悬停才清晰（与原博客 .ip-address 一致）。
                 注意：这是纯视觉遮挡，完整 IP 仍在 DOM 中。 */}
             <b className="welcome-ip" title="鼠标悬停查看">
-              {ip}
+              {info.ip}
             </b>
           </p>
         )}
@@ -663,9 +626,9 @@ export default function WelcomeVisitor() {
 
         {status === 'unavailable' && <p className="welcome-line welcome-tip">未能获取到你的位置信息，不过还是欢迎你的到来～</p>}
 
-        {status === 'ready' && place && (
+        {status === 'ready' && info && (
           <p className="welcome-line welcome-tip">
-            Tip：<b className="welcome-strong">{regionalGreeting(place, cityOnly)}</b>
+            Tip：<b className="welcome-strong">{regionalGreeting(info)}</b>
           </p>
         )}
 
