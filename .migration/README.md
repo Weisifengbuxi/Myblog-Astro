@@ -357,10 +357,43 @@ footerLinks:
 | 主题文件 | 改动 |
 | --- | --- |
 | `src/components/layout/Footer.astro` | 挂 `<FooterLinks />`，并渲染备案 / 徽章 |
-| `src/constants/site-config.ts` | 新增 `footerLinks` / `filings` / `badges` / `mournConfig` / `universeConfig` 导出 |
+| `src/components/layout/HomeSider.astro` | 挂 `<WelcomeCard />`；侧栏 `w-64` → `w-72`、`px-3` → `px-2` |
+| `src/constants/layout.ts` | `MAX_WIDTH.content` 1280px → `min(视口 - 6rem, 1760px)` |
+| `src/constants/site-config.ts` | 新增 `footerLinks` / `filings` / `badges` / `mournConfig` / `universeConfig` / `welcomeConfig` 导出 |
 | `src/layouts/AppShell.astro` | 挂 `<UniverseCanvas />` |
 | `src/layouts/BootScripts.astro` | 新增纪念日变灰的首屏内联脚本 |
 | `src/layouts/Layout.astro` | 新增去色 CSS |
+| `src/components/ui/cover/Cover.astro` | 首页开场文字加 `cover-intro-fade` 类；`alternate` 为空时不渲染空 `h2` |
+| `src/styles/components/cover.css` | 新增开场文字淡出的变量与关键帧 |
+
+## 版心宽度与侧栏（布局调整）
+
+原主题 `MAX_WIDTH.content = 'max-w-7xl'`（1280px），在宽屏下留白很大：
+实测 1600px 视口左右留白 156 / 708，1920px 时 316 / 868 —— 因为内容居中、
+侧栏又固定 256px，多出的宽度全堆在右侧。
+
+已改为：
+
+```ts
+content: 'max-w-[min(100%-6rem,110rem)]'   // 视口 - 6rem，上限 1760px
+```
+
+| 视口 | 侧栏宽 | 侧栏内卡片 | 主内容列 | 文章封面 | 左右留白 |
+| --- | --- | --- | --- | --- | --- |
+| 1440 | 288 | 272 | 968 | 452 | 各 48 |
+| 1600 | 288 | 272 | 1128 | 532 | 各 48 |
+| 1920 | 288 | 272 | 1392 | 664 | 各 76/124 |
+
+侧栏同时由 `w-64`（256px）放宽到 `w-72`（288px），内边距 `px-3` → `px-2`，
+因此卡片从 232px 增到 272px。
+
+窄屏回归已验证：侧栏在 ≤992px 正常隐藏（1024 显示、992 起隐藏），
+375 / 480 / 768 / 900 / 992 / 1024 各宽度**均无横向溢出**。
+
+> ⚠️ **正文宽度取舍**：版心变宽后文章详情页的 `.prose` 也变宽
+> （1600 视口 1128px、1920 视口 1392px）。中文一行约 100~130 字，
+> 比常规阅读舒适区（约 70~90 字）宽。若想收窄，在 `post.css` 给 `.prose`
+> 加 `max-width` 即可 —— 代价是图片/代码块不再铺满，或需一并限制。
 
 ## 纪念日 / 哀悼日变灰
 

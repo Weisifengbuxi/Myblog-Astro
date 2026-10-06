@@ -21,8 +21,20 @@ export const CONTENT_PADDING = {
  * Max width constraints
  */
 export const MAX_WIDTH = {
-  // Main content container (1400px)
-  content: 'max-w-7xl',
+  // 主内容容器。
+  //
+  // 原值 max-w-7xl（80rem = 1280px）在 1600px 以上视口会留下很宽的左右留白
+  // （实测 1600px 时左 156 / 右 708，1920px 时左 316 / 右 868），因为内容被居中、
+  // 侧栏又是固定 256px，剩余宽度全落在右侧。
+  //
+  // 改为 min(视口 - 6rem, 110rem = 1760px)：
+  //   - 宽屏下版心最多 1760px（1920 视口左右各 80px，1600 时各 48px）
+  //   - 窄屏下不超过视口，且保底左右各 48px，避免贴边与横向滚动
+  //   - 用 min() 而非纯 max-w-[110rem]，是为了小视口也安全
+  //
+  // 注意：版心变宽后文章卡片也会变宽。封面占比由 PostItem 的 calc(5x%) 决定，
+  // 若觉得封面过宽/过窄，调那个比例即可。
+  content: 'max-w-[min(100%-6rem,110rem)]',
 } as const;
 
 /**
