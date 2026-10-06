@@ -73,6 +73,13 @@ categoryMap:
   # /categories/note 与 /categories/note/code —— 父级前缀由主题自动拼接，
   # 所以这里的值千万不要再写成 "note/code"，否则会变成 note/note/code。
   #
+  # ⚠️ 规则二：**一个 slug 只能对应一个分类名**。
+  # 主题用 `slugToName`（反向 Map）从 URL 反查分类名，重复的 slug 会让
+  # 先写的那条被覆盖。曾因为 `教程`/`福利` 也映射到 tools，导致
+  # /categories/tools 反查成「福利」而树里只有「工具」，页面标题变空、
+  # 文章列表匹配不到（v7.4.0 起改为按名称精确解析后暴露）。
+  # 只保留真正在文章 frontmatter 里用到的分类名。
+  #
   # 一级分类
   生活日常: life
   学习笔记: note
@@ -84,12 +91,10 @@ categoryMap:
   比赛: contest
   美化: beautify
   数学建模: modeling
-  # 前端分类，保留以备后续使用 -> /categories/note/front-end
+  # 前端分类：暂未被任何文章使用。若要启用，必须**同时**把它作为
+  # 二级分类写进文章的 categories（如 [[学习笔记, 前端]]）才会出现在树里。
   前端: front-end
-  # 其他
-  教程: tools
-  福利: tools
-  # 可按需继续添加（不要在值里写斜杠）：
+  # 可按需继续添加（不要在值里写斜杠，也不要与已有 slug 重复）：
   # 书摘: reading
   # 项目: project
 # =============================================================================

@@ -16,7 +16,7 @@
     "generate:all": "npm run generate:lqips && npm run generate:summaries && npm run generate:similarities",
     "build": "pnpm koharu migrate --check && astro build && node .migration/postbuild-redirects.mjs",
     "preview": "astro preview",
-    "verify": "node .migration/verify.mjs && node .migration/verify-pages.mjs && node .migration/check-nav-equipment.mjs && node .migration/test-mourn-dates.mjs && node .migration/verify-mourn.mjs && node .migration/check-no-theme-samples.mjs && node .migration/check-site-config.mjs",
+    "verify": "node .migration/verify.mjs && node .migration/verify-pages.mjs && node .migration/check-categories.mjs && node .migration/check-nav-equipment.mjs && node .migration/test-mourn-dates.mjs && node .migration/verify-mourn.mjs && node .migration/check-no-theme-samples.mjs && node .migration/check-site-config.mjs",
     "migrate:hexo": "node .migration/migrate-hexo.mjs && node .migration/convert-hexo-tags.mjs && node .migration/normalize-code-langs.mjs",
     "astro": "astro",
     "check": "astro check",

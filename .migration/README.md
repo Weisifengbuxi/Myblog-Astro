@@ -370,6 +370,60 @@ node .migration/check-no-theme-samples.mjs   # 扫描构建产物里的主题示
 node .migration/check-site-config.mjs        # site-config.ts 结构自检
 ```
 
+## 更新主题（实测记录）
+
+### 完整流程
+
+```powershell
+git add -A && git commit -m "..."   # 先提交手头改动
+pnpm koharu update                  # 选「备份」
+pnpm install                        # 若 CLI 的装依赖步骤失败（见下）
+pnpm build
+pnpm verify
+git push                            # 成功后推送存档
+```
+
+> ⚠️ **DSH 环境下 `pnpm koharu update` 会在装依赖那步失败**（`spawn EINVAL`）：
+> CLI 用 `child_process.spawn` + 管道 stdio 调用 git/npm，而沙箱禁止管道 stdio。
+> **合并本身已经成功**（git 操作走同步 execSync），只需手动补 `pnpm install`。
+
+### 不要用 `--clean`
+
+`pnpm koharu update --clean` 会用上游替换全部主题文件，再**从备份还原**用户内容。
+但备份对 `src/pages/` 的规则是 `pattern: '*.md'` —— **不备 `.mdx`**，所以会删掉
+本项目的 8 个 `.mdx` 页面且无法还原；`.migration/` 也会被删（含 `manifest.json`，
+删除后构建直接失败）。用默认 merge 模式即可。
+
+### v7.2.1 → v7.4.0 实测结果
+
+- 上游 **91 个文件**变更（含索引页重设计）
+- **零冲突**：`AppShell.astro` / `Layout.astro` 虽被上游改动，但改动行不重叠
+- 我改的 5 个主题文件全部保留
+- 依赖只 +1 −2，`@astrojs/mdx` 仍锁 7.0.8（上游未升 Astro）
+
+### 更新暴露出的一个潜在 bug（已修）
+
+v7.4.0 把分类页从「用 slug 重新映射」改成「按分类名精确解析」
+（新增 `src/lib/content/index-categories.ts`，路由里生成 `path: string[]`），
+于是暴露出 `config/site.yaml` 的一个旧问题：
+
+```yaml
+categoryMap:
+  工具: tools
+  教程: tools   # ← 重复 slug
+  福利: tools   # ← 重复 slug
+```
+
+主题用 `slugToName`（反向 Map）从 URL 反查分类名，重复 slug 会**后者覆盖前者**，
+反查 `tools` 得到「福利」，而分类树里只有「工具」→ `/categories/tools` 标题变空、
+文章列表也匹配不到。
+
+**修法**：删掉 `教程` / `福利` 这两个没有任何文章使用的映射。
+**规则**：`categoryMap` 里一个 slug 只能对应一个分类名。
+
+回归检查：`node .migration/check-categories.mjs`（已并入 `pnpm verify`），
+校验 slug 唯一性、文章用到的分类名都已映射、以及构建出的分类页标题非空。
+
 ## 页脚备案信息
 
 原 Hexo 博客页脚挂了三条备案（`_config.anzhiyu.yml` 的 `footer.linkList`），
