@@ -387,6 +387,34 @@ git push                            # 成功后推送存档
 > CLI 用 `child_process.spawn` + 管道 stdio 调用 git/npm，而沙箱禁止管道 stdio。
 > **合并本身已经成功**（git 操作走同步 execSync），只需手动补 `pnpm install`。
 
+### 手头有未提交改动时怎么办（实测）
+
+**先提交，再更新。** 实测三种情况：
+
+| 情况 | git 行为 |
+| --- | --- |
+| 有未提交改动 + 上游改了同一文件 | **直接拒绝合并**：`error: Your local changes ... would be overwritten by merge`。改动完好无损，提交后重跑即可；此时**不要**手动 `git merge` |
+| 已提交 + 改了同一文件的**不同位置** | 自动合并成功，无需干预 |
+| 已提交 + 改了**同一行** | CONFLICT，git 打标记，需手动解决 |
+
+因为自动保留只覆盖 `USER_CONTENT_PREFIXES`，且未提交改动会让 git 直接中止，
+所以「先 commit」是最省事也最安全的入口：
+
+```powershell
+git add -A
+git commit -m "wip: 本次改动"     # 只存本地，四舍五入零成本，且给了回滚点
+pnpm koharu update               # 选「备份」
+pnpm install
+pnpm build && pnpm verify
+git push                         # 自己的改动 + 合并一起推
+```
+
+> 不想留 wip 提交也可以用 `git stash`，但 stash 的恢复冲突**不受主题的自动保留
+> 策略保护**，反而更难处理。推荐直接 commit。
+>
+> `git fetch upstream` 是只读的（只更新远程快照），想先看有没有新版本又不碰工作区：
+> `git log --oneline HEAD..upstream/main`。
+
 ### 不要用 `--clean`
 
 `pnpm koharu update --clean` 会用上游替换全部主题文件，再**从备份还原**用户内容。
