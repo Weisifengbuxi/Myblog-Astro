@@ -39,7 +39,6 @@ interface IpInfo {
 type Status = 'loading' | 'ready' | 'unavailable';
 
 const REQUEST_TIMEOUT_MS = 6000;
-const GEO_TIMEOUT_MS = 7000;
 
 /**
  * `ipapi.co` and `ipwho.is` share this shape closely enough for one normalizer.
@@ -57,9 +56,62 @@ const GEO_TIMEOUT_MS = 7000;
  */
 const CN_NAMES_BY_CODE: Record<string, string> = {
   CN: '中国',
-  HK: '中国香港',
-  MO: '中国澳门',
-  TW: '中国台湾',
+  HK: '香港特别行政区',
+  MO: '澳门特别行政区',
+  TW: '台湾',
+};
+
+/**
+ * English country name → the Chinese key used by `welcome.greetings`.
+ *
+ * ipwho.is returns `country: "China"` / `"United States"`; the greeting table
+ * (ported verbatim from the previous blog) is keyed in Chinese, so without this
+ * map every visitor would fall through to the generic `其他` line. ipapi.co
+ * already returns Chinese names and short-circuits this.
+ */
+const COUNTRY_CN: Record<string, string> = {
+  China: '中国',
+  'United States': '美国',
+  'United States of America': '美国',
+  Japan: '日本',
+  Russia: '俄罗斯',
+  'Russian Federation': '俄罗斯',
+  France: '法国',
+  Germany: '德国',
+  Australia: '澳大利亚',
+  Canada: '加拿大',
+  'United Kingdom': '英国',
+  Italy: '意大利',
+  Spain: '西班牙',
+  Brazil: '巴西',
+  India: '印度',
+  Mexico: '墨西哥',
+  'South Africa': '南非',
+  Egypt: '埃及',
+  Turkey: '土耳其',
+  'South Korea': '韩国',
+  'Korea, Republic of': '韩国',
+  Vietnam: '越南',
+  Thailand: '泰国',
+  Philippines: '菲律宾',
+  Malaysia: '马来西亚',
+  Singapore: '新加坡',
+  Indonesia: '印尼',
+  'Saudi Arabia': '沙特阿拉伯',
+  'United Arab Emirates': '阿联酋',
+  Israel: '以色列',
+  Netherlands: '荷兰',
+  Belgium: '比利时',
+  Switzerland: '瑞士',
+  Sweden: '瑞典',
+  Norway: '挪威',
+  Denmark: '丹麦',
+  Finland: '芬兰',
+  Poland: '波兰',
+  'Czech Republic': '捷克共和国',
+  Czechia: '捷克共和国',
+  Greece: '希腊',
+  Portugal: '葡萄牙',
 };
 
 /** Romanized Chinese province / municipality (ipwho.is style) → 中文名. */
@@ -178,14 +230,16 @@ function normalize(raw: Record<string, unknown>, fallbackIp: string): IpInfo {
   const code = str(raw.country_code).toUpperCase();
   const rawRegion = str(raw.region) || str(raw.region_name);
   const rawCity = str(raw.city);
-  const country = str(raw.country_name) || CN_NAMES_BY_CODE[code] || str(raw.country);
+  // 国名：ipapi.co 给中文 country_name；ipwho.is 给英文 country + country_code。
+  const rawCountry = str(raw.country_name) || str(raw.country);
+  const country = CN_NAMES_BY_CODE[code] ?? COUNTRY_CN[rawCountry] ?? rawCountry;
   // Only translate Chinese place names when we are actually in China — "Dublin"
   // must not be rewritten just because some other country has a similar name.
-  const isCn = country.startsWith('中国') || country === 'China';
+  const isCn = country === '中国' || country.startsWith('中国');
 
   return {
     ip: str(raw.ip) || fallbackIp,
-    country: country === 'China' ? '中国' : country,
+    country,
     province: (isCn ? CN_REGIONS[rawRegion] : undefined) ?? rawRegion,
     city: (isCn ? CN_CITIES[rawCity] : undefined) ?? rawCity,
     lng: num(raw.longitude ?? raw.lng),
@@ -265,20 +319,16 @@ function regionalGreeting(info: IpInfo | null): string {
   return byProvince[info.city] ?? byProvince['其他'] ?? '';
 }
 
-/** `中国 广东 珠海` → `广东 珠海`; other countries keep their own name. */
+/**
+ * `中国 广东 珠海` → `广东 珠海`（省份 + 城市更具体）；其它国家保留国名。
+ *
+ * 显示用的地名一律来自 IP 城市级解析，**不用**浏览器定位坐标去覆盖它 ——
+ * 否则会出现「写着广州、距离按精确定位算」的割裂，也是之前位置看起来不准的原因。
+ */
 function formatLocation(info: IpInfo): string {
   if (!info.country) return '神秘地区';
   if (info.country === '中国') return [info.province, info.city].filter(Boolean).join(' ') || '中国';
-  return [info.country, info.city].filter(Boolean).join(' ');
-}
-
-/** `113.76.180.255` → `113.76.*.*`; IPv6 is collapsed entirely. */
-function maskIp(ip: string): string {
-  if (!ip) return '未知';
-  if (ip.includes(':')) return 'IPv6 地址（已隐藏）';
-  const parts = ip.split('.');
-  if (parts.length !== 4) return ip;
-  return `${parts[0]}.${parts[1]}.*.*`;
+  return [info.country, info.city].filter(Boolean).join(' · ');
 }
 
 const CACHE_PREFIX = 'welcome-ip-v1:';
@@ -340,8 +390,15 @@ function resolveIp(): Promise<IpInfo> {
 export default function WelcomeVisitor() {
   const [status, setStatus] = useState<Status>('loading');
   const [info, setInfo] = useState<IpInfo | null>(null);
+  /**
+   * Distance to the blogger, in whole km.
+   *
+   * Kept in one field on purpose: an earlier version had both a geolocation-based
+   * value and an IP-based one, which rendered as two competing "距离" lines.
+   * The IP lookup already returns city-level coordinates, so that is the single
+   * source — no geolocation prompt, nothing to get out of sync.
+   */
   const [distance, setDistance] = useState<number | null>(null);
-  const [revealed, setRevealed] = useState(false);
   const alive = useRef(true);
 
   useEffect(() => {
@@ -354,31 +411,23 @@ export default function WelcomeVisitor() {
   const run = useCallback(async () => {
     setStatus('loading');
 
-    // --- geolocation is optional: never block the card on it ------------------
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          if (!alive.current) return;
-          const { longitude, latitude } = pos.coords;
-          const { lng, lat } = welcomeConfig.blogLocation;
-          if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
-            setDistance(distanceKm(longitude, latitude, lng, lat));
-          }
-        },
-        () => {
-          /* denied or unavailable — the distance line simply stays hidden */
-        },
-        { timeout: GEO_TIMEOUT_MS, maximumAge: 10 * 60 * 1000 },
-      );
-    }
-
-    // --- IP geolocation -------------------------------------------------------
     try {
       const next = await resolveIp();
-      if (alive.current) {
-        setInfo(next);
-        setStatus('ready');
+      if (!alive.current) return;
+
+      setInfo(next);
+
+      // Distance uses the same coordinates that produced the place name, so the
+      // two always agree. Resolved at build time? No — computed here, in the
+      // browser, so it always reflects the current config.
+      const { lng, lat } = welcomeConfig.blogLocation;
+      if (next.lng !== null && next.lat !== null) {
+        setDistance(distanceKm(next.lng, next.lat, lng, lat));
+      } else {
+        setDistance(null);
       }
+
+      setStatus('ready');
     } catch {
       if (alive.current) setStatus('unavailable');
     }
@@ -423,21 +472,17 @@ export default function WelcomeVisitor() {
 
         {distance !== null && (
           <p className="welcome-line">
-            你当前距博主约 <b className="welcome-strong">{distance}</b> 公里！
+            您距离博主位置约 <b className="welcome-strong">{distance}</b> 公里！
           </p>
         )}
 
         <p className="welcome-line">
-          你的 IP 地址：
-          <button
-            type="button"
-            className="welcome-ip"
-            onClick={() => setRevealed((v) => !v)}
-            aria-pressed={revealed}
-            title={revealed ? '点击隐藏' : '点击显示完整地址'}
-          >
-            {revealed ? info.ip : maskIp(info.ip)}
-          </button>
+          您的 IP 地址：
+          {/* 常态模糊，鼠标悬停才清晰（与原博客 .ip-address 一致）。
+              注意：这是纯视觉遮挡，完整 IP 仍在 DOM 中。 */}
+          <b className="welcome-ip" title="鼠标悬停查看">
+            {info.ip}
+          </b>
         </p>
 
         <p className="welcome-line">{timeGreeting()}</p>

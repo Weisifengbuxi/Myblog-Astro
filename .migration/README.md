@@ -253,7 +253,55 @@ welcome:
   但真实访客浏览器通常正常，且它返回中文地名，因此**仍保留为首选**，
   ipwho.is 作回退。不要因为本机测不通就删掉它。
 
+### 对齐原博客的第二轮修正
+
+首版做出来后与用户预期有差距，已按原版逐项对齐：
+
+| 项目 | 首版（我的实现） | 现在（对齐原版） |
+| --- | --- | --- |
+| 位置显示 | 偶发英文（`Guangdong`） | **中文**：新增 `COUNTRY_CN` 国名表，配合已有的省/市表 |
+| 距离来源 | 定位 + IP 两套坐标，渲染出**两条**距离行 | **只用 IP 城市级坐标**，合并为一条，且与显示的地名同源 |
+| IP 展示 | JS 层脱敏成 `113.76.*.*`，点击展开 | **常态 `blur(5px)`、hover `blur(0)`**，与原版 `.ip-address` 一致 |
+| Tip | 自拟的省份猜测（常回退到「其他」） | **逐条照搬原表**：39 国 / 中国 35 省 / 广东含 4 市 |
+| 文案 | 「你当前距博主约 N 公里！」 | 「您距离博主位置约 N 公里！」（用户指定措辞） |
+
+关于「位置不准确」的根因：首版把**浏览器定位坐标**用于算距离，却用 **IP 地名**
+做显示，两者不一致 —— 显示「广州」但距离按真实位置算，或反之。现在两者都来自
+IP 解析，天然一致，也不再弹定位授权（因此 `GEO_TIMEOUT_MS` 已删除）。
+
+> ⚠️ IP 现在是**纯视觉模糊**，完整地址仍在 DOM 中（与原版一致）。这是用户明确
+> 要求的观感，但它不再是隐私保护手段 —— 若将来需要真正的隐藏，要改回 JS 脱敏。
+
 > 详细记录（含原实现逐函数分析、行为对照表）：`.migration/NOTES-welcome-card.md`
+> 原版提取的原始数据（greetings 全表、扫光 CSS、模糊样式）：`.migration/REF-welcome-original.md`
+
+## 文章卡片 hover 擦亮（扫光）
+
+照搬原 Hexo 博客 `source/css/home.css`（原文仅 15 行）：
+
+```css
+::before { content:""; position:absolute; top:0; left:0;
+           width:100%; height:200%;
+           background: linear-gradient(to right, transparent, white, transparent);
+           transform: translateX(-200%);
+           transition: transform 0.5s linear; z-index:1; }
+:hover::before { transform: translateX(100%) skewX(-60deg); }
+```
+
+落在 `src/styles/components/post.css` 的 `.post-item-card::before`。适配点：
+
+- 显式补 `overflow: hidden`（原版靠主题卡片裁剪），否则 200% 高度的渐变会溢出卡片
+- `border-radius: inherit` 让扫光贴合圆角
+- 仅 `@media (hover: hover)` 启用，避免触屏点一下就闪
+- `prefers-reduced-motion: reduce` 时整条 `display: none`
+
+实测 `::before` 的 `translateX` 时间序列（500ms 内完成）：
+
+```plain
+   0ms  -1856px      300ms   -34px
+ 100ms  -1281px      400ms   541px
+ 200ms   -650px      500ms   928px  ← 到位
+```
 
 ## 小空调（/air-conditioner）
 

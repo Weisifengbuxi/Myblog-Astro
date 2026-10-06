@@ -137,3 +137,58 @@
     display: none;
   }
 }
+
+/*
+  文章卡片的 hover「擦亮」（扫光）效果。
+
+  照搬原 Hexo 博客 source/css/home.css：
+
+    #recent-posts > .recent-post-item:not(a)::before {
+      content: ""; position: absolute; top: 0; left: 0;
+      width: 100%; height: 200%;
+      background: linear-gradient(to right, transparent, white, transparent);
+      transform: translateX(-200%);
+      transition: transform 0.5s linear; z-index: 1;
+    }
+    #recent-posts > .recent-post-item:not(a):hover::before {
+      transform: translateX(100%) skewX(-60deg);
+    }
+
+  适配说明：
+  - 原版依赖 `overflow` 由主题卡片自行裁剪；这里显式加 overflow: hidden，
+    否则 200% 高度的渐变会溢出到卡片外。
+  - `border-radius: inherit` 让扫光贴合卡片圆角。
+  - z-index 原版为 1；卡片内的封面/文字没有建立更高层级，1 即可覆盖其上。
+  - 仅在有真实指针（hover: hover）时启用，避免触屏上点一下就闪。
+  - 遵循 prefers-reduced-motion：减弱动效时只做微弱的静态高亮，不做扫光。
+*/
+.post-item-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 200%;
+  border-radius: inherit;
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.85), transparent);
+  transform: translateX(-200%);
+  transition: transform 0.5s linear;
+  pointer-events: none;
+}
+
+.post-item-card {
+  overflow: hidden;
+}
+
+@media (hover: hover) {
+  .post-item-card:hover::before {
+    transform: translateX(100%) skewX(-60deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-item-card::before {
+    display: none;
+  }
+}

@@ -36,28 +36,23 @@ html.dark .welcome-strong {
   opacity: 0.75;
 }
 
-/* The IP is masked in JS (not with a blur), so this only signals interactivity. */
+/* IP 常态模糊，鼠标悬停才清晰 —— 与原博客 `.ip-address` 完全一致：
+     .ip-address { filter: blur(5px); transition: filter 0.3s ease; }
+     .ip-address:hover { filter: blur(0); }
+   注意：这是纯视觉遮挡，完整 IP 仍在 DOM 中（原版亦然）。
+   键盘用户通过 :focus-visible 也能看清。 */
 .welcome-ip {
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
+  display: inline-block;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  text-decoration: underline dotted;
-  text-underline-offset: 0.2em;
-  transition: color 0.2s ease;
+  filter: blur(5px);
+  transition: filter 0.3s ease;
+  cursor: help;
 }
 
 .welcome-ip:hover,
 .welcome-ip:focus-visible {
-  color: #e9546b;
-}
-
-html.dark .welcome-ip:hover,
-html.dark .welcome-ip:focus-visible {
-  color: #ed788c;
+  filter: blur(0);
 }
 
 .welcome-refresh {
