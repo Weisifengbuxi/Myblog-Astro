@@ -27,20 +27,13 @@ const checks = [
   // Charts: derived from real posts
   { path: '/charts', contains: ['文章总数', '标签总数', '分类总数', '文章发布统计', '学习笔记'] },
 
-  // Air conditioner widget：基础结构 + 制冷/制热模式按钮 + 按键音开关
+  // Air conditioner widget：基础结构 + 制冷/制热模式按钮
+  // 注意：静音按钮已按需求移除（按键音常开），故不再断言 data-ac-sound，
+  // 反而要确认它没有回来。
   {
     path: '/air-conditioner',
-    contains: [
-      'data-ac',
-      '26 度是适宜温度',
-      'ac-controls',
-      '开机',
-      'data-ac-modebtn',
-      'data-ac-sound',
-      '切制热',
-      'aria-pressed',
-      'ac-panel',
-    ],
+    contains: ['data-ac', '26 度是适宜温度', 'ac-controls', '开机', 'data-ac-modebtn', '切制热', 'aria-pressed', 'ac-panel'],
+    notContains: ['data-ac-sound'],
   },
 
   // Footer strip on every page
@@ -68,6 +61,9 @@ for (const check of checks) {
   }
   for (const needle of check.contains) {
     if (!body.includes(needle)) failures.push(`${check.path} — missing: ${needle}`);
+  }
+  for (const needle of check.notContains ?? []) {
+    if (body.includes(needle)) failures.push(`${check.path} — unexpected: ${needle}`);
   }
   passed++;
 }
