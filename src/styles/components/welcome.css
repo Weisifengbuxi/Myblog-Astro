@@ -83,39 +83,36 @@ html.dark .welcome-strong {
   transform: rotate(180deg);
 }
 
-/* Loading placeholder — three shimmering bars. */
+/* Loading placeholder — two shimmering bars, only for the network-dependent lines. */
+.welcome-skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+/*
+  加载占位：**静态**色块，不做脉冲动画。
+
+  曾用 `welcome-pulse` 让骨架反复明暗呼吸，但那会让整张卡片在每次网络查询的
+  1~4 秒里一直"闪"（实测每 120ms 采样都会得到不同画面，一屏内 14 次变化）。
+  骨架本来就只存在一小会儿，静态块足够表达"正在加载"，且完全无闪烁。
+
+  另外整个骨架只在网络查询期间出现：时段问候是同步的，首帧即渲染，因此
+  一次页面加载里可见内容只变化一次（骨架 → 内容）。
+*/
 .welcome-skeleton {
   display: block;
   height: 0.7rem;
   border-radius: 0.35rem;
   background: color-mix(in oklab, currentColor 12%, transparent);
-  animation: welcome-pulse 1.4s ease-in-out infinite;
 }
 
 .welcome-skeleton-short {
   width: 70%;
 }
 
-.welcome-skeleton + .welcome-skeleton {
-  margin-top: 0.4rem;
-}
-
-@keyframes welcome-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .welcome-skeleton {
-    animation: none;
-    opacity: 0.6;
-  }
-
   .welcome-refresh:hover,
   .welcome-refresh:focus-visible {
     transform: none;
