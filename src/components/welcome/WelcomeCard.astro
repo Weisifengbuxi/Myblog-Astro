@@ -1,0 +1,62 @@
+---
+/**
+ * Visitor welcome card — sidebar shell.
+ *
+ * Renders the card chrome (title + surface) and mounts the client island that
+ * does the IP/geolocation work. Hidden entirely when disabled in
+ * `config/site.yaml` (welcome.enabled) or, with `homeOnly: true`, on any page
+ * other than the home page.
+ *
+ * Ported from the previous Hexo blog's `card-welcome.js`; the deliberate
+ * changes from that original are documented in the island and in
+ * `.migration/NOTES-welcome-card.md`.
+ */
+import { welcomeConfig } from '@constants/site-config';
+import { stripLocaleFromPath } from '@/i18n';
+import WelcomeVisitor from './WelcomeVisitor';
+
+// 去掉语言前缀后的路径：'' 或 '/' 即首页
+const stripped = stripLocaleFromPath(Astro.url.pathname).replace(/\/+$/, '');
+const isHome = stripped === '';
+const visible = welcomeConfig.enabled && (!welcomeConfig.homeOnly || isHome);
+---
+
+{
+  visible && (
+    <section class="shadow-box welcome-shell" aria-label="访客欢迎">
+      <h2 class="welcome-title">
+        <span class="welcome-dot" aria-hidden="true" />
+        欢迎
+      </h2>
+      <WelcomeVisitor client:load />
+    </section>
+  )
+}
+
+<style>
+  .welcome-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.9rem 1rem 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .welcome-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+
+  .welcome-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 9999px;
+    background: #e9546b;
+    box-shadow: 0 0 6px rgb(233 84 107 / 0.7);
+  }
+</style>

@@ -113,6 +113,36 @@ export const universeConfig: UniverseConfig = {
   onlyDark: rawUniverse?.onlyDark !== false,
 };
 
+export interface WelcomeConfig {
+  enabled: boolean;
+  /** Show the card on the home page only (the previous blog did this). */
+  homeOnly: boolean;
+  blogLocation: { lng: number; lat: number };
+  cacheHours: number;
+  /** Nested greeting lookup: country → province → city, with an `其他` fallback at each level. */
+  greetings: Record<string, string | Record<string, string | Record<string, string>>>;
+}
+
+/**
+ * Visitor welcome card (`config/site.yaml` → `welcome:`).
+ *
+ * Ported from the previous Hexo blog's `card-welcome.js`. Three deliberate
+ * changes are documented in `.migration/NOTES-welcome-card.md`: the hardcoded
+ * third-party API key is gone, geolocation is an optional enhancement rather
+ * than a requirement, and the IP is masked by default.
+ */
+const rawWelcome = (yamlConfig as { welcome?: Partial<WelcomeConfig> }).welcome;
+export const welcomeConfig: WelcomeConfig = {
+  enabled: rawWelcome?.enabled === true,
+  homeOnly: rawWelcome?.homeOnly !== false,
+  blogLocation: {
+    lng: typeof rawWelcome?.blogLocation?.lng === 'number' ? rawWelcome.blogLocation.lng : 113.666,
+    lat: typeof rawWelcome?.blogLocation?.lat === 'number' ? rawWelcome.blogLocation.lat : 22.666,
+  },
+  cacheHours: typeof rawWelcome?.cacheHours === 'number' && rawWelcome.cacheHours > 0 ? rawWelcome.cacheHours : 1,
+  greetings: rawWelcome?.greetings ?? {},
+};
+
 export interface MournConfig {
   enabled: boolean;
   /** Dates in `M-D` form, e.g. `['4-5', '5-12']`. Quoting them is recommended. */

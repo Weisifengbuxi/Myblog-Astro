@@ -194,6 +194,67 @@ git push -u origin main
 另外 `@astrojs/mdx` 锁在 **7.0.8**：8.x 要求 `astro >= 7.2.6`，而本仓库
 （astro-koharu 7.2.1）锁定 `astro@7.1.3`。
 
+## 访客欢迎卡片
+
+仿原 Hexo 博客的 `card-welcome.js`：在首页**侧边栏信息槽**显示
+
+```plain
+欢迎来自 广东 广州 的朋友
+你当前距博主约 45 公里！
+你的 IP 地址：113.76.*.*      ← 点击才展开完整地址
+即将下班🚶 记得按时吃饭~
+Tip：饮茶先啦！🍵
+```
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/components/welcome/WelcomeCard.astro` | 卡片外壳（标题 + 容器），按 `enabled` / `homeOnly` 决定是否输出 |
+| `src/components/welcome/WelcomeVisitor.tsx` | `client:load` 岛，全部客户端逻辑 |
+| `src/styles/components/welcome.css` | 岛内样式 |
+| `src/constants/site-config.ts` | `welcomeConfig` 导出 |
+| `config/site.yaml` | `welcome:` 段（开关、坐标、问候语、缓存） |
+
+配置：
+
+```yaml
+welcome:
+  enabled: true
+  homeOnly: true            # 仅首页（与原博客一致）
+  blogLocation: { lng: 113.666, lat: 22.666 }   # 博主坐标，算「距离」
+  cacheHours: 1
+  greetings:                # 国家 → 省 → 市 逐级回退，末级取「其他」
+    中国:
+      广东: 饮茶先啦！🍵
+      其他: 欢迎来自中国的朋友～
+    其他: 欢迎来自世界各地的朋友～🌍
+```
+
+### 与原始实现的四处差异（都是有意的）
+
+1. **去掉了硬编码的第三方 API Key。** 原文里 `IP_CONFIG.API_KEY` 是**别人博客的
+   key**（v1.nsuuu.com）。现改为无 key 的公开服务，双服务降级：
+   `ipapi.co` → `ipwho.is`。
+2. **定位权限改为可选增强。** 原版拒绝授权就弹对话框、卡片基本不可用；
+   现在拒绝只是不显示「距离」那一行，其余照常。
+3. **IP 默认脱敏。** 原文把完整 IP 写进 DOM 再用 CSS `blur(5px)` 遮住 ——
+   复制、截图、脚本都还能拿到。现改为 JS 层输出 `113.76.*.*`，点击才展开。
+4. **失败静默降级。** 原版弹错误框 + 重试图标；现在查不到就只显示时段问候，
+   并保留一个低调的「↻」手动重试。
+
+### 实测中发现并修掉的问题
+
+- **首次加载发 4 次请求**：`sider-content` 在桌面侧栏与移动抽屉各渲染一次，
+  两个岛各跑一遍查询。已加进程内 Promise 共享，降为 2 次（首选失败 + 回退成功）；
+  二次访问 0 次（sessionStorage 命中）。
+- **地名语言不一致**：ipwho.is 返回 `China / Guangdong Sheng / Guangzhou`，
+  与中文配置键和观感都不符。已加 `CN_NAMES_BY_CODE` / `CN_REGIONS` / `CN_CITIES`
+  三张归一化表（仅在确认是中国时翻译，避免误伤同名外国地名）。
+- **ipapi.co 在服务器 IP 上会被 Cloudflare 拦**（403 `Just a moment...`，连续实测 3 次皆失败）。
+  但真实访客浏览器通常正常，且它返回中文地名，因此**仍保留为首选**，
+  ipwho.is 作回退。不要因为本机测不通就删掉它。
+
+> 详细记录（含原实现逐函数分析、行为对照表）：`.migration/NOTES-welcome-card.md`
+
 ## 小空调（/air-conditioner）
 
 `src/components/pages/AirConditioner.astro`，无第三方依赖。功能：
