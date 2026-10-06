@@ -370,6 +370,73 @@ node .migration/tools-shoot-mourn.mjs
 `tools-check-mourn-scope.mjs` 会用 `addInitScript` 覆盖 `Date`，因此走的是
 **真实日期判断分支**，而不是手动加类名 —— 能同时验证日期门与路径门。
 
+## 首页开场文字淡出动画
+
+首页头图上的站名与副标题会**淡入上浮 → 保持 1 秒 → 淡出上移**，之后保持隐藏。
+
+实现只有两处：
+
+| 位置 | 内容 |
+| --- | --- |
+| `src/components/ui/cover/Cover.astro` | 「无 title / 无 data」分支的文本元素加 `cover-intro-fade` 类 |
+| `src/styles/components/cover.css` | 变量 + `@keyframes cover-intro-life` |
+
+**作用范围**：`cover-intro-fade` 只标在「无 title / 无 data」分支上，也就是只有
+`index.astro` 的 `<Cover slot="cover" />` 会渲染它。归档、友链、404 等页面都传了
+`title`，走另一分支，因此天然不受影响，不需要判断首页路径。
+
+### 踩过的两个坑
+
+**1. 起初拆成两个动画，结果淡出永远不触发。**
+
+一开始用 `motion-rise-focus`（入场）+ `cover-intro-fade-out`（淡出）两个动画，但：
+
+- 两个都会改 `opacity` / `translate`，按 CSS 规则逐属性合成
+- `--i` 元素同时带 `.motion-rise` 类，而那条规则在样式表里**更靠后**，
+  它的 `animation-delay` 会覆盖本规则的 delay
+
+结果淡出的 delay 被重置成入场延迟，实测 3200ms 后 opacity 仍是 1（完全没有淡出）。
+
+**改法**：合并成**单一关键帧** `cover-intro-life`（0% 淡入 → 20% 完成 →
+48% 保持结束 → 100% 淡出），只用一个 `animation` 简写与一个 delay，
+并去掉冗余的 `.motion-rise` 类，彻底避开层叠冲突。
+
+**2. `alternate` 被注释掉时，会渲染出一个空的 `<h2>`。**
+
+`site.alternate` 为 `undefined` 时那个 `h2` 仍会渲染（高度 0）但占着 `mt-3`
+的边距，把版面顶歪。现已改为条件渲染：
+
+```astro
+{siteConfig?.alternate && <h2 class="cover-intro-fade …">{siteConfig.alternate}</h2>}
+```
+
+### 时间参数
+
+| 变量 | 默认 | 含义 |
+| --- | --- | --- |
+| `--fade-in` | `0.7s` | 淡入上浮时长 |
+| `--fade-hold` | `1s` | 完整可见时长 |
+| `--fade-out` | `1.1s` | 淡出时长 |
+
+总时长 = 三者之和（约 2.8s）。用 `animation-fill-mode: both`，开场前即处于
+`0%` 状态，不会先亮一下再消失。元素按 DOM 顺序带 `--i`（0/1/2），入场有轻微错落。
+
+### 验证方式
+
+无头浏览器按时间轴采样计算后的 `opacity`，实测：
+
+```plain
+  时刻(ms)      [站名, 副标题]
+      0        [0, 0]          ← 开场不可见
+    900        [1, 1]          ← 完全可见
+   1200        [1, 1]          ← 保持中（约 1 秒）
+   1800        [0.73, 0.81]    ← 开始淡出
+   3200        [0, 0]          ← 完全消失，且不再回来
+```
+
+`prefers-reduced-motion` 或站点动效等级为 `reduced` 时**不加动画**，文字保持常显。
+回归检查已并入 `pnpm verify`：首页必须含 `cover-intro-fade`，归档/关于页必须不含。
+
 ## site.title / alternate 写反了（踩过的坑）
 
 迁移时 `configure-site.mjs` 把这两个字段的值**写反了**，而且一直没有报错：

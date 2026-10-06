@@ -16,7 +16,7 @@ site:
   # 它还会被拼进 <title>（形如 "Weisifengbuxi = 未似风不息 = 学习技术 分享生活"）。
   # 若想让 <title> 更接近原 Hexo 的「未似风不息 | 学习技术 分享生活」，
   # 把下面这行注释掉即可（页头会退化为显示 title）。
-  alternate: Weisifengbuxi
+#  alternate: Weisifengbuxi
   subtitle: 学习技术 分享生活 # 网站副标题
   name: 未似风不息 # 作者名称
   description: 未似风不息的个人技术博客，分享计算机组成原理、数据结构与算法、数学建模等学习笔记，以及生活感悟与博客搭建教程。 # 网站描述
@@ -25,7 +25,7 @@ site:
   author: 未似风不息 # 作者名称
   url: https://www.weisifengbuxi.top # 站点 URL 用于 RSS 和 SEO
   defaultOgImage: /img/avatar.jpg # 默认 Open Graph 图片
-  startYear: 2025 # 建站年份
+  startYear: 2025/7/14 # 建站年份
   timezone: Asia/Shanghai # 时区配置 (IANA 格式)
   keywords: # SEO 关键词 (全局)
     - 博客

@@ -58,6 +58,13 @@ const checks = [
   { path: '/', notContains: ['cover-petals'] },
   { path: '/post/3be0a65', contains: ['universe-canvas'] },
 
+  // ---- homepage cover intro text ---------------------------------------------
+  // 首页头图的开场文字（站名 + 副标题）带淡出动画类，且只在首页渲染。
+  // 其它页面传了 title 走另一分支，不应出现该类。
+  { path: '/', contains: ['cover-intro-fade'] },
+  { path: '/archives', notContains: ['cover-intro-fade'] },
+  { path: '/about', notContains: ['cover-intro-fade'] },
+
   // ---- footer filings --------------------------------------------------------
   // 备案信息必须出现在页脚（迁移自原 Hexo 博客 footer.linkList）
   {
