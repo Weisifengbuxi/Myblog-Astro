@@ -275,6 +275,11 @@ IP 解析，天然一致，也不再弹定位授权（因此 `GEO_TIMEOUT_MS` �
 > 详细记录（含原实现逐函数分析、行为对照表）：`.migration/NOTES-welcome-card.md`
 > 原版提取的原始数据（greetings 全表、扫光 CSS、模糊样式）：`.migration/REF-welcome-original.md`
 
+**中国地名只显示已归一成中文的部分**：`CN_REGIONS` / `CN_CITIES` 覆盖了全部省级
+行政区与主要城市；若某个小城市没命中，宁可只显示「中国」，也不把 `Shantou`
+这类罗马化名字混进中文地名。已用七个地区用例验证（含未映射省、市级无表、
+省级无市级、境外国家、未知国家）。
+
 ## 文章卡片 hover 擦亮（扫光）
 
 照搬原 Hexo 博客 `source/css/home.css`（原文仅 15 行）：

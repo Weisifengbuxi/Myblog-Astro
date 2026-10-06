@@ -324,10 +324,17 @@ function regionalGreeting(info: IpInfo | null): string {
  *
  * 显示用的地名一律来自 IP 城市级解析，**不用**浏览器定位坐标去覆盖它 ——
  * 否则会出现「写着广州、距离按精确定位算」的割裂，也是之前位置看起来不准的原因。
+ *
+ * 中国境内只信任已归一成中文的省市名：`CN_REGIONS` / `CN_CITIES` 覆盖了全部
+ * 省级行政区与主要城市，若某个小城市没命中，宁可只显示「中国」，
+ * 也不要把 `Shantou` 这类罗马化名字混进中文地名里。
  */
 function formatLocation(info: IpInfo): string {
   if (!info.country) return '神秘地区';
-  if (info.country === '中国') return [info.province, info.city].filter(Boolean).join(' ') || '中国';
+  if (info.country === '中国') {
+    const cn = (v: string) => (v && !/[A-Za-z]/.test(v) ? v : '');
+    return [cn(info.province), cn(info.city)].filter(Boolean).join(' ') || '中国';
+  }
   return [info.country, info.city].filter(Boolean).join(' · ');
 }
 

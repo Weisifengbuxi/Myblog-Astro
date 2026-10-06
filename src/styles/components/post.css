@@ -160,7 +160,7 @@
   - `border-radius: inherit` 让扫光贴合卡片圆角。
   - z-index 原版为 1；卡片内的封面/文字没有建立更高层级，1 即可覆盖其上。
   - 仅在有真实指针（hover: hover）时启用，避免触屏上点一下就闪。
-  - 遵循 prefers-reduced-motion：减弱动效时只做微弱的静态高亮，不做扫光。
+  - 遵循 prefers-reduced-motion：减弱动效时整个扫光层 display: none，不做动效。
 */
 .post-item-card::before {
   content: "";
