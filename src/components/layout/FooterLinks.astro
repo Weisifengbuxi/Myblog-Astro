@@ -95,47 +95,70 @@ const isCurrent = (path: string) => path.replace(/\/$/, '') === current;
 
     改为等分列（`repeat(N, minmax(0, 1fr))`）让各栏均分整行宽度，栏内文字居中，
     这样视觉上铺满整幅行宽，不再两侧空一大片。
+
+    标题/条目尺寸与间距对齐首页「文章列表」模块（均为实测值）：
+      条目间距 = 16px（文章列表容器 gap-4）
+      标题     = 15px / 600（与侧栏「欢迎」标题 14.4px/600 同量级）
+      条目文字 = 13px（原 12px 偏小）
+    另加标题左侧一道主色竖条，让「关于 / 我的 / 工具 / 协议」明显是标题而非链接。
   */
   .footer-groups {
     display: grid;
     grid-template-columns: repeat(var(--footer-cols, 4), minmax(0, 1fr));
     justify-content: stretch;
-    gap: 1.5rem 2rem;
+    gap: 2rem;
     width: 100%;
-    font-size: 0.75rem;
   }
 
   .footer-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    min-width: 0;
     align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
   }
 
   .footer-group-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     margin: 0;
+    font-size: 0.9375rem; /* 15px */
     font-weight: 600;
-    opacity: 0.9;
     letter-spacing: 0.02em;
     text-align: center;
+  }
+
+  /* 标题左侧的主色小竖条：给标题一个明确的视觉锚点 */
+  .footer-group-title::before {
+    content: "";
+    width: 0.15rem;
+    height: 0.85em;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: hsl(var(--primary) / 0.65);
   }
 
   .footer-group-links {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.3rem;
+    gap: 1rem; /* 与文章列表模块一致的 16px 条目间距 */
     margin: 0;
     padding: 0;
     list-style: none;
+    font-size: 0.8125rem; /* 13px */
     text-align: center;
   }
 
   @media (992px >= width) {
     .footer-groups {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1.25rem 1.5rem;
+      gap: 1.5rem;
+    }
+
+    .footer-group-links {
+      gap: 0.75rem;
     }
   }
 </style>
