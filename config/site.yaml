@@ -681,7 +681,10 @@ editor:
 #   item:
 #     name: 显示名称
 #     link: 完整外链（https://…）
-#     icon: 可选，图标地址（favicon.im 可自动取对方站点图标）
+#     icon: 图标路径。推荐用本地文件（public/img/tools/ 下已备好），
+#           不填则自动显示名称首字作为占位。
+#           注意：不要用 favicon.im / google s2 / ddg 这类第三方图标服务 ——
+#           实测在部分网络环境下域名不可达，图标会大片空白。
 # 置空（toolsMenu: []）即可隐藏该按钮。
 # -----------------------------------------------------------------------------
 toolsMenu:
@@ -697,30 +700,30 @@ toolsMenu:
     item:
       - name: 路过图床
         link: https://imgse.com/
-        icon: https://favicon.im/imgse.com
+        # 该站本机不可达，未能下载到图标，留空则显示「路」字占位
       - name: PDF派
         link: https://www.pdfpai.com/
-        icon: https://favicon.im/www.pdfpai.com
+        icon: /img/tools/pdfpai.ico
       - name: ITDOG
         link: https://www.itdog.cn/
-        icon: https://favicon.im/www.itdog.cn
+        icon: /img/tools/itdog.ico
       - name: draw.io
         link: https://www.drawio.com/
-        icon: https://favicon.im/www.drawio.com
+        icon: /img/tools/drawio.ico
       - name: GeoGebra
         link: https://www.geogebra.org/
-        icon: https://favicon.im/www.geogebra.org
+        icon: /img/tools/geogebra.ico
       - name: 萌盘
         link: https://pan.moe/
-        icon: https://favicon.im/pan.moe
+        icon: /img/tools/panmoe.ico
   - title: 服务
     item:
       - name: 51la统计
         link: https://v6.51.la/
-        icon: https://favicon.im/v6.51.la
+        icon: /img/tools/51la.ico
       - name: 开往
         link: https://github.com/travellings-link/travellings
-        icon: https://favicon.im/github.com
+        icon: /img/tools/github.svg
 
 # -----------------------------------------------------------------------------
 # 图标参考：

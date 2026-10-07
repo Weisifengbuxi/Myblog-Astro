@@ -18,6 +18,14 @@
  *
  * Driven by `toolsMenu` in config/site.yaml; renders nothing when unset.
  * Hidden on mobile, where the drawer already carries the navigation.
+ *
+ * Interaction: opens on **hover** (`:hover` / `:focus-within`, no JS), matching
+ * the original's hover panel rather than a click toggle.
+ *
+ * Icons are **local files** under `public/img/tools/`. Third-party favicon
+ * services were tried first and abandoned: `favicon.im`, Google's `s2` service
+ * and DuckDuckGo's icon endpoint were all unreachable from this network, so most
+ * icons silently rendered blank for visitors on the same networks.
  */
 import { toolsMenuGroups } from '@constants/site-config';
 import { Icon } from 'astro-icon/components';
@@ -26,11 +34,10 @@ if (!toolsMenuGroups.length) return;
 ---
 
 <div class="tools-menu tablet:hidden">
-  <input type="checkbox" id="tools-menu-toggle" class="tools-menu-toggle" />
-
-  <label class="tools-menu-btn" for="tools-menu-toggle" title="实用工具" aria-label="实用工具">
+  {/* 不加 title：原生 tooltip 会在面板展开时正好压住第一栏的分组标题 */}
+  <button type="button" class="tools-menu-btn" aria-label="实用工具">
     <Icon name="ri:apps-2-line" class="size-5" />
-  </label>
+  </button>
 
   <div class="tools-menu-panel" role="menu" aria-label="实用工具">
     {
@@ -49,8 +56,8 @@ if (!toolsMenuGroups.length) return;
                 {item.icon ? (
                   <img class="tools-menu-icon" src={item.icon} alt="" loading="lazy" decoding="async" />
                 ) : (
-                  <span class="tools-menu-icon tools-menu-icon-fallback">
-                    <Icon name="ri:link" class="size-4" />
+                  <span class="tools-menu-icon tools-menu-icon-empty" aria-hidden="true">
+                    {item.name.slice(0, 1)}
                   </span>
                 )}
                 <span class="tools-menu-text">{item.name}</span>
@@ -65,21 +72,13 @@ if (!toolsMenuGroups.length) return;
 
 <style>
   /*
-    纯 CSS 开合（checkbox + label），不引入客户端 JS：页头在每个页面都渲染，
-    保持零 JS 成本。点击面板外部不会自动关闭 —— 与原版的行为差别可控，
-    再次点击按钮即可收起。
+    悬停开合，纯 CSS（:hover / :focus-within），无需客户端 JS —— 页头每页都渲染，
+    保持零 JS 成本。键盘 Tab 到按钮同样能打开（:focus-within）。
+    鼠标从按钮移到面板时仍处于 .tools-menu 的 :hover 内，因此不会中途收起。
   */
   .tools-menu {
     position: relative;
     margin-right: 0.25rem;
-  }
-
-  .tools-menu-toggle {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
   }
 
   .tools-menu-btn {
@@ -88,7 +87,11 @@ if (!toolsMenuGroups.length) return;
     justify-content: center;
     width: 2rem;
     height: 2rem;
+    padding: 0;
+    border: 0;
     border-radius: 9999px;
+    background: none;
+    color: inherit;
     cursor: pointer;
     opacity: 0.85;
     transition:
@@ -97,20 +100,16 @@ if (!toolsMenuGroups.length) return;
       rotate 0.3s ease;
   }
 
-  .tools-menu-btn:hover {
-    opacity: 1;
-    background: rgb(255 255 255 / 0.16);
-  }
-
-  .tools-menu-toggle:focus-visible + .tools-menu-btn {
-    outline: 2px solid rgb(255 255 255 / 0.8);
-    outline-offset: 2px;
-  }
-
-  .tools-menu-toggle:checked + .tools-menu-btn {
+  .tools-menu:hover .tools-menu-btn,
+  .tools-menu:focus-within .tools-menu-btn {
     opacity: 1;
     background: rgb(255 255 255 / 0.2);
     rotate: 90deg;
+  }
+
+  .tools-menu-btn:focus-visible {
+    outline: 2px solid rgb(255 255 255 / 0.8);
+    outline-offset: 2px;
   }
 
   .tools-menu-panel {
@@ -119,7 +118,7 @@ if (!toolsMenuGroups.length) return;
     left: 0;
     z-index: 60;
     display: flex;
-    gap: 1.25rem;
+    gap: 1.5rem;
     padding: 0.9rem 1.1rem;
     border-radius: 0.75rem;
     /* 主题的颜色变量是 HSL 分量（如 `--card: 0 12% 99%`），必须用 hsl() 包起来；
@@ -136,7 +135,8 @@ if (!toolsMenuGroups.length) return;
       visibility 0.2s;
   }
 
-  .tools-menu-toggle:checked ~ .tools-menu-panel {
+  .tools-menu:hover .tools-menu-panel,
+  .tools-menu:focus-within .tools-menu-panel {
     opacity: 1;
     visibility: visible;
     translate: 0;
@@ -191,11 +191,16 @@ if (!toolsMenuGroups.length) return;
     object-fit: contain;
   }
 
-  .tools-menu-icon-fallback {
+  /* 没有图标时显示名称首字，避免出现空白方块 */
+  .tools-menu-icon-empty {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.7;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0.65;
+    background: hsl(var(--primary) / 0.14);
+    color: hsl(var(--primary));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -204,7 +209,8 @@ if (!toolsMenuGroups.length) return;
       transition: none;
     }
 
-    .tools-menu-toggle:checked + .tools-menu-btn {
+    .tools-menu:hover .tools-menu-btn,
+    .tools-menu:focus-within .tools-menu-btn {
       rotate: none;
     }
   }
