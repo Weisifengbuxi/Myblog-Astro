@@ -39,6 +39,17 @@ const checks = [
   // Footer strip on every page
   { path: '/', contains: ['页脚导航', '友链申请', '最新评论', '相册集', 'Cookies政策', '隐私政策', '版权协议'] },
 
+  // Grouped footer: 4 titled columns (footerLinkGroups), rendered vertically.
+  {
+    path: '/',
+    contains: ['footer-groups', 'footer-group-title', 'footer-group-links', '关于', '我的', '工具', '协议'],
+  },
+
+  // Header utility-tools button (ported from the original blog's .back-home-button).
+  // Renders on every page with the toolsMenu config; lists the external tools.
+  { path: '/', contains: ['tools-menu', 'tools-menu-btn', 'tools-menu-panel', '网页', '项目', '路过图床', 'ITDOG'] },
+  { path: '/about', contains: ['tools-menu-btn'] },
+
   // Friend-link gate
   { path: '/link', contains: ['friendlink-gate', 'checkbox1', 'checkbox5', '免责声明', '本站添加的友链要求', 'friendlink-gate-open'] },
 

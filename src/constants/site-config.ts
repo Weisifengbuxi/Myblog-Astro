@@ -40,9 +40,95 @@ export const socialConfig: SocialConfig = yamlConfig.social ?? {};
 /**
  * Footer navigation links ("小页面" strip shown at the bottom of every page).
  * Managed through the `footerLinks` list in config/site.yaml.
+ *
+ * Kept as the flat fallback: when `footerLinkGroups` is empty this list renders
+ * as a single inline row, exactly as before.
  */
 export const footerLinks: { name: string; path: string }[] = Array.isArray(yamlConfig.footerLinks)
   ? yamlConfig.footerLinks.filter((item): item is { name: string; path: string } => Boolean(item?.name && item?.path))
+  : [];
+
+export interface FooterLinkGroup {
+  title: string;
+  links: { name: string; path: string }[];
+}
+
+/**
+ * Grouped footer navigation (`footerLinkGroups` in config/site.yaml).
+ *
+ * Mirrors the original Hexo/anzhiyu footer, which rendered
+ * `theme.footer.list.project` as several titled columns with the links stacked
+ * vertically inside each:
+ *
+ *   #anzhiyu-footer
+ *     .footer-group          ← one column per array entry
+ *       .footer-title        ← column heading
+ *       .footer-links        ← vertical stack
+ *         a.footer-item
+ *
+ * Falls back to a single "导航" column built from `footerLinks` when the grouped
+ * form is not configured, so existing configs keep working.
+ */
+const rawFooterLinkGroups = (yamlConfig as { footerLinkGroups?: unknown }).footerLinkGroups;
+
+export const footerLinkGroups: FooterLinkGroup[] = Array.isArray(rawFooterLinkGroups)
+  ? rawFooterLinkGroups
+      .map((group) => {
+        const g = group as { title?: unknown; links?: unknown };
+        const links = Array.isArray(g?.links)
+          ? g.links
+              .filter((l): l is { name: string; path: string } => {
+                const item = l as { name?: unknown; path?: unknown };
+                return Boolean(item?.name && item?.path);
+              })
+              .map((l) => ({ name: String(l.name), path: String(l.path) }))
+          : [];
+        return { title: String(g?.title ?? ''), links };
+      })
+      .filter((group) => group.title && group.links.length > 0)
+  : [];
+
+/** True when the footer should render the multi-column layout. */
+export const hasFooterLinkGroups = footerLinkGroups.length > 0;
+
+export interface ToolsMenuItem {
+  name: string;
+  link: string;
+  icon?: string;
+}
+
+export interface ToolsMenuGroup {
+  title: string;
+  items: ToolsMenuItem[];
+}
+
+/**
+ * Header utility-tools menu (`toolsMenu` in config/site.yaml).
+ *
+ * Mirrors the original Hexo/anzhiyu blog's top-left gripper button
+ * (`nav.pug` → `.back-home-button`), which opened a small panel of grouped
+ * external tools. Rendered next to the logo.
+ */
+const rawToolsMenu = (yamlConfig as { toolsMenu?: unknown }).toolsMenu;
+
+export const toolsMenuGroups: ToolsMenuGroup[] = Array.isArray(rawToolsMenu)
+  ? rawToolsMenu
+      .map((group) => {
+        const g = group as { title?: unknown; item?: unknown; items?: unknown };
+        const rawItems = Array.isArray(g?.item) ? g.item : Array.isArray(g?.items) ? g.items : [];
+        const items = rawItems
+          .map((i) => {
+            const item = i as { name?: unknown; link?: unknown; icon?: unknown };
+            return {
+              name: String(item?.name ?? ''),
+              link: String(item?.link ?? ''),
+              icon: item?.icon ? String(item.icon) : undefined,
+            };
+          })
+          .filter((item) => item.name && item.link);
+        return { title: String(g?.title ?? ''), items };
+      })
+      .filter((group) => group.title && group.items.length > 0)
   : [];
 
 // ICP filing config — normalize string shorthand to { text } object

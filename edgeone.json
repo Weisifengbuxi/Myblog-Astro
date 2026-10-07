@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "https://weisifengbuxi.top/*",
+      "destination": "https://www.weisifengbuxi.top/:splat",
+      "statusCode": 301
+    }
+  ]
+}

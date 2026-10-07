@@ -9,6 +9,7 @@ import { MAX_WIDTH } from '@constants/layout';
 import { christmasConfig, siteConfig } from 'constants/site-config';
 import { getLocaleFromUrl } from '@/i18n';
 import Navigator from './Navigator';
+import ToolsMenu from './ToolsMenu.astro';
 
 interface Props {
   isPostPage?: boolean;
@@ -27,6 +28,8 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
   <div class={`header-inner mx-auto tablet:w-full px-6 tablet:pl-10 tablet:pr-3 ${MAX_WIDTH.content}`}>
     <div class="header-capsule" aria-hidden="true"></div>
     <div class="header-content flex items-center justify-between">
+      <!-- Desktop: 实用工具（左上角抓手按钮，移植自原 Hexo 博客 nav.pug 的 .back-home-button） -->
+      <ToolsMenu />
       <!-- Desktop: Always show logo -->
       <a
         transition:persist="page-header-avatar"

@@ -464,6 +464,56 @@ footerLinks:
 | `src/layouts/Layout.astro` | 新增去色 CSS |
 | `src/components/ui/cover/Cover.astro` | 首页开场文字加 `cover-intro-fade` 类；`alternate` 为空时不渲染空 `h2` |
 | `src/styles/components/cover.css` | 新增开场文字淡出的变量与关键帧 |
+| `src/components/layout/FooterLinks.astro` | 重写：支持分组多栏（`footerLinkGroups`），保留扁平列表作回退 |
+| `src/components/layout/Header.astro` | 页头挂 `<ToolsMenu />`（左上角实用工具按钮） |
+
+## 页脚分栏（footerLinkGroups）
+
+原 Hexo 博客的页脚是**多栏纵向**排布：`footer.pug` 把
+`theme.footer.list.project` 渲染成 `#anzhiyu-footer` 下若干 `.footer-group`，
+每栏一个 `.footer-title` + 纵向的 `.footer-links`。koharu 之前是一行 `·` 分隔、
+靠 `flex-wrap` 折行，15 个链接时很乱。
+
+现在照原结构分四栏（配置在 `config/site.yaml` 的 `footerLinkGroups`）：
+
+| 栏 | 链接 |
+| --- | --- |
+| 关于 | 关于本人 / 友链申请 / 最新评论 / 公众号说明 |
+| 我的 | 相册集 / 我的日常 / 世界各地风景 / 游戏荣誉 / 我的装备 / 即刻短文 |
+| 工具 | 网站统计 / 小空调 |
+| 协议 | 隐私政策 / Cookies 政策 / 版权协议 |
+
+- 宽屏 `grid-template-columns: repeat(auto-fit, minmax(7rem, max-content))` 并排
+- ≤768px 折成两栏并居中
+- **未配置 `footerLinkGroups` 时自动回退**到原来那份扁平 `footerLinks` 单行样式
+  （配置项都保留，不影响既有部署）
+
+实测：4 栏、每栏链接纵向对齐、文字无折断换行。
+
+## 页头「实用工具」按钮（toolsMenu）
+
+移植自原主题 `nav.pug` 的 `.back-home-button`：页头左上角一个抓手图标，
+点开是分组的外链工具面板（原配置在 `_config.anzhiyu.yml` 的 `nav.menu`）。
+
+```plain
+网页：博客 / 个人主页
+项目：路过图床 / PDF派 / ITDOG / draw.io / GeoGebra / 萌盘
+服务：51la统计 / 开往
+```
+
+实现要点：
+
+- `src/components/layout/ToolsMenu.astro`，**纯 CSS 开合**（checkbox + label），
+  不引入客户端 JS —— 页头每页都渲染，保持零 JS 成本
+- 移动端 `tablet:hidden`（抽屉里已有导航）
+- 外链一律 `target="_blank" rel="noopener noreferrer"`
+
+> ⚠️ **颜色变量必须包 `hsl()`**：主题的 `--card` 是 HSL 分量（`0 12% 99%`），
+> 不是完整颜色。一开始写 `background: var(--card, #fff)`，因值不合法整条失效，
+> 面板变成透明的（头像透过来了）。正确写法：`background: hsl(var(--card, 0 0% 100%))`。
+
+实测：初始隐藏 → 点击展开；背景不透明（浅色 `rgb(253,252,252)` /
+深色 `rgb(35,31,45)`）；10 个工具项、分组正确、面板不溢出视口；移动端隐藏。
 
 ## 版心宽度与侧栏（布局调整）
 

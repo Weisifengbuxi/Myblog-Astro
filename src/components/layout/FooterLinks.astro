@@ -1,16 +1,26 @@
 ---
 /**
- * Footer navigation links.
+ * Footer navigation.
  *
- * Renders the `footerLinks` list from `config/site.yaml` as a small link row,
- * mirroring the "小页面" link strip the original Hexo/anzhiyu blog showed in its
- * footer. Hidden entirely when the list is empty.
+ * Two shapes, mirroring the original Hexo/anzhiyu blog:
+ *
+ *  1. **Grouped** (`footerLinkGroups` in config/site.yaml) — several titled
+ *     columns with the links stacked vertically, exactly like the original's
+ *     `#anzhiyu-footer` / `.footer-group` markup.
+ *  2. **Flat** (`footerLinks`) — the original single inline row of links
+ *     separated by `·`, kept as a fallback when no groups are configured.
+ *
+ * The grouping exists because a 15-item flat row wraps awkwardly on narrow
+ * screens, whereas columns stay readable.
  */
-import { footerLinks } from '@constants/site-config';
+import { footerLinkGroups, footerLinks } from '@constants/site-config';
 import { getLocaleFromUrl } from '@/i18n';
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-if (!footerLinks.length) return;
+
+const grouped = footerLinkGroups;
+const flat = footerLinks;
+if (!grouped.length && !flat.length) return;
 
 /** Prefix an internal path with the active locale when the site is multilingual. */
 const href = (path: string) => {
@@ -23,19 +33,99 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isCurrent = (path: string) => path.replace(/\/$/, '') === current;
 ---
 
-<nav class="text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs" aria-label="页脚导航">
-  {
-    footerLinks.map((item, index) => (
-      <>
-        {index > 0 && <span class="opacity-30" aria-hidden="true">·</span>}
-        <a
-          href={href(item.path)}
-          class:list={['footer-link', { 'footer-link-active': isCurrent(item.path) }]}
-          aria-current={isCurrent(item.path) ? 'page' : undefined}
-        >
-          {item.name}
-        </a>
-      </>
-    ))
+{
+  grouped.length > 0 ? (
+    <nav class="footer-groups" aria-label="页脚导航">
+      {grouped.map((group) => (
+        <div class="footer-group">
+          <p class="footer-group-title">{group.title}</p>
+          <ul class="footer-group-links">
+            {group.links.map((item) => (
+              <li>
+                <a
+                  href={href(item.path)}
+                  class:list={['footer-link', { 'footer-link-active': isCurrent(item.path) }]}
+                  aria-current={isCurrent(item.path) ? 'page' : undefined}
+                >
+                  {item.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  ) : (
+    <nav
+      class="text-muted-foreground flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs"
+      aria-label="页脚导航"
+    >
+      {flat.map((item, index) => (
+        <>
+          {index > 0 && (
+            <span class="opacity-30" aria-hidden="true">
+              ·
+            </span>
+          )}
+          <a
+            href={href(item.path)}
+            class:list={['footer-link', { 'footer-link-active': isCurrent(item.path) }]}
+            aria-current={isCurrent(item.path) ? 'page' : undefined}
+          >
+            {item.name}
+          </a>
+        </>
+      ))}
+    </nav>
+  )
+}
+
+<style>
+  /*
+    多栏页脚，仿原博客 #anzhiyu-footer：
+    宽屏并排成若干栏、窄屏自动折行；每栏标题在上、链接纵向排列。
+  */
+  .footer-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, max-content));
+    justify-content: center;
+    gap: 1.5rem 3rem;
+    width: 100%;
+    font-size: 0.75rem;
   }
-</nav>
+
+  .footer-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .footer-group-title {
+    margin: 0;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 0.02em;
+  }
+
+  .footer-group-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (768px >= width) {
+    .footer-groups {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem 1.5rem;
+    }
+
+    .footer-group-title,
+    .footer-group-links {
+      text-align: center;
+    }
+  }
+</style>

@@ -1,0 +1,211 @@
+---
+/**
+ * Header utility-tools button.
+ *
+ * Ported from the original Hexo/anzhiyu blog, where `nav.pug` rendered a
+ * gripper button (`.back-home-button`) at the top-left that opened a panel of
+ * grouped external tools:
+ *
+ *   .back-home-button
+ *     i.icon-grip-vertical
+ *     .back-menu-list-groups
+ *       .back-menu-list-group
+ *         .back-menu-list-title= group.title
+ *         .back-menu-list
+ *           a.back-menu-item
+ *             img.back-menu-item-icon
+ *             span.back-menu-item-text
+ *
+ * Driven by `toolsMenu` in config/site.yaml; renders nothing when unset.
+ * Hidden on mobile, where the drawer already carries the navigation.
+ */
+import { toolsMenuGroups } from '@constants/site-config';
+import { Icon } from 'astro-icon/components';
+
+if (!toolsMenuGroups.length) return;
+---
+
+<div class="tools-menu tablet:hidden">
+  <input type="checkbox" id="tools-menu-toggle" class="tools-menu-toggle" />
+
+  <label class="tools-menu-btn" for="tools-menu-toggle" title="实用工具" aria-label="实用工具">
+    <Icon name="ri:apps-2-line" class="size-5" />
+  </label>
+
+  <div class="tools-menu-panel" role="menu" aria-label="实用工具">
+    {
+      toolsMenuGroups.map((group) => (
+        <div class="tools-menu-group">
+          <p class="tools-menu-title">{group.title}</p>
+          <div class="tools-menu-list">
+            {group.items.map((item) => (
+              <a
+                class="tools-menu-item"
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={item.name}
+              >
+                {item.icon ? (
+                  <img class="tools-menu-icon" src={item.icon} alt="" loading="lazy" decoding="async" />
+                ) : (
+                  <span class="tools-menu-icon tools-menu-icon-fallback">
+                    <Icon name="ri:link" class="size-4" />
+                  </span>
+                )}
+                <span class="tools-menu-text">{item.name}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  /*
+    纯 CSS 开合（checkbox + label），不引入客户端 JS：页头在每个页面都渲染，
+    保持零 JS 成本。点击面板外部不会自动关闭 —— 与原版的行为差别可控，
+    再次点击按钮即可收起。
+  */
+  .tools-menu {
+    position: relative;
+    margin-right: 0.25rem;
+  }
+
+  .tools-menu-toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tools-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    opacity: 0.85;
+    transition:
+      opacity 0.2s ease,
+      background-color 0.2s ease,
+      rotate 0.3s ease;
+  }
+
+  .tools-menu-btn:hover {
+    opacity: 1;
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  .tools-menu-toggle:focus-visible + .tools-menu-btn {
+    outline: 2px solid rgb(255 255 255 / 0.8);
+    outline-offset: 2px;
+  }
+
+  .tools-menu-toggle:checked + .tools-menu-btn {
+    opacity: 1;
+    background: rgb(255 255 255 / 0.2);
+    rotate: 90deg;
+  }
+
+  .tools-menu-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 60;
+    display: flex;
+    gap: 1.25rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 0.75rem;
+    /* 主题的颜色变量是 HSL 分量（如 `--card: 0 12% 99%`），必须用 hsl() 包起来；
+       直接写 var(--card) 会因值不合法而整条失效、面板变透明。 */
+    background: hsl(var(--card, 0 0% 100%));
+    color: hsl(var(--card-foreground, 340 12% 12%));
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.22);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 -0.35rem;
+    transition:
+      opacity 0.2s ease,
+      translate 0.2s ease,
+      visibility 0.2s;
+  }
+
+  .tools-menu-toggle:checked ~ .tools-menu-panel {
+    opacity: 1;
+    visibility: visible;
+    translate: 0;
+  }
+
+  .tools-menu-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 6.5rem;
+  }
+
+  .tools-menu-title {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0.55;
+    letter-spacing: 0.04em;
+  }
+
+  .tools-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .tools-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.2rem 0.3rem;
+    border-radius: 0.4rem;
+    font-size: 0.8rem;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .tools-menu-item:hover {
+    background: hsl(var(--primary) / 0.12);
+    color: hsl(var(--primary));
+  }
+
+  .tools-menu-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border-radius: 0.2rem;
+    object-fit: contain;
+  }
+
+  .tools-menu-icon-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tools-menu-btn,
+    .tools-menu-panel {
+      transition: none;
+    }
+
+    .tools-menu-toggle:checked + .tools-menu-btn {
+      rotate: none;
+    }
+  }
+</style>

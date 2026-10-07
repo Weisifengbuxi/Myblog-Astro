@@ -670,6 +670,63 @@ editor:
 #   - Font Awesome 6: https://icon-sets.iconify.design/fa6-solid/
 #   - Remix Icon: https://icon-sets.iconify.design/ri/
 # -----------------------------------------------------------------------------
+# =============================================================================
+# Tools Menu
+# 实用工具菜单 —— 页头左上角抓手按钮，点开是分组的外链工具面板。
+# 移植自原 Hexo 博客 anzhiyu 主题的 nav.pug `.back-home-button`
+# （对应原 _config.anzhiyu.yml 里的 nav.menu 分组）。
+# =============================================================================
+# 字段说明：
+#   title: 分组标题
+#   item:
+#     name: 显示名称
+#     link: 完整外链（https://…）
+#     icon: 可选，图标地址（favicon.im 可自动取对方站点图标）
+# 置空（toolsMenu: []）即可隐藏该按钮。
+# -----------------------------------------------------------------------------
+toolsMenu:
+  - title: 网页
+    item:
+      - name: 博客
+        link: https://www.weisifengbuxi.top/
+        icon: /img/avatar.jpg
+      - name: 个人主页
+        link: https://www.weisifengbuxi.top/about/
+        icon: /img/avatar.jpg
+  - title: 项目
+    item:
+      - name: 路过图床
+        link: https://imgse.com/
+        icon: https://favicon.im/imgse.com
+      - name: PDF派
+        link: https://www.pdfpai.com/
+        icon: https://favicon.im/www.pdfpai.com
+      - name: ITDOG
+        link: https://www.itdog.cn/
+        icon: https://favicon.im/www.itdog.cn
+      - name: draw.io
+        link: https://www.drawio.com/
+        icon: https://favicon.im/www.drawio.com
+      - name: GeoGebra
+        link: https://www.geogebra.org/
+        icon: https://favicon.im/www.geogebra.org
+      - name: 萌盘
+        link: https://pan.moe/
+        icon: https://favicon.im/pan.moe
+  - title: 服务
+    item:
+      - name: 51la统计
+        link: https://v6.51.la/
+        icon: https://favicon.im/v6.51.la
+      - name: 开往
+        link: https://github.com/travellings-link/travellings
+        icon: https://favicon.im/github.com
+
+# -----------------------------------------------------------------------------
+# 图标参考：
+#   - Font Awesome 6: https://icon-sets.iconify.design/fa6-solid/
+#   - Remix Icon: https://icon-sets.iconify.design/ri/
+# -----------------------------------------------------------------------------
 navigation:
   - name: 首页
     nameKey: nav.home
@@ -712,6 +769,61 @@ navigation:
 # Footer Links
 # 页脚链接 - 每个页面底部显示的一排小页面入口（类似原 Hexo 博客的页脚导航）
 # =============================================================================
+# 字段说明：
+#   name: 显示名称
+#   path: 站内路径（以 / 开头）或完整外链
+# 置空（footerLinks: []）即可隐藏这一排链接。
+# -----------------------------------------------------------------------------
+# 分组页脚（推荐）—— 仿原 Hexo 博客的页脚：若干栏，每栏一个标题，链接纵向排列。
+# 对应原主题的 theme.footer.list.project（footer.pug 渲染成 .footer-group 多栏）。
+#
+# 配置了本段则优先用它，下面那份扁平 footerLinks 会被忽略（保留是为了兼容/回退）。
+# 分组是我按原博客的四个分组（服务/主题/导航/协议）整理的，
+# 里面的链接映射到本博客现有的对应页面。
+# -----------------------------------------------------------------------------
+footerLinkGroups:
+  - title: 关于
+    links:
+      - name: 关于本人
+        path: /about
+      - name: 友链申请
+        path: /link
+      - name: 最新评论
+        path: /messages
+      - name: 公众号说明
+        path: /wechat
+  - title: 我的
+    links:
+      - name: 相册集
+        path: /album
+      - name: 我的日常
+        path: /dailyPhoto
+      - name: 世界各地风景
+        path: /wordScenery
+      - name: 游戏荣誉
+        path: /gamePhotos
+      - name: 我的装备
+        path: /equipment
+      - name: 即刻短文
+        path: /essay
+  - title: 工具
+    links:
+      - name: 网站统计
+        path: /charts
+      - name: 小空调
+        path: /air-conditioner
+  - title: 协议
+    links:
+      - name: 隐私政策
+        path: /privacy
+      - name: Cookies政策
+        path: /cookies
+      - name: 版权协议
+        path: /copyright
+
+# -----------------------------------------------------------------------------
+# 扁平页脚（回退用）—— 未配置上面的 footerLinkGroups 时，这一排会以「·」分隔单行显示。
+# -----------------------------------------------------------------------------
 # 字段说明：
 #   name: 显示名称
 #   path: 站内路径（以 / 开头）或完整外链
