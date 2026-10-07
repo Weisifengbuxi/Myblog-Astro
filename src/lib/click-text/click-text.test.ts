@@ -71,6 +71,11 @@ class FakeElement extends EventTarget {
     return selector.startsWith('a[href]') ? this : null;
   }
 
+  /** Used as the fallback anchor for keyboard-activated clicks (0/0 coords). */
+  getBoundingClientRect() {
+    return { left: 100, top: 200, width: 40, height: 20, right: 140, bottom: 220, x: 100, y: 200 };
+  }
+
   setAttribute() {}
 
   append(child: FakeElement) {
@@ -133,12 +138,12 @@ function setupDom(): Harness {
     getComputedStyle: { value: () => ({ fontSize: '20px' }), configurable: true },
   });
 
-  const press = (x = 20, y = 30) => {
-    const event = new Event('pointerdown');
+  const press = (x = 20, y = 30, button = 0) => {
+    const event = new Event('click');
     Object.defineProperties(event, {
       target: { value: new FakeElement(flights) },
-      button: { value: 0 },
-      isPrimary: { value: true },
+      button: { value: button },
+      detail: { value: 1 },
       clientX: { value: x },
       clientY: { value: y },
     });
@@ -275,3 +280,20 @@ test('an empty word pool disables the effect', async () => {
     dom.restore();
   }
 });
+
+test('a keyboard-activated button anchors the word to its centre', () =>
+  withEffect((dom) => {
+    // Enter/Space on a button emits `click` with 0/0 coordinates.
+    dom.press(0, 0);
+    const word = layerOf(dom.root).children[0];
+    // FakeElement#getBoundingClientRect → 100,200 40×20, so the centre is 120,210.
+    assert.match(String(word.keyframes[0].translate), /calc\(120px - 50%\)/);
+    assert.match(String(word.keyframes[0].translate), /calc\(210px - 50%\)/);
+  }));
+
+test('secondary mouse buttons do not spawn a word', () =>
+  withEffect((dom) => {
+    dom.press(10, 10, 2);
+    assert.equal(dom.flights.length, 0);
+    assert.equal(dom.root.children.length, 0);
+  }));

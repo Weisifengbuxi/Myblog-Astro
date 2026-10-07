@@ -362,6 +362,10 @@ butterfly-extsrc 的 `click-show-text.min.js`，CDN 加载）。原版**没有�
 - **`fontSize` 支持非 px 单位**：非 px 时用一个隐藏元素量一次实际像素值。
 - 与樱花特效**共用同一套层契约**（层挂在 `<html>` 上以挺过 ClientRouter 换页、
   空中时带 `view-transition-name` 以免被冻进快照、换页冻结时暂停后原地恢复）。
+- **点击触发**：监听标准 `click` 事件（而非 `pointerdown`），与原博客行为一致；
+  点击只有浏览器判定不是拖拽/滚动后才成立。键盘 Enter/Space 激活按钮同样会派发
+  `click`，此时坐标是 0/0 —— 会回退到该元素的中心点，文字仍然出现在合理位置。
+  右键/中键（`button > 0`）不触发。
 - 仅在 `lively` 动效等级生效；切到后台或降级会取消并清空。
 - 与樱花二选一，由 `motion.clickEffect` 决定；两个同时配也不会叠加。
 
@@ -573,14 +577,25 @@ footerLinks:
 
 实现要点：
 
-- `src/components/layout/ToolsMenu.astro`，**纯 CSS 开合**（checkbox + label），
-  不引入客户端 JS —— 页头每页都渲染，保持零 JS 成本
+- `src/components/layout/ToolsMenu.astro`，**点击开合**：状态放在一个视觉隐藏的
+  checkbox 里，显隐由 `:checked` 驱动（同层兄弟选择器），按钮与面板都不需要 JS
+- 只有两件 CSS 做不到的事由一小段脚本处理：**点击面板外部关闭**、**Esc 关闭**
+  （Esc 后焦点回到按钮）。用 `Symbol.for` 做幂等绑定，避免 ClientRouter 换页后重复挂监听
+- 键盘可用：checkbox 可聚焦，Tab 到它按空格即可切换
+- 按钮**不设 `title`**：原生 tooltip 会在面板展开时正好压住第一栏的分组标题
+  （有无障碍名称 `aria-label` 兜底）
 - 移动端 `tablet:hidden`（抽屉里已有导航）
 - 外链一律 `target="_blank" rel="noopener noreferrer"`
+
+> 交互方式改过两轮：最初是点击，后按要求改成悬停（`:hover` / `:focus-within` 纯 CSS），
+> 最终又按要求改回**点击**。现在是 checkbox + 少量 JS 的方案。
 
 > ⚠️ **颜色变量必须包 `hsl()`**：主题的 `--card` 是 HSL 分量（`0 12% 99%`），
 > 不是完整颜色。一开始写 `background: var(--card, #fff)`，因值不合法整条失效，
 > 面板变成透明的（头像透过来了）。正确写法：`background: hsl(var(--card, 0 0% 100%))`。
+
+实测：初始隐藏 → 悬停不打开 → 点击打开 → 再次点击关闭 → 点击面板内部不关闭
+→ 点击外部关闭 → Esc 关闭 → checkbox 可聚焦，全部符合预期。
 
 实测：初始隐藏 → 点击展开；背景不透明（浅色 `rgb(253,252,252)` /
 深色 `rgb(35,31,45)`）；10 个工具项、分组正确、面板不溢出视口；移动端隐藏。

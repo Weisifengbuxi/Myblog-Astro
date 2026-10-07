@@ -33,11 +33,17 @@ import { Icon } from 'astro-icon/components';
 if (!toolsMenuGroups.length) return;
 ---
 
-<div class="tools-menu tablet:hidden">
-  {/* 不加 title：原生 tooltip 会在面板展开时正好压住第一栏的分组标题 */}
-  <button type="button" class="tools-menu-btn" aria-label="实用工具">
+<div class="tools-menu tablet:hidden" data-tools-menu>
+  {/*
+    点击开合。状态放在 checkbox 里，纯 CSS 负责显隐 —— 这样按钮与面板都无需
+    JS 参与，只有「点击外部 / Esc 关闭」需要一小段脚本。
+    不加 title：原生 tooltip 会在面板展开时正好压住第一栏的分组标题
+    （aria-label 已提供无障碍名称）。
+  */}
+  <input type="checkbox" id="tools-menu-toggle" class="tools-menu-toggle" aria-label="实用工具" />
+  <label class="tools-menu-btn" for="tools-menu-toggle">
     <Icon name="ri:apps-2-line" class="size-5" />
-  </button>
+  </label>
 
   <div class="tools-menu-panel" role="menu" aria-label="实用工具">
     {
@@ -72,13 +78,22 @@ if (!toolsMenuGroups.length) return;
 
 <style>
   /*
-    悬停开合，纯 CSS（:hover / :focus-within），无需客户端 JS —— 页头每页都渲染，
-    保持零 JS 成本。键盘 Tab 到按钮同样能打开（:focus-within）。
-    鼠标从按钮移到面板时仍处于 .tools-menu 的 :hover 内，因此不会中途收起。
+    点击开合。显隐完全由 checkbox 的 :checked 驱动（同层兄弟选择器），
+    按钮与面板都不需要 JS；只有「点击外部 / Esc 关闭」用一小段脚本处理。
+    checkbox 本身视觉隐藏但仍可聚焦，因此键盘可用（Tab → Space 切换）。
   */
   .tools-menu {
     position: relative;
     margin-right: 0.25rem;
+  }
+
+  .tools-menu-toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .tools-menu-btn {
@@ -100,14 +115,17 @@ if (!toolsMenuGroups.length) return;
       rotate 0.3s ease;
   }
 
-  .tools-menu:hover .tools-menu-btn,
-  .tools-menu:focus-within .tools-menu-btn {
+  .tools-menu-btn:hover,
+  .tools-menu-toggle:checked + .tools-menu-btn {
     opacity: 1;
     background: rgb(255 255 255 / 0.2);
+  }
+
+  .tools-menu-toggle:checked + .tools-menu-btn {
     rotate: 90deg;
   }
 
-  .tools-menu-btn:focus-visible {
+  .tools-menu-toggle:focus-visible + .tools-menu-btn {
     outline: 2px solid rgb(255 255 255 / 0.8);
     outline-offset: 2px;
   }
@@ -135,8 +153,7 @@ if (!toolsMenuGroups.length) return;
       visibility 0.2s;
   }
 
-  .tools-menu:hover .tools-menu-panel,
-  .tools-menu:focus-within .tools-menu-panel {
+  .tools-menu-toggle:checked ~ .tools-menu-panel {
     opacity: 1;
     visibility: visible;
     translate: 0;
@@ -209,9 +226,47 @@ if (!toolsMenuGroups.length) return;
       transition: none;
     }
 
-    .tools-menu:hover .tools-menu-btn,
-    .tools-menu:focus-within .tools-menu-btn {
+    .tools-menu-toggle:checked + .tools-menu-btn {
       rotate: none;
     }
   }
 </style>
+
+<script>
+  /*
+    点击开合由 checkbox + CSS 完成；这里只补两件 CSS 做不到的事：
+    点击面板外部、以及按 Esc 时关闭。
+    用事件委托挂在 document 上，且对「同一页重新注册」做了幂等处理 ——
+    每次 ClientRouter 换页后 <script> 会重新执行一次。
+  */
+  const TOGGLE_ID = 'tools-menu-toggle';
+
+  function closeOnOutsideClick(event: Event) {
+    const toggle = document.getElementById(TOGGLE_ID) as HTMLInputElement | null;
+    if (!toggle?.checked) return;
+
+    const menu = toggle.closest('[data-tools-menu]');
+    // 点击在菜单内（按钮或面板）交给 checkbox 自己切换，不在这里处理。
+    if (menu && event.target instanceof Node && menu.contains(event.target)) return;
+    toggle.checked = false;
+  }
+
+  function closeOnEscape(event: KeyboardEvent) {
+    if (event.key !== 'Escape') return;
+    const toggle = document.getElementById(TOGGLE_ID) as HTMLInputElement | null;
+    if (!toggle?.checked) return;
+    toggle.checked = false;
+    // 焦点回到按钮，键盘用户可以继续操作。
+    toggle.closest('[data-tools-menu]')?.querySelector('label')?.focus();
+  }
+
+  // `astro:page-load` fires on the initial load and after every ClientRouter
+  // navigation, so bind once per document rather than once per script run.
+  const bound = Symbol.for('tools-menu-outside-click');
+  const doc = document as Document & { [bound]?: boolean };
+  if (!doc[bound]) {
+    doc[bound] = true;
+    document.addEventListener('click', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+  }
+</script>

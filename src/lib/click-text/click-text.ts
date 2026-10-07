@@ -10,6 +10,11 @@
  * The word pool is the 社会主义核心价值观 from the original config, which is why
  * `motion.clickEffect` defaults to `text`.
  *
+ * Fired on `click` rather than `pointerdown`: the previous blog's effect was
+ * click-driven, and a click only lands once the browser has decided it is not a
+ * drag/scroll gesture. Keyboard-activated buttons (Enter/Space) also emit
+ * `click` and are handled by falling back to the element's centre.
+ *
  * Shares the click-burst layer contract with the petal burst: the layer lives on
  * <html> so it survives ClientRouter swaps, carries a view-transition-name while
  * words are airborne so a navigation shows it live rather than frozen, and holds
@@ -173,13 +178,25 @@ export function setupClickText(options: ResolvedClickShowTextConfig): void {
   subscribeMotionLevel(stopWhenDisabled);
   document.addEventListener('visibilitychange', stopWhenDisabled);
   document.addEventListener(
-    'pointerdown',
+    'click',
     (event) => {
-      if (event.button !== 0 || !event.isPrimary) return;
+      // Ignore secondary/middle buttons (`button` is 0 for a left click, 2 for
+      // right; `undefined` in some synthetic events, which should still work).
+      if (typeof event.button === 'number' && event.button > 0) return;
       const target = event.target;
       if (!(target instanceof Element) || !target.closest(INTERACTIVE) || target.closest(EXCLUDED)) return;
       if (document.hidden || readMotionLevel() !== 'lively') return;
-      floatWordAt(event.clientX, event.clientY);
+
+      // Keyboard-activated buttons (Enter/Space) also emit `click` but report
+      // 0/0 coordinates; fall back to the element's centre so the word still
+      // lands somewhere sensible.
+      const hasPoint = event.clientX !== 0 || event.clientY !== 0;
+      if (hasPoint) {
+        floatWordAt(event.clientX, event.clientY);
+        return;
+      }
+      const rect = target.getBoundingClientRect();
+      floatWordAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
     },
     { passive: true },
   );
