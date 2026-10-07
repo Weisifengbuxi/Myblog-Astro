@@ -138,10 +138,13 @@ function setupDom(): Harness {
     getComputedStyle: { value: () => ({ fontSize: '20px' }), configurable: true },
   });
 
-  const press = (x = 20, y = 30, button = 0) => {
+  // interactive: false simulates a click on blank space (target.closest → null).
+  const press = (x = 20, y = 30, button = 0, interactive: boolean | null = true) => {
+    const target = new FakeElement(flights);
+    if (interactive === null) target.closest = () => null;
     const event = new Event('click');
     Object.defineProperties(event, {
-      target: { value: new FakeElement(flights) },
+      target: { value: target },
       button: { value: button },
       detail: { value: 1 },
       clientX: { value: x },
@@ -296,4 +299,25 @@ test('secondary mouse buttons do not spawn a word', () =>
     dom.press(10, 10, 2);
     assert.equal(dom.flights.length, 0);
     assert.equal(dom.root.children.length, 0);
+  }));
+
+test('a click on blank space also spawns a word', () =>
+  withEffect((dom) => {
+    // `closest` returning null means the target is not interactive; blank-area
+    // clicks must still work (matching the previous blog).
+    dom.press(300, 400, 0, null);
+    assert.equal(dom.flights.length, 1);
+    const word = layerOf(dom.root).children[0];
+    assert.match(String(word.keyframes[0].translate), /calc\(300px - 50%\)/);
+    assert.match(String(word.keyframes[0].translate), /calc\(400px - 50%\)/);
+  }));
+
+test('re-running setup replaces the handler instead of stacking one', () =>
+  withEffect((dom) => {
+    // A second registration must not double-fire a click — this was the
+    // "one click spawns two identical words" bug.
+    setupClickText(TEST_CONFIG);
+    setupClickText(TEST_CONFIG);
+    dom.press(50, 60);
+    assert.equal(dom.flights.length, 1);
   }));

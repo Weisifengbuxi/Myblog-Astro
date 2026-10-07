@@ -366,6 +366,12 @@ butterfly-extsrc 的 `click-show-text.min.js`，CDN 加载）。原版**没有�
   点击只有浏览器判定不是拖拽/滚动后才成立。键盘 Enter/Space 激活按钮同样会派发
   `click`，此时坐标是 0/0 —— 会回退到该元素的中心点，文字仍然出现在合理位置。
   右键/中键（`button > 0`）不触发。
+- **空白处也触发**：不再过滤可交互元素（原先要求 `target.closest(INTERACTIVE)`），
+  所以在页面任意位置点击都会冒字，与原博客一致。只保留 `EXCLUDED` 作为主动豁免
+  （输入框、`contenteditable`、`[data-no-click-text]`）。
+- **重复注册不会双触发**：`setup` 每次先 `removeEventListener` 再挂新的，
+  而不是简单叠加。Astro 可能在 ClientRouter 换页后再执行一次 AppShell 脚本、
+  dev 下 HMR 也会重跑模块，早先的实现会让一次点击冒出**两个相同的字**。
 - 仅在 `lively` 动效等级生效；切到后台或降级会取消并清空。
 - 与樱花二选一，由 `motion.clickEffect` 决定；两个同时配也不会叠加。
 
@@ -577,18 +583,17 @@ footerLinks:
 
 实现要点：
 
-- `src/components/layout/ToolsMenu.astro`，**点击开合**：状态放在一个视觉隐藏的
-  checkbox 里，显隐由 `:checked` 驱动（同层兄弟选择器），按钮与面板都不需要 JS
-- 只有两件 CSS 做不到的事由一小段脚本处理：**点击面板外部关闭**、**Esc 关闭**
-  （Esc 后焦点回到按钮）。用 `Symbol.for` 做幂等绑定，避免 ClientRouter 换页后重复挂监听
-- 键盘可用：checkbox 可聚焦，Tab 到它按空格即可切换
+- `src/components/layout/ToolsMenu.astro`，**悬停开合**，纯 CSS 无客户端 JS
+- 键盘可用性用 `:has(:focus-visible)` 而**不是** `:focus-within`：
+  点击按钮会让它获得焦点，`:focus-within` 会把面板锁在打开状态直到点别处，
+  鼠标用户会觉得「点一下就关不掉」。`:focus-visible` 只在 Tab 导航时匹配
 - 按钮**不设 `title`**：原生 tooltip 会在面板展开时正好压住第一栏的分组标题
   （有无障碍名称 `aria-label` 兜底）
 - 移动端 `tablet:hidden`（抽屉里已有导航）
 - 外链一律 `target="_blank" rel="noopener noreferrer"`
 
-> 交互方式改过两轮：最初是点击，后按要求改成悬停（`:hover` / `:focus-within` 纯 CSS），
-> 最终又按要求改回**点击**。现在是 checkbox + 少量 JS 的方案。
+> 交互方式改过三轮：点击 → 悬停 → 点击（checkbox + 少量 JS）→ 最终回到**悬停**。
+> 最终方案是纯 CSS，没有客户端脚本。
 
 > ⚠️ **颜色变量必须包 `hsl()`**：主题的 `--card` 是 HSL 分量（`0 12% 99%`），
 > 不是完整颜色。一开始写 `background: var(--card, #fff)`，因值不合法整条失效，

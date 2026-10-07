@@ -24,13 +24,43 @@
 import type { ResolvedClickShowTextConfig } from '@lib/config/types';
 import { readMotionLevel, subscribeMotionLevel } from '@lib/motion-level';
 
-const INTERACTIVE = 'a[href], button, [role="button"], summary, label[for]';
+/**
+ * Elements that opt out of the effect. `INTERACTIVE` is intentionally absent:
+ * the word also springs from clicks on blank page areas, matching the previous
+ * blog, so the only filtering needed is this opt-out list.
+ */
 const EXCLUDED = 'input, textarea, select, [contenteditable="true"], [data-no-click-text]';
 const LAYER_NAME = 'click-text';
 const LAYER_CLASS = 'click-text-layer';
 
 let layer: HTMLDivElement | null = null;
 const flights = new Set<Animation>();
+
+/**
+ * Currently-bound document listeners.
+ *
+ * `setupClickText` can run more than once for a document (Astro may execute the
+ * AppShell script again after a ClientRouter navigation, and HMR re-runs modules
+ * in dev). Each run *replaces* these listeners instead of adding another one —
+ * previously every run added a fresh `click` handler, so one click spawned two
+ * identical words.
+ */
+let boundClick: ((event: MouseEvent) => void) | null = null;
+let boundStop: (() => void) | null = null;
+let boundHold: ((event: Event) => void) | null = null;
+
+function unbind(): void {
+  if (boundClick) document.removeEventListener('click', boundClick);
+  if (boundStop) {
+    document.removeEventListener('visibilitychange', boundStop);
+    boundStop = null;
+  }
+  if (boundHold) {
+    document.removeEventListener('astro:before-swap', boundHold);
+    boundHold = null;
+  }
+  boundClick = null;
+}
 
 /**
  * Config for the active instance.
@@ -166,6 +196,9 @@ export function setupClickText(options: ResolvedClickShowTextConfig): void {
   layer?.replaceChildren();
   layer = null;
   config = options;
+
+  // Always start from a clean binding so repeated setups cannot stack handlers.
+  unbind();
   if (!options.text.length) return;
 
   const stopWhenDisabled = () => {
@@ -175,30 +208,36 @@ export function setupClickText(options: ResolvedClickShowTextConfig): void {
     layer?.replaceChildren();
     layer?.style.removeProperty('view-transition-name');
   };
+
+  const onClick = (event: MouseEvent) => {
+    // Ignore secondary/middle buttons (`button` is 0 for a left click, 2 for
+    // right; `undefined` in some synthetic events, which should still work).
+    if (typeof event.button === 'number' && event.button > 0) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest(EXCLUDED)) return;
+    if (document.hidden || readMotionLevel() !== 'lively') return;
+
+    // Keyboard-activated buttons (Enter/Space) emit `click` with 0/0
+    // coordinates; fall back to that element's centre so the word still lands
+    // somewhere sensible. Everything else — links, buttons and **blank areas** —
+    // uses the pointer position, which is why no INTERACTIVE filter is applied.
+    const hasPoint = event.clientX !== 0 || event.clientY !== 0;
+    if (hasPoint || !(target instanceof Element)) {
+      floatWordAt(event.clientX, event.clientY);
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    floatWordAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  };
+
+  const onBeforeSwap = (event: Event) => holdClickText((event as { viewTransition: ViewTransition }).viewTransition);
+
+  boundClick = onClick;
+  boundStop = stopWhenDisabled;
+  boundHold = onBeforeSwap;
+
   subscribeMotionLevel(stopWhenDisabled);
   document.addEventListener('visibilitychange', stopWhenDisabled);
-  document.addEventListener(
-    'click',
-    (event) => {
-      // Ignore secondary/middle buttons (`button` is 0 for a left click, 2 for
-      // right; `undefined` in some synthetic events, which should still work).
-      if (typeof event.button === 'number' && event.button > 0) return;
-      const target = event.target;
-      if (!(target instanceof Element) || !target.closest(INTERACTIVE) || target.closest(EXCLUDED)) return;
-      if (document.hidden || readMotionLevel() !== 'lively') return;
-
-      // Keyboard-activated buttons (Enter/Space) also emit `click` but report
-      // 0/0 coordinates; fall back to the element's centre so the word still
-      // lands somewhere sensible.
-      const hasPoint = event.clientX !== 0 || event.clientY !== 0;
-      if (hasPoint) {
-        floatWordAt(event.clientX, event.clientY);
-        return;
-      }
-      const rect = target.getBoundingClientRect();
-      floatWordAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    },
-    { passive: true },
-  );
-  document.addEventListener('astro:before-swap', (event) => holdClickText(event.viewTransition));
+  document.addEventListener('click', onClick, { passive: true });
+  document.addEventListener('astro:before-swap', onBeforeSwap);
 }
