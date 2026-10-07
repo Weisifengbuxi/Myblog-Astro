@@ -208,12 +208,41 @@ export interface MotionConfig {
   level?: MotionLevel;
   /** Falling sakura petals over page covers; only runs at the `lively` level. */
   heroPetals?: boolean;
-  /** Petal burst where interactive elements are clicked; only runs at the `lively` level. */
+  /** Decorative effect fired where interactive elements are pressed; `lively` only. */
   clickBurst?: boolean;
+  /**
+   * Which click effect to fire: a word from `clickShowText` (`text`) or the
+   * sakura petal burst (`petals`). Defaults to `text`.
+   */
+  clickEffect?: ClickEffectKind;
 }
+
+/** Which decorative effect plays on click. */
+export type ClickEffectKind = 'text' | 'petals';
 
 /** Motion config after defaults are applied — no optional fields. */
 export type ResolvedMotionConfig = Required<MotionConfig>;
+
+/**
+ * Raw `clickShowText:` section — the word pool, font size and colour pool for
+ * the click effect. Ported from the original blog's `ClickShowText`
+ * (butterfly-extsrc's click-show-text.js).
+ */
+export interface ClickShowTextConfig {
+  /** Words to pick from, one per click. The effect is disabled when empty. */
+  text?: string[];
+  /** CSS length for the glyph size. */
+  fontSize?: string;
+  /** Fixed colour pool; leave empty to generate a random colour on every click. */
+  colors?: string[];
+}
+
+/** Click-effect config after defaults are applied — no optional fields. */
+export interface ResolvedClickShowTextConfig {
+  text: string[];
+  fontSize: string;
+  colors: string[];
+}
 
 // =============================================================================
 // Navigation
@@ -686,8 +715,10 @@ export interface SiteYamlConfig {
   announcements?: AnnouncementConfig[];
   defaultCoverList?: string[];
   content?: ContentConfig;
-  /** Motion intensity default and decorative sakura effects. */
+  /** Motion intensity default and decorative click/cover effects. */
   motion?: MotionConfig;
+  /** Word pool + styling for the `text` click effect. */
+  clickShowText?: ClickShowTextConfig;
   /** Optional dynamic moments archive backed by koharu-suite. */
   moments?: MomentsConfig;
   /** Optional public Markdown writing room. */

@@ -60,8 +60,9 @@ const { post, siderType, isPostPage, articleTools = true } = Astro.props;
 </div>
 
 <script>
-  import { motionConfig } from '@constants/site-config';
+  import { clickShowTextConfig, motionConfig } from '@constants/site-config';
   import { setupArrivalRender } from '@lib/arrival-render';
+  import { setupClickText } from '@lib/click-text/click-text';
   import { setupHeaderContinuity } from '@lib/header-continuity';
   import { setupMorphTransitions } from '@lib/morph-transitions';
   import { setupPetalBurst } from '@lib/sakura/petal-burst';
@@ -73,5 +74,10 @@ const { post, siderType, isPostPage, articleTools = true } = Astro.props;
   setupArrivalRender();
   setupScrollReveal();
   setupScrollbarActivity();
-  if (motionConfig.clickBurst) setupPetalBurst();
+  // One click effect at a time; `motion.clickEffect` picks which
+  // (`text` = the word burst, `petals` = the sakura burst).
+  if (motionConfig.clickBurst) {
+    if (motionConfig.clickEffect === 'petals') setupPetalBurst();
+    else setupClickText(clickShowTextConfig);
+  }
 </script>

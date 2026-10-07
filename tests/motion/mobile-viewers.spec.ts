@@ -61,7 +61,10 @@ async function bottomClose(panel: Locator, viewportHeight: number) {
 }
 
 async function screenshotReady(page: Page) {
-  await expect(page.locator('.petal-burst-layer .petal-burst')).toHaveCount(0);
+  // Wait for any airborne click effect to finish. The site can run either the
+  // word burst (`text`, the default) or the sakura burst (`petals`), depending
+  // on `motion.clickEffect`, so both layers are covered.
+  await expect(page.locator('.petal-burst-layer .petal-burst, .click-text-layer .click-text')).toHaveCount(0);
   await page.evaluate(
     () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
   );

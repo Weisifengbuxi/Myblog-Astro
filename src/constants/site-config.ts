@@ -9,6 +9,7 @@
 import { resolveEditorNavigation } from '@lib/config/editor';
 import { normalizeMomentsConfig, resolveMomentsNavigation } from '@lib/config/moments';
 import {
+  clickShowTextConfig,
   contentConfig,
   editorConfig,
   enabledLocaleCodes,
@@ -33,7 +34,7 @@ import type { UmamiStatsConfig } from '@/types/umami-stats';
 import yamlConfig from '../../config/site.yaml';
 import { DEFAULT_ROUTERS, RESERVED_ROUTES } from './router';
 
-export { contentConfig, editorConfig, i18nConfig, motionConfig, siteConfig };
+export { clickShowTextConfig, contentConfig, editorConfig, i18nConfig, motionConfig, siteConfig };
 
 export const socialConfig: SocialConfig = yamlConfig.social ?? {};
 

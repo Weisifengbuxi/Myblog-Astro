@@ -12,9 +12,15 @@ import { DEFAULT_TIMEZONE, isValidTimezone } from '../timezone';
 import { normalizeContentConfig } from './content';
 import { normalizeEditorConfig } from './editor';
 import { enabledFeaturedSeriesSlugs, normalizeFeaturedSeries } from './featured-series';
-import { normalizeMotionConfig } from './motion';
+import { normalizeClickShowTextConfig, normalizeMotionConfig } from './motion';
 import { RESERVED_ROUTES } from './reserved-routes';
-import type { I18nConfig, ResolvedContentConfig, ResolvedMotionConfig, ResolvedSiteConfig } from './types';
+import type {
+  I18nConfig,
+  ResolvedClickShowTextConfig,
+  ResolvedContentConfig,
+  ResolvedMotionConfig,
+  ResolvedSiteConfig,
+} from './types';
 
 /** Category name → URL slug map, e.g. `{ '随笔': 'life' }`. */
 export const categoryMap: Record<string, string> = yamlConfig.categoryMap ?? {};
@@ -39,8 +45,11 @@ export const enabledLocaleCodes = i18nConfig.locales.flatMap((locale) => (locale
 /** Content processing flags with field-level defaults applied. */
 export const contentConfig: ResolvedContentConfig = normalizeContentConfig(yamlConfig.content);
 
-/** Default motion level and sakura effect switches with field-level defaults applied. */
+/** Default motion level, click-effect kind, and sakura switches with field-level defaults applied. */
 export const motionConfig: ResolvedMotionConfig = normalizeMotionConfig(yamlConfig.motion);
+
+/** Word pool + styling for the `text` click effect (`clickShowText:` in site.yaml). */
+export const clickShowTextConfig: ResolvedClickShowTextConfig = normalizeClickShowTextConfig(yamlConfig.clickShowText);
 
 /** Writing room pages are only available when explicitly enabled. */
 export const editorConfig = normalizeEditorConfig(yamlConfig.editor);

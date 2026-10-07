@@ -326,6 +326,58 @@ Tip：珠玑璀璨传千古，渔歌悠扬荡天涯`，且 `navigator.permission
 
 另外骨架只在网络查询期间显示，查询结束才整体替换，避免「内容 → 又缩回骨架」。
 
+## 点击特效：社会主义核心价值观文字
+
+**默认生效**。点击可交互元素时，从指针处冒出一个词、上浮淡出，**每次随机换色**。
+
+配置在 `config/site.yaml`：
+
+```yaml
+motion:
+  clickBurst: true
+  clickEffect: text      # text = 文字（默认）；petals = 樱花花瓣
+
+clickShowText:
+  text: [富强, 民主, 文明, 和谐, 自由, 平等, 公正, 法治, 爱国, 敬业, 诚信, 友善]
+  fontSize: 20px
+  colors: []             # 留空 = 每次随机生成颜色
+```
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/lib/click-text/click-text.ts` | 特效实现 |
+| `src/styles/global/motion.css` | `.click-text-layer` / `.click-text` 样式 |
+| `src/layouts/AppShell.astro` | 按 `motion.clickEffect` 二选一挂载 |
+
+来源：原博客 `_config.anzhiyu.yml` 的 `ClickShowText`（anzhiyu 用的是
+butterfly-extsrc 的 `click-show-text.min.js`，CDN 加载）。原版**没有颜色随机**，
+按你的要求补上了。
+
+要点：
+
+- **颜色随机**：`hsl(随机色相 72~96% 46~62%)` —— 饱和度/亮度限制在鲜艳且
+  浅色深色底都看得见的区间，避免出现近白或近黑的字。
+- **可配置颜色池**：`colors` 非空时改用固定色，随机逻辑自动让位。
+- **文字池为空即禁用**：不需要额外的 `enable` 开关，删掉 `text` 就关掉。
+- **`fontSize` 支持非 px 单位**：非 px 时用一个隐藏元素量一次实际像素值。
+- 与樱花特效**共用同一套层契约**（层挂在 `<html>` 上以挺过 ClientRouter 换页、
+  空中时带 `view-transition-name` 以免被冻进快照、换页冻结时暂停后原地恢复）。
+- 仅在 `lively` 动效等级生效；切到后台或降级会取消并清空。
+- 与樱花二选一，由 `motion.clickEffect` 决定；两个同时配也不会叠加。
+
+### 依赖注入 + 单元测试
+
+`click-text.ts` **不直接 import site.yaml**，而是由 `AppShell` 通过
+`setupClickText(clickShowTextConfig)` 注入配置。这样模块不牵入 YAML 导入链，
+可以用裸 `node --test` 测试（YAML 在 node 下无法直接 import）。
+
+`src/lib/click-text/click-text.test.ts` 6 个用例（已并入 `npm run test:motion`）：
+按池出词、颜色随机（40 次点击 >5 种）、颜色池覆盖随机、动画从指针向上飘出、
+动效/可见性变化时取消且 transition 后不恢复、空词池禁用。
+
+`tests/motion/mobile-viewers.spec.ts` 里的 `screenshotReady()` 原本只等樱花播完，
+已改为同时匹配两种特效的层，切换 `clickEffect` 后依然有效。
+
 ## 文章卡片 hover 擦亮（扫光）
 
 照搬原 Hexo 博客 `source/css/home.css`（原文仅 15 行）：

@@ -270,3 +270,39 @@ html.motion-off [data-astro-transition-scope] {
 ::view-transition-old(petal-burst) {
   display: none;
 }
+
+/* Click word burst layer (see src/lib/click-text/click-text.ts). */
+.click-text-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.click-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* White halo keeps a mid-dark random colour legible over the cover artwork. */
+  text-shadow:
+    0 1px 2px rgb(255 255 255 / 0.75),
+    0 0 6px rgb(255 255 255 / 0.55);
+  font-weight: 700;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+html.dark .click-text {
+  text-shadow:
+    0 1px 3px rgb(0 0 0 / 0.65),
+    0 0 6px rgb(0 0 0 / 0.45);
+}
+::view-transition-group(click-text),
+::view-transition-new(click-text) {
+  animation: none;
+}
+
+::view-transition-old(click-text) {
+  display: none;
+}

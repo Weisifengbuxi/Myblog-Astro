@@ -44,7 +44,7 @@
     "test:umami": "node --import tsx --test src/lib/umami-stats.test.ts",
     "test:toc": "tsx --test src/lib/toc.test.ts src/lib/toc-ribbon.test.ts",
     "test:lightbox": "tsx --test src/lib/lightbox-flip.test.ts src/lib/lightbox-gestures.test.ts",
-    "test:motion": "node --import tsx --test src/lib/motion-level.test.ts src/lib/sakura/petal-burst.test.ts",
+    "test:motion": "node --import tsx --test src/lib/motion-level.test.ts src/lib/sakura/petal-burst.test.ts src/lib/config/motion.test.ts src/lib/click-text/click-text.test.ts",
     "test:motion:browser": "playwright test -c tests/motion/playwright.config.ts",
     "test:settings-panel": "node tests/settings/panel-animation.mjs",
     "test:bgm-panel": "node tests/bgm/panel-loading.mjs",
