@@ -654,6 +654,10 @@ node .migration/fetch-fcircle.mjs --dry    # 只打印统计，不写文件
 
 - 头图（`Cover compact`）显示标题，内容区顶部一条引言条只放提示语与描述
   —— 早期版本两处都写了标题，**同一屏出现两次「朋友圈」**，已拆开分工
+- 头图标题也会跟着渐隐（见「头图开场文字淡出动画」一节）
+- 引言条**不再设背景图**（`fcircle.topBackground` 留空）：原博客那张图是给宽横幅
+  准备的，而这里只有约 88px 高，整图会被裁得看不出内容；改为主题主色浅底更干净。
+  该配置项保留，想放图仍可填（此时会自动压一层暗色蒙版保证文字可读）
 - `created` 是带空格的 `"2026-10-08 11:23"`，`Date.parse` 对这种格式属实现相关，
   解析前先把空格换成 `T` 变成合法 ISO
 - 相对时间（`6 小时前`）在**构建时**算好写进 HTML，所以页面是纯静态的；
@@ -793,20 +797,33 @@ node .migration/tools-shoot-mourn.mjs
 `tools-check-mourn-scope.mjs` 会用 `addInitScript` 覆盖 `Date`，因此走的是
 **真实日期判断分支**，而不是手动加类名 —— 能同时验证日期门与路径门。
 
-## 首页开场文字淡出动画
+## 头图开场文字淡出动画
 
-首页头图上的站名与副标题会**淡入上浮 → 保持 1 秒 → 淡出上移**，之后保持隐藏。
+头图上的文字会**淡入上浮 → 保持 1 秒 → 淡出上移**，之后保持隐藏。
 
 实现只有两处：
 
 | 位置 | 内容 |
 | --- | --- |
-| `src/components/ui/cover/Cover.astro` | 「无 title / 无 data」分支的文本元素加 `cover-intro-fade` 类 |
+| `src/components/ui/cover/Cover.astro` | 给带该效果的文本元素加 `cover-intro-fade` 类 |
 | `src/styles/components/cover.css` | 变量 + `@keyframes cover-intro-life` |
 
-**作用范围**：`cover-intro-fade` 只标在「无 title / 无 data」分支上，也就是只有
-`index.astro` 的 `<Cover slot="cover" />` 会渲染它。归档、友链、404 等页面都传了
-`title`，走另一分支，因此天然不受影响，不需要判断首页路径。
+**作用范围**（`Cover.astro` 有三个分支，已按需求逐个决定）：
+
+| 分支 | 页面 | 是否渐隐 | 说明 |
+| --- | --- | --- | --- |
+| 无 `title` 无 `data` | 仅首页 | ✅ | 站名 + 副标题（2 个元素） |
+| 有 `title` | 朋友圈 / 归档 / 标签 / 分类 / 友链 / 关于 / 歌单 / 装备 / 404 等 | ✅ | 页面标题（1 个元素） |
+| 有 `data` | 文章页 | ❌ **刻意不加** | 文章标题不该自己消失 |
+
+> 帖子页不加是有意的：读者需要标题一直在。实测 `/post/3be0a65` 的
+> `.cover-hero .cover-intro-fade` 数量为 0、标题 `opacity: 1`；
+> 其余 19 个页面各 1~2 个。回归断言已写进 `verify.mjs`
+> （`/`、`/archives`、`/about`、`/fcircle` 必须含；`/post/3be0a65` 必须不含）。
+
+> ⚠️ **给标题加这个类时不能同时留 `motion-rise`。** 那条规则在样式表里更靠后，
+> 它的 `animation-delay` 会覆盖 `cover-intro-fade` 的 delay，淡出永远不触发
+> （首页那次已经踩过一次，加自定义标题时又差点重演）。`.`cover-intro-fade`> 的关键帧自带入场，不需要`motion-rise`。
 
 ### 踩过的两个坑
 
@@ -868,8 +885,11 @@ node .migration/tools-shoot-mourn.mjs
 
 解析出的 `animation-duration` 应为 `2.2s`。
 
-`prefers-reduced-motion` 或站点动效等级为 `reduced` 时**不加动画**，文字保持常显。
-回归检查已并入 `pnpm verify`：首页必须含 `cover-intro-fade`，归档/关于页必须不含。
+`prefers-reduced-motion` 或站点动效等级为 `reduced` 时**不加动画**，文字保持常显 ——
+此时标题就不会消失，是有意的降级。
+
+回归检查已并入 `pnpm verify`：`/`、`/archives`、`/about`、`/fcircle` 必须含
+`cover-intro-fade`，`/post/3be0a65` 必须不含。
 
 ## site.title / alternate 写反了（踩过的坑）
 

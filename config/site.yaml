@@ -226,7 +226,9 @@ social:
 #   description: 页面副标题
 #   pageSize:    首屏显示多少条
 #   topTips:     顶部横幅上的提示语
-#   topBackground: 顶部横幅背景图
+#   topBackground: 引言条的背景图；**留空则用主题主色的浅色底**（推荐，更干净）。
+#                 原博客在这里放了一张大图，但那是给宽横幅用的；
+#                 本页引言条只有约 88px 高，整图会被裁得看不出内容。
 # -----------------------------------------------------------------------------
 fcircle:
   enabled: true
@@ -234,7 +236,7 @@ fcircle:
   description: 看看友链们最近写了什么
   pageSize: 30
   topTips: 订阅友链最新文章
-  topBackground: /img/site_header_1920.webp
+  topBackground: ''
 
 # -----------------------------------------------------------------------------
 friends:

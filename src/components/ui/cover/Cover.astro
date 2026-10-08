@@ -61,7 +61,17 @@ const copyFailedLabel = t(locale, 'common.copyFailed');
       title ? (
         <h1
           class:list={[
-            'motion-rise shadow-text word-break flex items-center gap-2 text-center font-bold text-balance',
+            /*
+              自定义标题（朋友圈、归档、标签等页面）沿用首页那套「显示一会儿再渐隐」，
+              与 index.astro 的站点名一致：
+              `.cover-intro-fade` 的动画定义在 src/styles/components/cover.css。
+              注意帖子页走的是下面的 data 分支，不在这里 —— 文章标题不该自己消失。
+
+              **刻意不带 `motion-rise`**：那条规则在样式表里更靠后，它的
+              animation-delay 会覆盖 cover-intro-fade 的 delay，导致淡出永不触发
+              （首页那次踩过同一个坑）。`.cover-intro-fade` 的关键帧自带入场。
+            */
+            'cover-intro-fade shadow-text word-break flex items-center gap-2 text-center font-bold text-balance',
             MAX_WIDTH.content,
             compact
               ? 'text-4xl/[1.15] tracking-[0.08em] tablet:text-3xl/[1.15] tablet:tracking-[0.05em]'

@@ -58,12 +58,16 @@ const checks = [
   { path: '/', notContains: ['cover-petals'] },
   { path: '/post/3be0a65', contains: ['universe-canvas'] },
 
-  // ---- homepage cover intro text ---------------------------------------------
-  // 首页头图的开场文字（站名 + 副标题）带淡出动画类，且只在首页渲染。
-  // 其它页面传了 title 走另一分支，不应出现该类。
+  // ---- cover intro text (渐隐开场) --------------------------------------------
+  // 头图上的文字「显示一会儿再渐隐」，两类页面都要有：
+  //   - 首页：不传 title，走非 data 分支 → 站名 + 副标题（2 个元素）
+  //   - 其它页面：传了 title，走 title 分支 → 页面标题（1 个元素）
+  // 只有文章页（走 data 分支）刻意**不加** —— 文章标题不该自己消失。
   { path: '/', contains: ['cover-intro-fade'] },
-  { path: '/archives', notContains: ['cover-intro-fade'] },
-  { path: '/about', notContains: ['cover-intro-fade'] },
+  { path: '/archives', contains: ['cover-intro-fade'] },
+  { path: '/about', contains: ['cover-intro-fade'] },
+  { path: '/fcircle', contains: ['cover-intro-fade'] },
+  { path: '/post/3be0a65', notContains: ['cover-intro-fade'] },
 
   // ---- footer filings --------------------------------------------------------
   // 备案信息必须出现在页脚（迁移自原 Hexo 博客 footer.linkList）
