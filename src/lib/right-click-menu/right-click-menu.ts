@@ -179,15 +179,24 @@ function showMenu(x: number, y: number): void {
   mask.style.display = 'block';
 }
 
-/** 批量设置显隐：传入的 id 显示，其余隐藏。 */
+/**
+ * 批量设置显隐：传入的 id 显示，其余隐藏。
+ *
+ * 关键：如果**一个可见项都没有**，连容器一起隐藏。
+ * 否则容器自身的高度与虚线底边框仍会占位和渲染 —— 空白处右键时
+ * 上下文组为空，就会出现「两条虚线中间夹一条空隙」的观感。
+ */
 function setVisible(ids: string[], container: string): void {
   const box = el(container);
   if (!box) return;
   const wanted = new Set(ids);
+  let visible = 0;
   for (const node of box.querySelectorAll<HTMLElement>('[data-rm-item]')) {
-    const id = node.id;
-    node.style.display = wanted.has(id) ? 'flex' : 'none';
+    const show = wanted.has(node.id);
+    node.style.display = show ? 'flex' : 'none';
+    if (show) visible++;
   }
+  box.style.display = visible ? '' : 'none';
 }
 
 function readContext(target: EventTarget | null, event: MouseEvent): Context {
@@ -313,9 +322,9 @@ function onContextMenu(event: MouseEvent): void {
   ].filter(Boolean) as string[];
 
   setVisible(pluginIds, 'rightMenuPlugin');
-  // ③ 只有在没有任何上下文时，才显示「随便逛逛 / 分类 / 标签」，与原版一致
-  const otherBox = el('rightMenuOther');
-  if (otherBox) otherBox.style.display = pluginIds.length ? 'none' : 'block';
+  // ③ 只有在没有任何上下文时，才显示「随便逛逛 / 分类 / 标签」，与原版一致。
+  //    传空数组时 setVisible 会连容器一起隐藏，因此不会留下空的虚线框。
+  setVisible(pluginIds.length ? [] : ['menu-randompost', 'menu-categories', 'menu-tags'], 'rightMenuOther');
 
   showMenu(event.clientX, event.clientY);
   event.preventDefault();
