@@ -528,6 +528,8 @@ footerLinks:
 | `src/styles/components/cover.css` | 新增开场文字淡出的变量与关键帧 |
 | `src/components/layout/FooterLinks.astro` | 重写：支持分组多栏（`footerLinkGroups`），保留扁平列表作回退 |
 | `src/components/layout/Header.astro` | 页头挂 `<ToolsMenu />`（左上角实用工具按钮） |
+| `src/constants/site-config.ts` | 另外新增 `fcircleConfig` 导出 |
+| `src/lib/config/types.ts` | 新增 `FcircleConfig` / `ResolvedFcircleConfig` 与 `SiteYamlConfig.fcircle` |
 
 ## 页脚分栏（footerLinkGroups）
 
@@ -569,6 +571,94 @@ footerLinks:
 让「关于 / 我的 / 工具 / 协议」一眼能认出是标题而非链接。
 
 窄屏（≤992px）折成 2 栏并收紧条目间距到 12px；480px 下 2 栏、无横向溢出。
+
+## 友链朋友圈（/fcircle）
+
+聚合展示友链各站的最新文章，仿原 Hexo 博客的 `/fcircle/` 页面。
+
+### 为什么不用原来的后端
+
+原博客用 Friend-Circle-Lite 的轻量版，后端在 `fcircle.weisifengbuxi.top`。
+**实测该域名 SSL 证书已过期**（`SEC_E_CERT_EXPIRED`；DNS 解析到 Vercel 的 IP，
+`vercel.com` 本身访问正常，所以不是网络问题）—— 也就是说这个朋友圈在**原博客上
+现在也早已加载不出来**，不是迁移时丢的。
+
+现在改为：**在博客仓库内用 GitHub Actions 抓取 RSS，把结果提交进仓库，
+页面在构建时读它**。因此不再有独立后端、域名和证书需要维护。
+
+### 组成
+
+| 文件 | 作用 |
+| --- | --- |
+| `config/fcircle-friends.json` | 友链清单（抓取输入）：`{"friends":[[名称, 站点, 头像], …]}` |
+| `.migration/fetch-fcircle.mjs` | 抓取脚本，**零依赖**（自解析 RSS/Atom） |
+| `.github/workflows/fcircle.yml` | 每 6 小时跑一次并提交产物 |
+| `public/fcircle/all.json` | 产物数据（构建时读取） |
+| `src/lib/fcircle/types.ts` | 类型 + 解析 + 排序 + 相对时间 |
+| `src/lib/fcircle/data.ts` | 构建时读文件（读不到就降级为空，不影响构建） |
+| `src/components/friends/FriendsCircle.astro` | 列表渲染 |
+| `src/pages/fcircle.astro` | 路由（`enabled: false` 时 404，导航项一并移除） |
+
+### 输出格式：照 Friend-Circle-Lite 的真实 schema
+
+产物**兼容 FCLite**（这样也能直接喂给别的 fcircle 前端）。字段是照**真实实例**
+核对的，不是猜的：
+
+```json
+{
+  "statistical_data": {
+    "friends_num": 17, "active_num": 15, "error_num": 2,
+    "article_num": 260, "last_updated_time": "2026-10-08 17:12:47"
+  },
+  "article_data": [
+    { "title": "…", "created": "2026-10-08 10:55",
+      "link": "https://…", "author": "站点名", "avatar": "https://…" }
+  ]
+}
+```
+
+> ⚠️ **`article_data` 元素恰好 5 个键**（title/created/link/author/avatar）。
+> FCLite 和 hexo-circle-of-friends 两套 schema 里**都没有 `content`、没有 `site`**
+> —— 我第一版凭直觉多加了这两个字段，是错的。`created` 为 `"YYYY-MM-DD HH:MM"`（只到分钟）。
+
+解析器同时兼容 hexo-circle-of-friends 后端那套（元素多了 `floor`/`updated`，
+开了 AI 摘要时还有 `summary`），因为两者顶层结构一致、只是元素字段有差异。
+
+### 实测抓取结果
+
+```plain
+成功 15/17 个友链，失败 2，共 260 篇文章
+```
+
+- 脚本按 `/atom.xml → /rss.xml → /feed → /index.xml → …` 顺序探测，
+  再兜底读首页的 `<link rel="alternate" type="application/rss+xml">`
+- **青桔气球**、**KangQi の Blog** 未找到可用 feed（已计入 `error_num`）
+- 很多 feed 不带作者（`<author>` 为空），用友链清单里的**站点名兜底**
+- 每站最多 20 篇、总量上限 500 篇，避免个别高产站点刷屏
+
+### 手动操作
+
+```bash
+node .migration/fetch-fcircle.mjs          # 本地抓取，写入 public/fcircle/all.json
+node .migration/fetch-fcircle.mjs --dry    # 只打印统计，不写文件
+```
+
+改友链后要同步 `config/fcircle-friends.json`（它由 `site.yaml` 的 `friends.data`
+生成：`[[site, url, image], …]`），然后 Actions 会自动重抓（也支持手动触发）。
+
+> ⚠️ 工作流最后一步要 `git push`，需在仓库
+> **Settings → Actions → General → Workflow permissions** 选
+> **Read and write permissions**，否则提交会失败。
+
+### 页面渲染
+
+- 头图（`Cover compact`）显示标题，内容区顶部一条引言条只放提示语与描述
+  —— 早期版本两处都写了标题，**同一屏出现两次「朋友圈」**，已拆开分工
+- `created` 是带空格的 `"2026-10-08 11:23"`，`Date.parse` 对这种格式属实现相关，
+  解析前先把空格换成 `T` 变成合法 ISO
+- 相对时间（`6 小时前`）在**构建时**算好写进 HTML，所以页面是纯静态的；
+  代价是构建后时间文案不会自己刷新（对这类列表页面可以接受）
+- 头像加载失败或缺失时用站点名首字占位，不出现空白方块
 
 ## 页头「实用工具」按钮（toolsMenu）
 

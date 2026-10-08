@@ -11,6 +11,7 @@ import yamlConfig from '../../../config/site.yaml';
 import { DEFAULT_TIMEZONE, isValidTimezone } from '../timezone';
 import { normalizeContentConfig } from './content';
 import { normalizeEditorConfig } from './editor';
+import { normalizeFcircleConfig } from './fcircle';
 import { enabledFeaturedSeriesSlugs, normalizeFeaturedSeries } from './featured-series';
 import { normalizeClickShowTextConfig, normalizeMotionConfig } from './motion';
 import { RESERVED_ROUTES } from './reserved-routes';
@@ -18,6 +19,7 @@ import type {
   I18nConfig,
   ResolvedClickShowTextConfig,
   ResolvedContentConfig,
+  ResolvedFcircleConfig,
   ResolvedMotionConfig,
   ResolvedSiteConfig,
 } from './types';
@@ -53,6 +55,9 @@ export const clickShowTextConfig: ResolvedClickShowTextConfig = normalizeClickSh
 
 /** Writing room pages are only available when explicitly enabled. */
 export const editorConfig = normalizeEditorConfig(yamlConfig.editor);
+
+/** Friend-circle aggregation page (`fcircle:` in site.yaml). */
+export const fcircleConfig: ResolvedFcircleConfig = normalizeFcircleConfig(yamlConfig.fcircle);
 
 /**
  * Site timezone in IANA format.

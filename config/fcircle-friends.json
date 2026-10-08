@@ -1,0 +1,33 @@
+{
+  "friends": [
+    [
+      "Hexo",
+      "https://hexo.io/zh-tw/",
+      "https://d33wubrfki0l68.cloudfront.net/6657ba50e702d84afb32fe846bed54fba1a77add/827ae/logo.svg"
+    ],
+    ["anzhiyu主题", "https://blog.anheyu.com/", "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"],
+    ["小嗷犬的技术小站", "https://blog.marquis.eu.org/", "https://blog.marquis.eu.org/img/avatar/2.png"],
+    ["Akilarの糖果屋", "https://akilar.top/", "https://npm.elemecdn.com/akilar-friends@latest/avatar/akilar.top.jpg"],
+    ["青桔气球", "https://blog.qjqq.cn/", "https://q2.qlogo.cn/headimg_dl?dst_uin=1645253&spec=640"],
+    ["张洪Heo", "https://blog.zhheo.com/", "https://img.zhheo.com/i/67d8fa75943e4.webp"],
+    ["山岳库博", "https://kmar.top/", "https://s21.ax1x.com/2025/09/01/pVcHzGt.png"],
+    ["梦爱吃鱼", "https://blog.bsgun.cn/", "https://oss-cdn.bsgun.cn/logo/avatar.256.png"],
+    ["周润发", "https://blog.zrf.me/", "https://blog.zrf.me/img/logo.webp"],
+    ["清羽飞扬", "https://blog.liushen.fun/", "https://blog.liushen.fun/info/avatar.ico"],
+    ["杜老师说", "https://dusays.com", "https://cdn.dusays.com/favicon.ico"],
+    [
+      "谢大大",
+      "https://xiedada.net/",
+      "https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/youlian1.jpg"
+    ],
+    ["洛元の小屋", "https://blog.dimeta.top/", "https://blog.dimeta.top/upload/avatar.jpg"],
+    ["碧水荡漾", "https://blog.yvyang.top", "https://blog.yvyang.top/favicon.webp"],
+    [
+      "Lifeline",
+      "https://lifelinest.github.io/",
+      "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    ],
+    ["辰渊尘の个人博客", "https://blog.mcxiaochen.top/", "https://blog.mcxiaochen.top/favicon.ico"],
+    ["KangQi の Blog", "https://www.kangqiovo.com", "https://www.kangqiovo.com/wp-content/uploads/2025/10/KangQi-.png"]
+  ]
+}

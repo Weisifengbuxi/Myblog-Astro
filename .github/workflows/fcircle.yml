@@ -1,0 +1,89 @@
+# =============================================================================
+# 友链朋友圈 · 定时抓取
+# =============================================================================
+# 抓取「友链」各站的 RSS，生成 public/fcircle/all.json 并提交回仓库。
+# 页面 /fcircle 在**构建时**读这个文件，所以不需要任何运行时后端。
+#
+# 为什么要这样做：
+#   原 Hexo 博客用 Friend-Circle-Lite 的独立后端（fcircle.weisifengbuxi.top），
+#   实测其 SSL 证书已过期，在原博客上也早已加载不出来。改为在仓库内生成数据后，
+#   就没有域名与证书需要维护了。
+#
+# 需要的前置条件：
+#   - 仓库 Settings → Actions → General → Workflow permissions 选
+#     "Read and write permissions"，否则最后一步推不上去
+#
+# 手动触发：Actions 页面选本工作流 → Run workflow
+# 本地预览：node .migration/fetch-fcircle.mjs
+# =============================================================================
+
+name: fcircle
+
+on:
+  schedule:
+    # 每 6 小时一次（UTC）。GitHub 的定时任务在高峰期可能延迟几十分钟。
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      # 改了友链清单就重新抓一次
+      - 'config/fcircle-friends.json'
+      - '.migration/fetch-fcircle.mjs'
+      - '.github/workflows/fcircle.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fcircle
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # 抓取脚本只用 Node 内置能力（零依赖），所以这里其实不装依赖也能跑；
+      # 但装上可以让未来的实现自由引用项目依赖。
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch friend feeds
+        run: node .migration/fetch-fcircle.mjs
+
+      # 全站都抓不到时脚本会以非零退出，这里显式停下并提示，
+      # 避免把一份空的 all.json 提交进去、把线上页面清空。
+      - name: Guard against empty result
+        run: |
+          node -e "
+            const d = require('./public/fcircle/all.json');
+            const n = d?.statistical_data?.active_num ?? 0;
+            if (n === 0) { console.error('没有任何友链抓取成功，放弃提交'); process.exit(1); }
+            console.log('可访问友链 ' + n + ' 个，文章 ' + d.statistical_data.article_num + ' 篇');
+          "
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/fcircle/all.json
+          if git diff --staged --quiet; then
+            echo "内容无变化，无需提交"
+            exit 0
+          fi
+          # [skip ci] 避免这次提交又触发一次构建
+          git commit -m "chore(fcircle): refresh friend-circle data [skip ci]"
+          git push

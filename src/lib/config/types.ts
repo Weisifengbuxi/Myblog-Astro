@@ -701,6 +701,29 @@ export interface WritingRoomConfig {
   enabled?: boolean;
 }
 
+/**
+ * Friend-circle (`fcircle:`) — aggregates the latest posts from every friend
+ * site. The data is produced ahead of time by `.migration/fetch-fcircle.mjs` and
+ * read at build time, so the page needs no runtime backend.
+ */
+export interface FcircleConfig {
+  /** Master switch; when off the page is not rendered and the nav omits it. */
+  enabled?: boolean;
+  /** Page title. */
+  title?: string;
+  /** Page subtitle. */
+  description?: string;
+  /** How many entries the first page shows. */
+  pageSize?: number;
+  /** Hint shown on the banner. */
+  topTips?: string;
+  /** Banner background image. */
+  topBackground?: string;
+}
+
+/** Fcircle config after defaults are applied — no optional fields. */
+export type ResolvedFcircleConfig = Required<Omit<FcircleConfig, 'enabled'>> & { enabled: boolean };
+
 // =============================================================================
 // Root Configuration Type
 // =============================================================================
@@ -723,6 +746,8 @@ export interface SiteYamlConfig {
   moments?: MomentsConfig;
   /** Optional public Markdown writing room. */
   editor?: WritingRoomConfig;
+  /** Friend-circle aggregation page (`/fcircle`). */
+  fcircle?: FcircleConfig;
   navigation?: RouterItem[];
   comment?: CommentConfig;
   analytics?: AnalyticsConfig;

@@ -1,0 +1,266 @@
+---
+/**
+ * 友链朋友圈（/fcircle）内容区。
+ *
+ * 展示「友链各站最新文章」的聚合列表，数据来自构建时读到的
+ * `public/fcircle/all.json`（由 .migration/fetch-fcircle.mjs 生成）。
+ *
+ * 原博客用的是 Friend-Circle-Lite 的 Vue 前端 + 独立后端；这里改为
+ * 服务端渲染静态列表 —— 无运行时请求，因此不受 CORS、证书、后端可用性影响，
+ * 首屏也更快（内容已在 HTML 里）。
+ */
+import { fcircleConfig } from '@constants/site-config';
+import { getFcircleData } from '@lib/fcircle/data';
+import { type FcirclePost, formatRelative } from '@lib/fcircle/types';
+import { Icon } from 'astro-icon/components';
+
+const { posts: allPosts, stat } = getFcircleData();
+const posts = allPosts.slice(0, fcircleConfig.pageSize) as FcirclePost[];
+
+/** 取站点名首字作为头像缺失时的占位，避免出现空白方块。 */
+const initial = (name: string) => name.trim().slice(0, 1) || '友';
+---
+
+<div class="fcircle">
+  {
+    stat && (
+      <p class="fcircle-stat">
+        <Icon name="ri:links-line" class="size-4" />
+        <span>
+          共聚合 <b>{stat.friends ?? 0}</b> 个友链，
+          其中 <b>{stat.active ?? 0}</b> 个可访问，
+          收录 <b>{stat.article ?? allPosts.length}</b> 篇文章
+        </span>
+        {stat.lastUpdated && <span class="fcircle-stat-time">更新于 {stat.lastUpdated}</span>}
+      </p>
+    )
+  }
+
+  {
+    posts.length === 0 ? (
+      <div class="fcircle-empty">
+        <Icon name="ri:inbox-archive-line" class="size-8 opacity-40" />
+        <p>还没有抓取到朋友圈内容。</p>
+        <p class="fcircle-empty-hint">
+          数据由 <code>.migration/fetch-fcircle.mjs</code> 生成；先运行一次该脚本，
+          或在 GitHub Actions 里手动触发 <code>fcircle</code> 工作流。
+        </p>
+      </div>
+    ) : (
+      <ul class="fcircle-list">
+        {posts.map((post) => (
+          <li class="fcircle-item">
+            <a class="fcircle-link" href={post.link} target="_blank" rel="noopener noreferrer" title={post.title}>
+              <span class="fcircle-avatar">
+                {post.avatar ? (
+                  <img src={post.avatar} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                ) : (
+                  <span class="fcircle-avatar-fallback" aria-hidden="true">
+                    {initial(post.author)}
+                  </span>
+                )}
+              </span>
+
+              <span class="fcircle-body">
+                <span class="fcircle-title">{post.title}</span>
+                <span class="fcircle-meta">
+                  <span class="fcircle-author">{post.author}</span>
+                  <span class="fcircle-dot" aria-hidden="true">
+                    ·
+                  </span>
+                  <time datetime={post.created ?? ''}>{formatRelative(post)}</time>
+                </span>
+              </span>
+
+              <Icon name="ri:arrow-right-up-line" class="fcircle-arrow size-4" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    allPosts.length > posts.length && (
+      <p class="fcircle-more">
+        仅显示最近 {posts.length} 篇，共 {allPosts.length} 篇。
+      </p>
+    )
+  }
+</div>
+
+<style>
+  .fcircle {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .fcircle-stat {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    opacity: 0.78;
+  }
+
+  .fcircle-stat b {
+    font-weight: 600;
+    color: hsl(var(--primary));
+  }
+
+  .fcircle-stat-time {
+    opacity: 0.7;
+  }
+
+  .fcircle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fcircle-item {
+    min-width: 0;
+  }
+
+  .fcircle-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.6rem;
+    color: inherit;
+    text-decoration: none;
+    transition:
+      background-color 0.18s ease,
+      translate 0.18s ease;
+  }
+
+  .fcircle-link:hover {
+    background: hsl(var(--primary) / 0.07);
+    translate: 3px 0;
+  }
+
+  .fcircle-avatar {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: hsl(var(--primary) / 0.12);
+  }
+
+  .fcircle-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .fcircle-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: hsl(var(--primary));
+  }
+
+  .fcircle-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .fcircle-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    /* 标题最多两行，超出省略，保证列表行高一致 */
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .fcircle-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    opacity: 0.65;
+  }
+
+  .fcircle-author {
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fcircle-dot {
+    opacity: 0.5;
+  }
+
+  .fcircle-arrow {
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+
+  .fcircle-link:hover .fcircle-arrow,
+  .fcircle-link:focus-visible .fcircle-arrow {
+    opacity: 0.6;
+  }
+
+  .fcircle-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 2.5rem 1rem;
+    text-align: center;
+    opacity: 0.75;
+  }
+
+  .fcircle-empty p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+
+  .fcircle-empty-hint {
+    font-size: 0.75rem !important;
+    opacity: 0.8;
+  }
+
+  .fcircle-empty-hint code {
+    padding: 0.05em 0.35em;
+    border-radius: 0.25em;
+    background: hsl(var(--primary) / 0.1);
+  }
+
+  .fcircle-more {
+    margin: 0;
+    text-align: center;
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fcircle-link {
+      transition: none;
+    }
+
+    .fcircle-link:hover {
+      translate: none;
+    }
+  }
+</style>

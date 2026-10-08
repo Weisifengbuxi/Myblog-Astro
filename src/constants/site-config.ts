@@ -14,6 +14,7 @@ import {
   editorConfig,
   enabledLocaleCodes,
   enabledSeriesSlugList,
+  fcircleConfig,
   featuredSeriesList,
   i18nConfig,
   motionConfig,
@@ -34,7 +35,7 @@ import type { UmamiStatsConfig } from '@/types/umami-stats';
 import yamlConfig from '../../config/site.yaml';
 import { DEFAULT_ROUTERS, RESERVED_ROUTES } from './router';
 
-export { clickShowTextConfig, contentConfig, editorConfig, i18nConfig, motionConfig, siteConfig };
+export { clickShowTextConfig, contentConfig, editorConfig, fcircleConfig, i18nConfig, motionConfig, siteConfig };
 
 export const socialConfig: SocialConfig = yamlConfig.social ?? {};
 

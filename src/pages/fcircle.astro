@@ -1,0 +1,113 @@
+---
+/**
+ * 友链朋友圈（/fcircle）。
+ *
+ * 仿原 Hexo 博客的 `/fcircle/` 页面（anzhiyu 的 fcircle.pug）：顶部一条横幅 +
+ * 友链各站最新文章的聚合列表。
+ *
+ * 与原版的主要差别：原版是 Vue 前端去请求 Friend-Circle-Lite 后端拿 JSON；
+ * 这里的数据在**构建时**就从 `public/fcircle/all.json` 读进来并渲染成静态 HTML，
+ * 因此没有运行时请求，也不依赖任何后端（原来那个后端的证书已过期）。
+ */
+import FriendsCircle from '@components/friends/FriendsCircle.astro';
+import HomeSider from '@components/layout/HomeSider.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { fcircleConfig, siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
+import { defaultLocale } from '@/i18n';
+
+interface Props {
+  locale?: string;
+}
+
+// Root pages render the default locale; `[lang]/` mirrors pass their locale in explicitly.
+const { locale = defaultLocale } = Astro.props;
+
+// 关闭时直接 404：导航项也会被 resolveFcircleNavigation 一并移除，不会留下死链。
+if (!fcircleConfig.enabled) {
+  return Astro.redirect('/404');
+}
+
+const title = `${fcircleConfig.title} | ${siteConfig.title}`;
+const description = fcircleConfig.description;
+---
+
+<Layout locale={locale} title={title} description={description}>
+  <TwoColumnLayout>
+    {/*
+      用短头图（compact）显示页面标题；原来的 fcircle 页面把标题和提示语放在
+      内容区顶部的横幅里，两者叠在同一屏会**重复显示一次标题**，
+      因此这里分工：头图负责标题，下面的引言条只放提示语与描述。
+    */}
+    <Cover slot="cover" title={fcircleConfig.title} compact />
+    <HomeSider slot="sider" />
+    <div class="fcircle-page">
+      <header
+        class="fcircle-intro"
+        style={fcircleConfig.topBackground ? `background-image:url(${fcircleConfig.topBackground})` : undefined}
+      >
+        <div class="fcircle-intro-content">
+          <p class="fcircle-intro-tips">{fcircleConfig.topTips}</p>
+          <p class="fcircle-intro-desc">{fcircleConfig.description}</p>
+        </div>
+      </header>
+
+      <FriendsCircle />
+    </div>
+  </TwoColumnLayout>
+</Layout>
+
+<style>
+  .fcircle-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .fcircle-intro {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 5.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    background-color: hsl(var(--primary) / 0.1);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+  }
+
+  /* 用图片作背景时压一层暗色蒙版，保证白字可读 */
+  .fcircle-intro[style]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgb(0 0 0 / 0.6), rgb(0 0 0 / 0.2));
+  }
+
+  .fcircle-intro-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  /* 有背景图时文字转白并加投影；纯色底则沿用主题前景色 */
+  .fcircle-intro[style] .fcircle-intro-content {
+    color: #fff;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+  }
+
+  .fcircle-intro-tips {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .fcircle-intro-desc {
+    margin: 0;
+    font-size: 0.75rem;
+    opacity: 0.85;
+  }
+</style>

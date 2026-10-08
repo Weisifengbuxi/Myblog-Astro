@@ -53,6 +53,12 @@ const checks = [
   // Friend-link gate
   { path: '/link', contains: ['friendlink-gate', 'checkbox1', 'checkbox5', '免责声明', '本站添加的友链要求', 'friendlink-gate-open'] },
 
+  // 友链朋友圈：数据在构建时读 public/fcircle/all.json 并渲染成静态列表，
+  // 所以页面 HTML 里必须已经有真实条目（而不是运行时再请求后端）。
+  { path: '/fcircle', contains: ['fcircle-list', 'fcircle-item', 'fcircle-stat', '共聚合'] },
+  // 导航里应出现朋友圈入口
+  { path: '/', contains: ['/fcircle'] },
+
   // Messages board (Twikoo unreachable -> graceful message, never a crash)
   { path: '/messages', contains: ['comments-page', 'GET_RECENT_COMMENTS', '最新评论'] },
 ];
