@@ -47,8 +47,11 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
+        # 故意**不写 version**：pnpm/action-setup 在 `with.version` 与
+        # package.json 的 `packageManager` 字段同时存在且不一致时会直接报错
+        # （本工作流最初写 version: 10，而 package.json 是 pnpm@10.28.2，
+        # 于是连续两次运行都失败在 Setup pnpm 这一步）。
+        # 留空即自动读取 packageManager —— 单一来源，以后升级 pnpm 不用改这里。
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -56,10 +59,12 @@ jobs:
           node-version: 24
           cache: pnpm
 
-      # 抓取脚本只用 Node 内置能力（零依赖），所以这里其实不装依赖也能跑；
-      # 但装上可以让未来的实现自由引用项目依赖。
+      # 抓取脚本只用 Node 内置能力（零依赖），这里装依赖只是为将来可能的改动预留。
+      # 因此不让它成为阻塞点：装不上（例如某个平台相关依赖在 CI 上编译失败）
+      # 也继续往下跑，抓取与提交照常。
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        continue-on-error: true
 
       - name: Fetch friend feeds
         run: node .migration/fetch-fcircle.mjs
