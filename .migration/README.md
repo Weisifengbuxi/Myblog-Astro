@@ -529,7 +529,7 @@ footerLinks:
 | `src/components/layout/FooterLinks.astro` | 重写：支持分组多栏（`footerLinkGroups`），保留扁平列表作回退 |
 | `src/components/layout/Header.astro` | 页头挂 `<ToolsMenu />`（左上角实用工具按钮） |
 | `src/constants/site-config.ts` | 另外新增 `fcircleConfig` 导出 |
-| `src/lib/config/types.ts` | 新增 `FcircleConfig` / `ResolvedFcircleConfig` 与 `SiteYamlConfig.fcircle` |
+| `src/lib/config/types.ts` | 新增 `FcircleConfig` / `RightClickMenuConfig` 及其 Resolved 类型与对应的 SiteYamlConfig 字段 |
 
 ## 页脚分栏（footerLinkGroups）
 
@@ -571,6 +571,62 @@ footerLinks:
 让「关于 / 我的 / 工具 / 协议」一眼能认出是标题而非链接。
 
 窄屏（≤992px）折成 2 栏并收紧条目间距到 12px；480px 下 2 栏、无横向溢出。
+
+## 自定义右键菜单
+
+移植自原 Hexo 博客 anzhiyu 主题的 rightmenu（`right_click_menu.js` +
+`rightmenu.pug` + `rightmenu.styl`）。桌面端接管浏览器右键，弹出四组：
+① 后退/前进/刷新/回到顶部 ② 上下文项 ③ 空白处通用项 ④ 复制本页地址/深色模式。
+
+| 文件 | 作用 |
+| --- | --- |
+| `src/components/common/RightClickMenu.astro` | 菜单 DOM（id/分组沿用原版命名，便于对照）+ 样式 |
+| `src/lib/right-click-menu/right-click-menu.ts` | 全部行为 |
+| `config/site.yaml` → `rightClickMenu.enabled` | 开关，默认 `false`（接管原生菜单应当是显式选择） |
+
+**上下文相关项的显隐**（与原版一致的判断顺序）：
+
+| 右键位置 | 显示 |
+| --- | --- |
+| 空白处 | 随便逛逛 / 博客分类 / 文章标签 + 复制本页地址 / 深色模式 |
+| 链接上 | 新窗口打开 / 复制链接地址（**同时隐藏**通用三项） |
+| 图片上 | 复制此图片 / 下载此图片 / 新窗口打开图片 |
+| 选中文本后 | 复制选中文本 / 站内搜索 / 搜索此内容 |
+| 输入框、`contenteditable` 内 | **完全不接管**，保留浏览器原生菜单 |
+
+最后一条是刻意的：输入框里系统自带的拼写检查、粘贴、输入法是刚需，
+用自定义菜单替换只会添麻烦。
+
+### 未移植原版的部分（及原因）
+
+| 原版项 | 为何不做 |
+| --- | --- |
+| 粘贴文本 | 读剪贴板需 `clipboard-read` 权限会弹权限框；输入框内本就保留原生菜单 |
+| 引用到评论 | 依赖原博客评论组件的 DOM，本主题评论器不同 |
+| 音乐类五项（播放/上一首/下一首/歌单/复制歌名） | 原版依赖 `#nav-music` 那套接口，本主题播放器结构不同 |
+| 百度搜索 | 改用 Google，避免**默认**把选中文字发给第三方；要百度在 `SEARCH_ENGINES` 加一行即可 |
+| 繁简转换 | 需引入 opencc 之类的转换表（数百 KB），为一个菜单项不划算 |
+| 关闭热评 | 本主题没有弹幕式热评功能 |
+
+### 两个实现要点
+
+- **深色/浅色沿用主题的状态**：切 `html.dark` + 写 `localStorage['theme']`
+  （与主题自带切换按钮完全一致），而不是另搞一套，否则两处会打架。
+- **站内搜索复用主题的弹窗**：只 `dispatchEvent('search-dialog-open')`，
+  不重复实现索引查询。
+
+### 实测验证（浏览器）
+
+- 空白处：显示通用三项 + 本页操作，**不含**链接/图片/文本项
+- 链接上：显示两项并**隐藏**通用三项；图片上：显示三项
+- 选中文本后：显示复制文本 / 站内搜索 / 搜索此内容
+- `textarea`、`input`、`contenteditable` 内**均不接管**（对照组：空白处正常弹出）
+- 深色模式切换生效且写入 `localStorage.theme`；菜单内**无重复 id**
+- 菜单外点击 / 滚动 / 缩放 / `Esc` / 换页都会收起
+
+> ⚠️ **写测试时注意**：判断菜单项是否可见必须用 `getClientRects().length`，
+> 只看元素自身的 `display` 会把「祖先容器被隐藏」的项误判为可见 ——
+> 我第一版断言就是这么写错的，白排查了一轮。
 
 ## 友链朋友圈（/fcircle）
 

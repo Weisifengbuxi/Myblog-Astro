@@ -69,6 +69,15 @@ const checks = [
   { path: '/fcircle', contains: ['cover-intro-fade'] },
   { path: '/post/3be0a65', notContains: ['cover-intro-fade'] },
 
+  // ---- custom right-click menu -------------------------------------------------
+  // 四组菜单都要在 HTML 里（行为由客户端脚本按右键位置增删显隐）。
+  // 注意文章页也要有 —— 它按站点级配置渲染，不是仅首页。
+  {
+    path: '/',
+    contains: ['id="rightMenu"', 'rightMenuPlugin', 'rightMenuOther', 'menu-backward', 'menu-randompost', 'menu-darkmode'],
+  },
+  { path: '/post/3be0a65', contains: ['id="rightMenu"'] },
+
   // ---- footer filings --------------------------------------------------------
   // 备案信息必须出现在页脚（迁移自原 Hexo 博客 footer.linkList）
   {

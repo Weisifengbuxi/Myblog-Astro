@@ -15,12 +15,14 @@ import { normalizeFcircleConfig } from './fcircle';
 import { enabledFeaturedSeriesSlugs, normalizeFeaturedSeries } from './featured-series';
 import { normalizeClickShowTextConfig, normalizeMotionConfig } from './motion';
 import { RESERVED_ROUTES } from './reserved-routes';
+import { normalizeRightClickMenuConfig } from './right-click-menu';
 import type {
   I18nConfig,
   ResolvedClickShowTextConfig,
   ResolvedContentConfig,
   ResolvedFcircleConfig,
   ResolvedMotionConfig,
+  ResolvedRightClickMenuConfig,
   ResolvedSiteConfig,
 } from './types';
 
@@ -58,6 +60,9 @@ export const editorConfig = normalizeEditorConfig(yamlConfig.editor);
 
 /** Friend-circle aggregation page (`fcircle:` in site.yaml). */
 export const fcircleConfig: ResolvedFcircleConfig = normalizeFcircleConfig(yamlConfig.fcircle);
+
+/** Custom right-click (context) menu. */
+export const rightClickMenuConfig: ResolvedRightClickMenuConfig = normalizeRightClickMenuConfig(yamlConfig.rightClickMenu);
 
 /**
  * Site timezone in IANA format.

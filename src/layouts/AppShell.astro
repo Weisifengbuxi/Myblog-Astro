@@ -14,6 +14,7 @@ interface Props {
 import AnnouncementProvider from '@components/announcement/AnnouncementProvider.astro';
 import GlobalBGMPlayer from '@components/bgm/GlobalBGMPlayer';
 import ChristmasEffects from '@components/christmas/ChristmasEffects.astro';
+import RightClickMenu from '@components/common/RightClickMenu.astro';
 import UniverseCanvas from '@components/effects/UniverseCanvas.astro';
 import CodePenEmbed from '@components/embed/CodePenEmbed.astro';
 import FloatingGroup from '@components/layout/FloatingGroup';
@@ -57,6 +58,7 @@ const { post, siderType, isPostPage, articleTools = true } = Astro.props;
   <Toaster client:idle />
   <AnnouncementProvider />
   <CodePenEmbed />
+  <RightClickMenu />
 </div>
 
 <script>
@@ -65,6 +67,7 @@ const { post, siderType, isPostPage, articleTools = true } = Astro.props;
   import { setupClickText } from '@lib/click-text/click-text';
   import { setupHeaderContinuity } from '@lib/header-continuity';
   import { setupMorphTransitions } from '@lib/morph-transitions';
+  import { setupRightClickMenu } from '@lib/right-click-menu/right-click-menu';
   import { setupPetalBurst } from '@lib/sakura/petal-burst';
   import { setupScrollReveal } from '@lib/scroll-reveal';
   import { setupScrollbarActivity } from '@lib/scrollbar-activity';
@@ -74,6 +77,7 @@ const { post, siderType, isPostPage, articleTools = true } = Astro.props;
   setupArrivalRender();
   setupScrollReveal();
   setupScrollbarActivity();
+  setupRightClickMenu();
   // One click effect at a time; `motion.clickEffect` picks which
   // (`text` = the word burst, `petals` = the sakura burst).
   if (motionConfig.clickBurst) {

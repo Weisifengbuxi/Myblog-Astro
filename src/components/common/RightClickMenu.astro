@@ -1,0 +1,234 @@
+---
+/**
+ * 自定义右键菜单的 DOM（逻辑见 src/lib/right-click-menu/right-click-menu.ts）。
+ *
+ * 分组与 id 沿用原 Hexo 博客 anzhiyu 主题的 rightmenu.pug，方便对照：
+ *   .rightMenu-small   ① 后退/前进/刷新/回到顶部
+ *   .rightMenuPlugin   ② 上下文相关项（按有没有选中文本/链接/图片动态显隐）
+ *   .rightMenuOther    ③ 空白处右键时的通用项
+ *   .rightMenuOther    ④ 本页操作：复制地址 / 深色模式
+ *
+ * 原版还有音乐类五项、引用到评论、粘贴文本、百度搜索、繁简转换、关闭热评 ——
+ * 未移植及原因写在 right-click-menu.ts 顶部的注释里。
+ */
+import { rightClickMenuConfig } from '@constants/site-config';
+import { Icon } from 'astro-icon/components';
+
+if (!rightClickMenuConfig.enabled) return;
+
+/** 图标名沿用原版语义，这里映射到本项目使用的 Remix Icon。 */
+const small = [
+  { id: 'menu-backward', icon: 'ri:arrow-left-s-line', label: '后退' },
+  { id: 'menu-forward', icon: 'ri:arrow-right-s-line', label: '前进' },
+  { id: 'menu-refresh', icon: 'ri:refresh-line', label: '刷新' },
+  { id: 'menu-top', icon: 'ri:arrow-up-line', label: '回到顶部' },
+];
+
+const others = [
+  { id: 'menu-randompost', icon: 'ri:shuffle-line', label: '随便逛逛' },
+  { id: 'menu-categories', icon: 'ri:apps-2-line', label: '博客分类', href: '/categories' },
+  { id: 'menu-tags', icon: 'ri:price-tag-3-line', label: '文章标签', href: '/tags' },
+];
+---
+
+<div id="rightMenu" class="right-menu" role="menu" aria-label="自定义右键菜单" aria-hidden="true">
+  <!-- ① 小图标一排 -->
+  <div class="right-menu-group right-menu-small">
+    {
+      small.map((it) => (
+        <button type="button" class="right-menu-item right-menu-icon" id={it.id} data-rm-item title={it.label} aria-label={it.label}>
+          <Icon name={it.icon} class="size-4" />
+        </button>
+      ))
+    }
+  </div>
+
+  <!-- ② 上下文相关项：初始全隐藏，由脚本按右键位置决定显示哪些 -->
+  <div class="right-menu-group right-menu-line" id="rightMenuPlugin">
+    {
+      [
+        { id: 'menu-copytext', icon: 'ri:file-copy-line', label: '复制选中文本' },
+        { id: 'menu-search', icon: 'ri:search-line', label: '站内搜索' },
+        { id: 'menu-websearch', icon: 'ri:global-line', label: '搜索此内容' },
+        { id: 'menu-newwindow', icon: 'ri:external-link-line', label: '新窗口打开' },
+        { id: 'menu-copylink', icon: 'ri:link', label: '复制链接地址' },
+        { id: 'menu-copyimg', icon: 'ri:image-line', label: '复制此图片' },
+        { id: 'menu-downloadimg', icon: 'ri:download-2-line', label: '下载此图片' },
+        { id: 'menu-newwindowimg', icon: 'ri:external-link-line', label: '新窗口打开图片' },
+      ].map((it) => (
+        <button
+          type="button"
+          class="right-menu-item"
+          id={it.id}
+          data-rm-item
+          style="display:none"
+        >
+          <Icon name={it.icon} class="right-menu-item-icon" />
+          <span data-rm-label>{it.label}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <!-- ③ 空白处右键 -->
+  <div class="right-menu-group right-menu-line" id="rightMenuOther">
+    {
+      others.map((it) =>
+        it.href ? (
+          <a class="right-menu-item" href={it.href} data-rm-item>
+            <Icon name={it.icon} class="right-menu-item-icon" />
+            <span data-rm-label>{it.label}</span>
+          </a>
+        ) : (
+          <button type="button" class="right-menu-item" id={it.id} data-rm-item>
+            <Icon name={it.icon} class="right-menu-item-icon" />
+            <span data-rm-label>{it.label}</span>
+          </button>
+        ),
+      )
+    }
+  </div>
+
+  <!-- ④ 本页操作 -->
+  <div class="right-menu-group right-menu-line">
+    <button type="button" class="right-menu-item" id="menu-copyurl" data-rm-item>
+      <Icon name="ri:link-m" class="right-menu-item-icon" />
+      <span data-rm-label>复制本页地址</span>
+    </button>
+    <button type="button" class="right-menu-item" id="menu-darkmode" data-rm-item>
+      <Icon name="ri:contrast-2-line" class="right-menu-item-icon" />
+      <span data-rm-label>深色模式</span>
+    </button>
+  </div>
+</div>
+
+<div id="rightmenu-mask" class="right-menu-mask"></div>
+
+<style>
+  /*
+    样式对齐原版 rightmenu.styl：固定定位、卡片底、圆角 12px、
+    组之间虚线分隔、hover 时主色高亮。
+  */
+  .right-menu {
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    z-index: 10002;
+    display: none;
+    width: 11rem;
+    height: fit-content;
+    padding: 0 0.25rem;
+    border: 1px solid hsl(var(--border, 0 0% 90%));
+    border-radius: 12px;
+    /* 主题的颜色变量是 HSL 分量，必须包 hsl() */
+    background: hsl(var(--card, 0 0% 100%));
+    color: hsl(var(--card-foreground, 340 12% 12%));
+    box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+    user-select: none;
+  }
+
+  .right-menu:hover {
+    border-color: hsl(var(--primary) / 0.5);
+  }
+
+  .right-menu-group {
+    padding: 0.35rem 0.3rem;
+  }
+
+  .right-menu-group:not(:last-child) {
+    border-bottom: 2px dashed hsl(var(--primary) / 0.18);
+  }
+
+  .right-menu-small {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .right-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.8125rem;
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color 0.1s ease,
+      color 0.1s ease;
+  }
+
+  .right-menu-icon {
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+  }
+
+  .right-menu-item:hover,
+  .right-menu-item:focus-visible {
+    background: hsl(var(--primary));
+    color: #fff;
+    outline: none;
+  }
+
+  .right-menu-item-icon {
+    width: 1.5rem;
+    height: 1rem;
+    margin: 0 0.5rem 0 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .right-menu-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    display: none;
+    margin: 0 !important;
+  }
+
+  /* 提示条 */
+  :global(.rightmenu-toast) {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 10003;
+    max-width: min(22rem, calc(100vw - 2.5rem));
+    padding: 0.55rem 0.9rem;
+    border-radius: 0.5rem;
+    background: hsl(var(--card, 0 0% 100%));
+    color: hsl(var(--card-foreground, 340 12% 12%));
+    font-size: 0.8125rem;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.2);
+    opacity: 0;
+    translate: 0 0.5rem;
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      translate 0.2s ease;
+  }
+
+  :global(.rightmenu-toast.is-visible) {
+    opacity: 1;
+    translate: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .right-menu-item,
+    :global(.rightmenu-toast) {
+      transition: none;
+    }
+  }
+
+  /* 触屏/窄屏不接管右键，菜单也不渲染出可点区域 */
+  @media (max-width: 768px) {
+    .right-menu,
+    .right-menu-mask {
+      display: none !important;
+    }
+  }
+</style>

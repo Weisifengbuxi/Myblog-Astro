@@ -724,6 +724,17 @@ export interface FcircleConfig {
 /** Fcircle config after defaults are applied — no optional fields. */
 export type ResolvedFcircleConfig = Required<Omit<FcircleConfig, 'enabled'>> & { enabled: boolean };
 
+/**
+ * Custom right-click menu (`rightClickMenu:`). Ported from the original blog's
+ * anzhiyu theme; only desktop widths take over the native context menu.
+ */
+export interface RightClickMenuConfig {
+  enabled?: boolean;
+}
+
+/** Right-click-menu config after defaults are applied. */
+export type ResolvedRightClickMenuConfig = Required<RightClickMenuConfig>;
+
 // =============================================================================
 // Root Configuration Type
 // =============================================================================
@@ -748,6 +759,8 @@ export interface SiteYamlConfig {
   editor?: WritingRoomConfig;
   /** Friend-circle aggregation page (`/fcircle`). */
   fcircle?: FcircleConfig;
+  /** Custom right-click (context) menu. */
+  rightClickMenu?: RightClickMenuConfig;
   navigation?: RouterItem[];
   comment?: CommentConfig;
   analytics?: AnalyticsConfig;

@@ -18,6 +18,7 @@ import {
   featuredSeriesList,
   i18nConfig,
   motionConfig,
+  rightClickMenuConfig,
   siteConfig,
 } from '@lib/config/site';
 import type {
@@ -35,7 +36,16 @@ import type { UmamiStatsConfig } from '@/types/umami-stats';
 import yamlConfig from '../../config/site.yaml';
 import { DEFAULT_ROUTERS, RESERVED_ROUTES } from './router';
 
-export { clickShowTextConfig, contentConfig, editorConfig, fcircleConfig, i18nConfig, motionConfig, siteConfig };
+export {
+  clickShowTextConfig,
+  contentConfig,
+  editorConfig,
+  fcircleConfig,
+  i18nConfig,
+  motionConfig,
+  rightClickMenuConfig,
+  siteConfig,
+};
 
 export const socialConfig: SocialConfig = yamlConfig.social ?? {};
 
