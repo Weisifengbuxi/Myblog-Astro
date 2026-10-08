@@ -106,8 +106,15 @@ const others = [
 
 <style>
   /*
-    样式对齐原版 rightmenu.styl：固定定位、卡片底、圆角 12px、
-    组之间虚线分隔、hover 时主色高亮。
+    样式对齐原版 rightmenu.styl：固定定位、卡片底、圆角、组之间虚线分隔、
+    hover 时主色高亮。尺寸比原版略大（原版 11rem 偏紧凑）。
+
+    两个关键点：
+    1. **菜单项必须铺满整行**。它们是 <button>/<a>，`button` 默认 `width:auto`，
+       只包住文字；再叠加分组容器的左右 padding，悬浮高亮就只覆盖文字一小块。
+       所以这里明确 `width:100%`，并把分组的左右 padding 收掉、改由条目自身撑开，
+       这样高亮是整齐的一整行。
+    2. `.right-menu-small` 那一排图标要用 `flex:1` 均分，否则各自的点击区宽窄不一。
   */
   .right-menu {
     position: fixed;
@@ -115,9 +122,9 @@ const others = [
     left: 10%;
     z-index: 10002;
     display: none;
-    width: 11rem;
+    width: 13rem;
     height: fit-content;
-    padding: 0 0.25rem;
+    padding: 0.35rem 0.4rem;
     border: 1px solid hsl(var(--border, 0 0% 90%));
     border-radius: 12px;
     /* 主题的颜色变量是 HSL 分量，必须包 hsl() */
@@ -132,7 +139,9 @@ const others = [
   }
 
   .right-menu-group {
-    padding: 0.35rem 0.3rem;
+    display: flex;
+    flex-direction: column;
+    padding: 0.25rem 0;
   }
 
   .right-menu-group:not(:last-child) {
@@ -140,33 +149,39 @@ const others = [
   }
 
   .right-menu-small {
-    display: flex;
+    flex-direction: row;
     justify-content: space-between;
+    gap: 0.15rem;
   }
 
   .right-menu-item {
     display: flex;
     align-items: center;
-    padding: 8px;
+    width: 100%;
+    min-height: 2.25rem;
+    padding: 0.5rem 0.75rem;
     border: 0;
     border-radius: 8px;
     background: none;
     color: inherit;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
     text-align: left;
     text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
     transition:
-      background-color 0.1s ease,
-      color 0.1s ease;
+      background-color 0.12s ease,
+      color 0.12s ease;
   }
 
+  /* 小图标那排：均分整行，保证每格点击区一样宽 */
   .right-menu-icon {
+    flex: 1;
     justify-content: center;
-    padding: 0.25rem 0.5rem;
-    font-size: 1rem;
+    padding: 0.4rem 0;
+    min-height: 2rem;
   }
 
   .right-menu-item:hover,
@@ -177,9 +192,9 @@ const others = [
   }
 
   .right-menu-item-icon {
-    width: 1.5rem;
-    height: 1rem;
-    margin: 0 0.5rem 0 0.25rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-right: 0.7rem;
     flex-shrink: 0;
   }
 
