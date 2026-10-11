@@ -565,8 +565,18 @@ export interface UmamiConfig {
   };
 }
 
+/** 51LA (51.la) visitor analytics. */
+export interface La51Config {
+  enabled: boolean;
+  /** Site id from the 51LA console (`LA.init({ id })`). */
+  id: string;
+  /** Channel key (`LA.init({ ck })`); falls back to `id` when omitted. */
+  ck?: string;
+}
+
 export interface AnalyticsConfig {
   umami?: UmamiConfig;
+  la51?: La51Config;
 }
 
 // =============================================================================

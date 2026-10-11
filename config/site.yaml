@@ -1092,6 +1092,14 @@ analytics:
     #   article_page_views: true
     #   footer_site_stats: true
 
+  # 51LA 访问统计（https://v6.51.la/）
+  # 脚本由 Layout.astro 注入到 </head> 之前，全站生效。
+  # id 与 ck 都取自 51LA 后台给出的初始化代码：LA.init({ id, ck })。
+  la51:
+    enabled: true
+    id: 3REPy7id8yIlqsbo
+    ck: 3REPy7id8yIlqsbo
+
 # =============================================================================
 # SEO Configuration
 # =============================================================================

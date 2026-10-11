@@ -19,6 +19,7 @@ interface Props extends PageMetaProps {
 }
 
 import { ClientRouter } from 'astro:transitions';
+import La51Analytics from '@components/analytics/La51Analytics.astro';
 import UmamiAnalytics from '@components/analytics/UmamiAnalytics.astro';
 import { pageTransition } from '@constants/anim/page-transition';
 import { seoConfig } from '@constants/site-config';
@@ -54,6 +55,7 @@ const isPostPage = stripLocaleFromPath(Astro.url.pathname).startsWith('/post/');
 
     <ClientRouter />
     <UmamiAnalytics />
+    <La51Analytics />
     <LoadingIndicator color="#e9536a" />
     <Tooltips />
 

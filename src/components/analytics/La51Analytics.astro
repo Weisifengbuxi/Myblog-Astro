@@ -1,0 +1,30 @@
+---
+/**
+ * 51LA（51.la）访问统计。
+ *
+ * 官方要求在 `</head>` 之前引入 SDK 并随即初始化：
+ * `<script src="//sdk.51.la/js-sdk-pro.min.js" charset="UTF-8" id="LA_COLLECT"></script>`
+ * 紧接 `LA.init({ id, ck })`。
+ *
+ * 两个标签都用 `is:inline` 原样输出：SDK 是渲染阻塞的普通脚本，Astro 默认会把它
+ * 提升并加 `type="module"`、`defer`，那样后面的 `LA.init` 会在 SDK 还没加载时执行。
+ * 同时 `is:inline` 也避免了 Astro 把脚本挪到 `</head>` 之外。
+ *
+ * SDK 地址沿用协议相对写法（`//sdk.51.la/...`），与官方给的代码保持一致。
+ */
+import { analyticsConfig } from '@constants/site-config';
+
+const config = analyticsConfig.la51;
+const enabled = config?.enabled === true && Boolean(config.id);
+// ck 用于区分同账号下的不同站点；缺省时回落到 id（官方示例两者相同）。
+const ck = config?.ck || config?.id;
+---
+
+{
+  enabled && (
+    <>
+      <script is:inline charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js" />
+      <script is:inline set:html={`LA.init({id:"${config.id}",ck:"${ck}"})`} />
+    </>
+  )
+}
