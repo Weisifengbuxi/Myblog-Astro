@@ -18,7 +18,11 @@ export interface SiteBasicConfig {
   showLogo?: boolean;
   author?: string;
   url: string;
-  startYear?: number;
+  /**
+   * 建站年份或完整建站日期，例如 `2025` 或 `2025/7/14`。
+   * 页脚版权取其中的年份，统计页用它计算运行天数，因此两种写法都要支持。
+   */
+  startYear?: number | string;
   defaultOgImage?: string;
   keywords?: string[];
   /** 面包屑导航中首页的显示名称 @default '首页' */
@@ -86,6 +90,8 @@ export type FeaturedSeries = FeaturedSeriesItem;
  */
 export type ResolvedSiteConfig = Omit<SiteBasicConfig, 'url'> & {
   site: string;
+  /** Same source as `startYear`, kept as a full date for runtime calculations. */
+  startDate?: number | string;
   featuredCategories?: FeaturedCategory[];
   featuredSeries: FeaturedSeriesItem[];
 };

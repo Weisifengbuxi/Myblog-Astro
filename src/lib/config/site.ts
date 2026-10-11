@@ -102,6 +102,8 @@ export const siteConfig: ResolvedSiteConfig = {
   author: yamlConfig.site.author,
   site: yamlConfig.site.url,
   startYear: yamlConfig.site.startYear,
+  /** 与 `startYear` 同源，但总是完整建站日期；统计页据此计算运行天数。 */
+  startDate: yamlConfig.site.startYear,
   defaultOgImage: yamlConfig.site.defaultOgImage,
   keywords: yamlConfig.site.keywords,
   breadcrumbHome: yamlConfig.site.breadcrumbHome,

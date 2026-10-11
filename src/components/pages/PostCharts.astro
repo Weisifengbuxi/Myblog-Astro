@@ -7,8 +7,11 @@
  * no client JS, no third-party dependency, and they inherit the theme's colours
  * and dark mode automatically.
  */
+import { siteConfig } from '@constants/site-config';
 import { getSortedPosts } from '@lib/content';
+import { getSiteStats } from '@lib/stats';
 import { defaultLocale } from '@/i18n';
+import VisitorStats from './VisitorStats.astro';
 
 interface Props {
   locale?: string;
@@ -16,6 +19,8 @@ interface Props {
 
 const { locale = defaultLocale } = Astro.props;
 const posts = await getSortedPosts(locale);
+// 全站字数 / 阅读时长 / 文章数，与页脚同源，避免两处算各一套。
+const siteStats = await getSiteStats();
 
 // ---- posts per month -------------------------------------------------------
 const monthCounts = new Map<string, number>();
@@ -50,15 +55,54 @@ for (const post of posts) {
 const categorySeries = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
 const maxCategory = Math.max(1, ...categorySeries.map(([, n]) => n));
 
+// ---- site runtime ----------------------------------------------------------
+// `startYear` 可能是年份（2025）也可能是完整日期（2025/7/14，注意不是 ISO 格式，
+// `new Date()` 在 Safari 上会解析失败），所以按 `/`、`-` 分隔手动解析。
+function parseStartDate(value: number | string | undefined): Date | null {
+  if (value === undefined || value === null) return null;
+  const parts = String(value)
+    .split(/[/\-.]/)
+    .map((part) => Number.parseInt(part, 10));
+  if (parts.some((part) => !Number.isFinite(part))) return null;
+
+  const [first, second, third] = parts;
+  // 年份在前（2025/7/14）或年份在后（7/14/2025）都支持。
+  if (first >= 1000) return new Date(first, (second ?? 1) - 1, third ?? 1);
+  if (third !== undefined && third >= 1000) return new Date(third, first - 1, second ?? 1);
+  return null;
+}
+
+const startDate = parseStartDate(siteConfig.startDate);
+const runningDays = startDate ? Math.max(1, Math.ceil((Date.now() - startDate.getTime()) / 86_400_000)) : '—';
+
+// ---- last update -----------------------------------------------------------
+// 文章按时间倒序返回，取第一篇的日期即最后一次更新。
+const lastUpdated = posts.length
+  ? new Date(posts[0].data.updated ?? posts[0].data.date).toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+  : '—';
+
 const summary = [
   { label: '文章总数', value: posts.length },
   { label: '标签总数', value: tagCounts.size },
   { label: '分类总数', value: categoryCounts.size },
   { label: '有记录月份', value: monthSeries.length },
+  { label: '总字数', value: siteStats.formattedWords },
+  { label: '总阅读时长', value: siteStats.formattedTime },
+  { label: '运行天数', value: runningDays },
+  { label: '最后更新', value: lastUpdated },
 ];
 ---
 
 <div class="charts">
+  <section class="charts-block">
+    <h2 class="charts-title">访问人数<span class="charts-sub">数据来源 busuanzi</span></h2>
+    <VisitorStats />
+  </section>
+
   <div class="charts-summary">
     {
       summary.map((item) => (

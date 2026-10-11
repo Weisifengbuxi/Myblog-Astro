@@ -1,0 +1,160 @@
+---
+import { siteConfig } from '@constants/site-config';
+/**
+ * 访问人数 — 站点 PV / UV 与当前页面 PV。
+ *
+ * 数据源是 vercount（busuanzi 的维护版本，原版 busuanzi 已停更）：
+ *   GET https://events.vercount.one/api/v2/log?url=<页面地址>
+ *
+ * 该接口返回纯 JSON 且带 `access-control-allow-origin: *`，所以可以直接 fetch，
+ * 不需要原版 busuanzi 那种"插入 script 后回填 DOM 元素"的写法。
+ *
+ * 统计以 URL 为键累计，所以站点数据跨页面共享、与旧博客同域名可延续累计。
+ * 它在构建期不可用（纯客户端请求），因此这里只渲染占位符，由下面的脚本填充。
+ */
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+// 上报的必须是**线上站点地址**，不能用浏览器当前地址：在 localhost 或预览域名下
+// 上报时 busuanzi 视作未知站点，会返回全局累计值（实测 4000 万量级，明显失真），
+// 只有站点真实域名才对应本站数据。站点地址来自 config/site.yaml 的 site.url。
+const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
+
+const items = [
+  { key: 'uv', icon: 'ri:user-3-line', label: '访问人数' },
+  { key: 'pv', icon: 'ri:eye-line', label: '总访问量' },
+  { key: 'page', icon: 'ri:file-list-3-line', label: '本页阅读' },
+];
+---
+
+<div class:list={['visitor-stats', className]} data-visitor-stats data-site-url={siteUrl}>
+  {
+    items.map((item) => (
+      <div class="visitor-stat">
+        <Icon name={item.icon} class="visitor-stat-icon" />
+        <span class="visitor-stat-value" data-visitor-value={item.key}>
+          —
+        </span>
+        <span class="visitor-stat-label">{item.label}</span>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  /**
+   * 单例：同一页面多次挂载（例如页脚 + 统计页）只请求一次。
+   */
+  const ENDPOINT = 'https://events.vercount.one/api/v2/log';
+  const SINGLETON_KEY = '__visitorStatsPromise';
+
+  interface VisitorData {
+    site_uv?: number;
+    site_pv?: number;
+    page_pv?: number;
+  }
+
+  type StatsWindow = Window & { [SINGLETON_KEY]?: Promise<VisitorData | null> };
+
+  function fetchVisitorStats(): Promise<VisitorData | null> {
+    const w = window as StatsWindow;
+    if (w[SINGLETON_KEY]) return w[SINGLETON_KEY];
+
+    const box = document.querySelector<HTMLElement>('[data-visitor-stats]');
+    const base = (box?.dataset.siteUrl || '').replace(/\/+$/, '');
+    // 优先用站点正式地址；没有配置时退回当前地址（本地开发仍可用，但数值不代表线上）。
+    const pageUrl = (base ? `${base}${window.location.pathname}` : window.location.href).split(/[?#]/)[0];
+
+    const query = new URLSearchParams({
+      url: pageUrl,
+      referrer: document.referrer || '',
+      title: document.title,
+    });
+
+    const promise = fetch(`${ENDPOINT}?${query.toString()}`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { data?: VisitorData } | null) => payload?.data ?? null)
+      .catch(() => null);
+
+    w[SINGLETON_KEY] = promise;
+    return promise;
+  }
+
+  function formatCount(value: number | undefined): string {
+    return typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString('zh-CN') : '—';
+  }
+
+  function paint(data: VisitorData | null): void {
+    const mapping: Record<string, number | undefined> = {
+      uv: data?.site_uv,
+      pv: data?.site_pv,
+      page: data?.page_pv,
+    };
+
+    for (const node of document.querySelectorAll<HTMLElement>('[data-visitor-stats]')) {
+      for (const [key, value] of Object.entries(mapping)) {
+        const target = node.querySelector<HTMLElement>(`[data-visitor-value="${key}"]`);
+        if (target) target.textContent = formatCount(value);
+      }
+      node.dataset.loaded = data ? 'true' : 'false';
+    }
+  }
+
+  function init(): void {
+    void fetchVisitorStats().then(paint);
+  }
+
+  // Astro 的 ClientRouter 会在站内跳转后替换 body，需要重新填充。
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+  document.addEventListener('astro:page-load', init);
+</script>
+
+<style>
+  .visitor-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .visitor-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1rem 0.5rem;
+    border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    border-radius: 0.5rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .visitor-stat:hover {
+    border-color: color-mix(in oklab, currentColor 28%, transparent);
+  }
+
+  .visitor-stat-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0.6;
+  }
+
+  .visitor-stat-value {
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+
+  .visitor-stat-label {
+    font-size: 0.78rem;
+    opacity: 0.7;
+  }
+</style>
