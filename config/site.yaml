@@ -838,9 +838,6 @@ navigation:
         nameKey: nav.archives
         path: /archives
         icon: ri:archive-2-fill
-      - name: 统计
-        path: /charts
-        icon: ri:line-chart-line
   - name: 友链
     nameKey: nav.friends
     path: /friends
@@ -912,6 +909,8 @@ footerLinkGroups:
         path: /essay
   - title: 工具
     links:
+      - name: 网站统计
+        path: /charts
       - name: 小空调
         path: /air-conditioner
   - title: 协议
@@ -950,6 +949,8 @@ footerLinks:
     path: /equipment
   - name: 即刻短文
     path: /essay
+  - name: 网站统计
+    path: /charts
   - name: 小空调
     path: /air-conditioner
   - name: Cookies政策

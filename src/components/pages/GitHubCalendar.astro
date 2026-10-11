@@ -1,0 +1,269 @@
+---
+/**
+ * GitHub 贡献日历（热力图）。
+ *
+ * 数据来自 https://github-contributions-api.jogruber.de —— 它把 GitHub 的贡献图
+ * 整理成 JSON 并开放跨域，所以不需要 token、不需要后端，静态博客也能用。
+ * （GitHub 自己的接口需要鉴权且不返回部分历史，因此不用。）
+ *
+ * 纯客户端渲染：构建期无网络依赖，接口挂了只影响这一张卡片。
+ */
+import { siteConfig, socialConfig } from '@constants/site-config';
+
+/** 从站点社交配置里取 GitHub 用户名，避免再配一份。 */
+const githubUrl = socialConfig.github?.url ?? '';
+const username = githubUrl.match(/github\.com\/([^/?#]+)/i)?.[1] ?? '';
+const username_ = username || siteConfig.name;
+---
+
+{
+  username && (
+    <section class="gh-calendar" data-gh-calendar data-username={username_}>
+      <div class="gh-calendar-head">
+        <span class="gh-calendar-title">GitHub 贡献</span>
+        <span class="gh-calendar-total" data-gh-total>
+          —
+        </span>
+        <a class="gh-calendar-link" href={githubUrl} target="_blank" rel="noopener noreferrer">
+          查看主页 →
+        </a>
+      </div>
+      <div class="gh-calendar-body" data-gh-body>
+        <span class="gh-calendar-loading">加载中…</span>
+      </div>
+      <div class="gh-calendar-legend">
+        <span>少</span>
+        <span class="gh-cell" data-level="0" />
+        <span class="gh-cell" data-level="1" />
+        <span class="gh-cell" data-level="2" />
+        <span class="gh-cell" data-level="3" />
+        <span class="gh-cell" data-level="4" />
+        <span>多</span>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .gh-calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    border-radius: 0.75rem;
+  }
+
+  .gh-calendar-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: baseline;
+  }
+
+  .gh-calendar-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .gh-calendar-total {
+    font-size: 0.82rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .gh-calendar-link {
+    margin-inline-start: auto;
+    font-size: 0.8rem;
+    color: hsl(var(--primary));
+    text-decoration: none;
+  }
+
+  .gh-calendar-link:hover {
+    text-decoration: underline;
+  }
+
+  /* 窄屏横向滚动，避免把格子压成 1px */
+  .gh-calendar-body {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .gh-calendar-loading {
+    font-size: 0.82rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .gh-months {
+    display: grid;
+    margin-bottom: 0.25rem;
+    font-size: 0.68rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .gh-weeks {
+    display: grid;
+    grid-auto-flow: column;
+    gap: 3px;
+    width: max-content;
+  }
+
+  .gh-week {
+    display: grid;
+    grid-template-rows: repeat(7, 11px);
+    gap: 3px;
+  }
+
+  .gh-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    background: color-mix(in oklab, currentColor 8%, transparent);
+  }
+
+  /* 用主色调的深浅表示贡献强度，跟随主题色 */
+  .gh-cell[data-level="1"] {
+    background: hsl(var(--primary) / 0.28);
+  }
+
+  .gh-cell[data-level="2"] {
+    background: hsl(var(--primary) / 0.48);
+  }
+
+  .gh-cell[data-level="3"] {
+    background: hsl(var(--primary) / 0.72);
+  }
+
+  .gh-cell[data-level="4"] {
+    background: hsl(var(--primary));
+  }
+
+  .gh-calendar-legend {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 0.68rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .gh-calendar-legend .gh-cell {
+    display: inline-block;
+  }
+</style>
+
+<script>
+  interface ContributionDay {
+    date: string;
+    count: number;
+    level: number;
+  }
+
+  const ENDPOINT = 'https://github-contributions-api.jogruber.de/v4';
+
+  /** 把按天返回的数据整理成「周列」（GitHub 贡献图的排布）。 */
+  function toWeeks(days: ContributionDay[]): (ContributionDay | null)[][] {
+    const weeks: (ContributionDay | null)[][] = [];
+    let current: (ContributionDay | null)[] = new Array(7).fill(null);
+
+    for (const day of days) {
+      const weekday = new Date(`${day.date}T00:00:00`).getDay(); // 0=周日
+      // 一周从周日开始，遇到周日且本周已有内容就换列。
+      if (weekday === 0 && current.some(Boolean)) {
+        weeks.push(current);
+        current = new Array(7).fill(null);
+      }
+      current[weekday] = day;
+    }
+    if (current.some(Boolean)) weeks.push(current);
+    return weeks;
+  }
+
+  function render(root: HTMLElement, days: ContributionDay[], total: number): void {
+    const body = root.querySelector<HTMLElement>('[data-gh-body]');
+    const totalEl = root.querySelector<HTMLElement>('[data-gh-total]');
+    if (!body) return;
+
+    const weeks = toWeeks(days);
+    const cell = 11;
+    const gap = 3;
+
+    // 月份标签：定位在每个月第一周所在的列上。
+    const monthLabels: { label: string; column: number }[] = [];
+    let lastMonth = -1;
+    weeks.forEach((week, index) => {
+      const first = week.find(Boolean) as ContributionDay | undefined;
+      if (!first) return;
+      const month = new Date(`${first.date}T00:00:00`).getMonth();
+      if (month !== lastMonth) {
+        lastMonth = month;
+        monthLabels.push({ label: `${month + 1}月`, column: index });
+      }
+    });
+
+    const monthsEl = document.createElement('div');
+    monthsEl.className = 'gh-months';
+    monthsEl.style.gridTemplateColumns = `repeat(${weeks.length}, ${cell}px)`;
+    monthsEl.style.gap = `${gap}px`;
+    for (const { label, column } of monthLabels) {
+      const span = document.createElement('span');
+      span.textContent = label;
+      span.style.gridColumnStart = String(column + 1);
+      monthsEl.appendChild(span);
+    }
+
+    const weeksEl = document.createElement('div');
+    weeksEl.className = 'gh-weeks';
+    for (const week of weeks) {
+      const column = document.createElement('div');
+      column.className = 'gh-week';
+      for (const day of week) {
+        const dot = document.createElement('span');
+        dot.className = 'gh-cell';
+        if (day) {
+          dot.dataset.level = String(day.level ?? 0);
+          dot.title = `${day.date}：${day.count} 次贡献`;
+        } else {
+          dot.style.visibility = 'hidden';
+        }
+        column.appendChild(dot);
+      }
+      weeksEl.appendChild(column);
+    }
+
+    body.replaceChildren(monthsEl, weeksEl);
+    if (totalEl) totalEl.textContent = `过去一年 ${total} 次贡献`;
+  }
+
+  async function init(): Promise<void> {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-gh-calendar]')) {
+      if (root.dataset.ghBound === 'true') continue;
+      root.dataset.ghBound = 'true';
+
+      const username = root.dataset.username;
+      const body = root.querySelector<HTMLElement>('[data-gh-body]');
+      if (!username || !body) continue;
+
+      try {
+        const response = await fetch(`${ENDPOINT}/${encodeURIComponent(username)}?y=last`);
+        if (!response.ok) throw new Error(String(response.status));
+        const payload = (await response.json()) as {
+          contributions?: ContributionDay[];
+          total?: Record<string, number>;
+        };
+        const days = payload.contributions ?? [];
+        if (days.length === 0) throw new Error('empty');
+        render(root, days, payload.total?.lastYear ?? 0);
+      } catch {
+        // 接口不可用时只提示这一张卡片，不影响页面其余部分。
+        body.innerHTML = '<span class="gh-calendar-loading">暂时取不到 GitHub 贡献数据</span>';
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => void init(), { once: true });
+  } else {
+    void init();
+  }
+  document.addEventListener('astro:page-load', () => void init());
+</script>

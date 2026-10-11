@@ -1,0 +1,464 @@
+/**
+ * 关于页卡片墙样式。
+ *
+ * 设计语言对齐本站既有卡片：`1px border + rounded-xl + bg-surface`，不放大图背景、
+ * 不用重阴影；颜色一律走主题变量，因此明暗模式自动生效。
+ */
+
+.about-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.about-card--wide {
+  grid-column: span 2;
+}
+
+.about-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+  border-radius: 0.75rem;
+  transition: border-color 0.25s ease;
+}
+
+.about-card:hover {
+  border-color: color-mix(in oklab, currentColor 26%, transparent);
+}
+
+.about-tips {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: hsl(var(--muted-foreground));
+}
+
+.about-card-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.about-accent {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+.about-link {
+  font-size: 0.85rem;
+  color: hsl(var(--primary));
+  text-decoration: none;
+}
+
+.about-link:hover {
+  text-decoration: underline;
+}
+
+/* ── hello 卡片：三球跟随鼠标 ───────────────────────────────── */
+.about-hello {
+  min-height: 15rem;
+  justify-content: space-between;
+}
+
+.about-hello-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 球：居中后用 translate3d 做位移，避免触发布局 */
+.about-shape {
+  position: absolute;
+  top: 38%;
+  left: 30%;
+  border-radius: 50%;
+  filter: blur(0.5px);
+  will-change: transform;
+}
+
+.about-shape-1 {
+  width: 5.5rem;
+  height: 5.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  opacity: 0.55;
+}
+
+.about-shape-2 {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  opacity: 0.5;
+}
+
+.about-shape-3 {
+  width: 2.25rem;
+  height: 2.25rem;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  opacity: 0.5;
+}
+
+.about-cursor {
+  position: absolute;
+  top: 38%;
+  left: 30%;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: hsl(var(--primary) / 0.35);
+  filter: blur(1px);
+  will-change: transform;
+}
+
+.about-hello-body,
+.about-avatar-row {
+  position: relative;
+  z-index: 1;
+}
+
+.about-hello-title {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.about-hello-sub {
+  margin: 0;
+  font-size: 0.9rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.about-avatar-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.about-avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.about-tag-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.about-tag-column--right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.about-tag {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* ── 追求卡片 ───────────────────────────────────────────────── */
+.about-pursuit-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.about-pursuit-mask {
+  position: relative;
+  display: block;
+  height: 1.6em;
+  margin-top: 0.35rem;
+  overflow: hidden;
+}
+
+.about-pursuit-word {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  color: hsl(var(--primary));
+  opacity: 0;
+  transform: translateY(120%);
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease;
+}
+
+.about-pursuit-word.is-current {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-pursuit-word.is-previous {
+  opacity: 0;
+  transform: translateY(-120%);
+}
+
+/* ── 技能 ───────────────────────────────────────────────────── */
+.about-skill-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.about-skill-icon {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.about-skill-icon:hover {
+  border-color: var(--skill-color, hsl(var(--primary)));
+  transform: translateY(-1px);
+}
+
+.about-skill-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--skill-color, hsl(var(--primary)));
+}
+
+/* ── 生涯 ───────────────────────────────────────────────────── */
+.about-career-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-career-item {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.about-career-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+/* ── 地图 ───────────────────────────────────────────────────── */
+.about-map-graphic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 5rem;
+  margin-top: 0.35rem;
+  border: 1px dashed color-mix(in oklab, currentColor 18%, transparent);
+  border-radius: 0.5rem;
+  background-image: radial-gradient(color-mix(in oklab, currentColor 12%, transparent) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+.about-map-pin {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: hsl(var(--primary));
+}
+
+/* ── 个人信息 ───────────────────────────────────────────────── */
+.about-self-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.about-self-tips {
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.about-self-content {
+  font-weight: 500;
+  text-align: right;
+}
+
+/* ── 性格 ───────────────────────────────────────────────────── */
+.about-personality-body {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.about-personality-photo {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.about-personality-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.about-personality-name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.about-personality-type {
+  font-size: 0.8rem;
+  color: hsl(var(--primary));
+}
+
+.about-personality-icon {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+}
+
+/* ── 座右铭 / 关注偏好 / 音乐偏好 ────────────────────────────── */
+.about-quote-top,
+.about-quote-bottom {
+  margin: 0;
+}
+
+.about-quote-top {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.about-quote-bottom {
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── 游戏 ───────────────────────────────────────────────────── */
+.about-game-uid {
+  margin: 0;
+  font-size: 0.82rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── 在追小说 ───────────────────────────────────────────────── */
+.about-comic-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-pill {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: border-color 0.2s ease;
+}
+
+.about-pill:hover {
+  border-color: hsl(var(--primary));
+}
+
+/* ── 十年之约 ───────────────────────────────────────────────── */
+.about-tenyear-range {
+  margin: 0;
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 赞赏名单 ───────────────────────────────────────────────── */
+.about-reward-thanks {
+  margin: 0;
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.about-reward-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.5rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-reward-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid color-mix(in oklab, currentColor 10%, transparent);
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.about-reward-name {
+  font-weight: 600;
+}
+
+.about-reward-amount {
+  color: hsl(var(--primary));
+}
+
+.about-reward-date {
+  margin-inline-start: auto;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 响应式 ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .about-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .about-card--wide {
+    grid-column: span 1;
+  }
+
+  .about-avatar-row {
+    flex-direction: column;
+  }
+
+  .about-tag-column,
+  .about-tag-column--right {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}
