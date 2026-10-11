@@ -391,6 +391,9 @@ export const uiStrings: UIStrings = {
   'audio.empty': 'トラックが見つかりません',
   'audio.listTab': '{index}の一覧',
   'audio.closePanel': 'パネルを閉じる',
+  'audio.vipUnavailable': 'この曲は QQ Music の会員限定のため、ここでは再生できません',
+  'audio.openInQq': 'QQ Music で聴く',
+  'audio.streamUnavailable': '再生URLを取得できませんでした',
 
   // ── 目次のコンテンツ ───────────────────────────────────────
   'toc.title': '目次',

@@ -9,6 +9,7 @@
 import { resolveEditorNavigation } from '@lib/config/editor';
 import { normalizeMomentsConfig, resolveMomentsNavigation } from '@lib/config/moments';
 import {
+  bgmConfig,
   clickShowTextConfig,
   contentConfig,
   editorConfig,
@@ -24,7 +25,6 @@ import {
 import type {
   AnalyticsConfig,
   BangumiConfig,
-  BgmAudioGroup,
   ChristmasConfig,
   CommentConfig,
   DevConfig,
@@ -37,6 +37,7 @@ import yamlConfig from '../../config/site.yaml';
 import { DEFAULT_ROUTERS, RESERVED_ROUTES } from './router';
 
 export {
+  bgmConfig,
   clickShowTextConfig,
   contentConfig,
   editorConfig,
@@ -325,13 +326,6 @@ export const christmasConfig: ChristmasConfig = yamlConfig.christmas || {
     mobileMaxLayers: 4,
     mobileMaxIterations: 6,
   },
-};
-
-// Map YAML bgm config
-export const bgmConfig: { enabled: boolean; metingApi?: string; audio: BgmAudioGroup[] } = {
-  enabled: yamlConfig.bgm?.enabled ?? (yamlConfig.bgm?.audio?.length ?? 0) > 0,
-  metingApi: yamlConfig.bgm?.metingApi,
-  audio: yamlConfig.bgm?.audio ?? [],
 };
 
 // Bangumi media tracking config — null when disabled (section commented out in YAML)

@@ -384,6 +384,53 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ── QQ Music paid tracks ──────────────────────────────────────
+   Paid tracks stay in the list for completeness but have no stream
+   (QQ Music answers with an empty purl without a VIP cookie). */
+.audio-player-song-item--vip {
+  opacity: 0.65;
+}
+
+.audio-player-song-vip {
+  flex-shrink: 0;
+  margin-left: 0.5em;
+  padding: 0.05em 0.4em;
+  border: 1px solid currentColor;
+  border-radius: 0.25em;
+  color: #d4a017;
+  font-size: 0.7em;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
+}
+
+/* A QQ track resolving its stream on click. */
+.audio-player-song-item--pending {
+  cursor: progress;
+}
+
+.audio-player-song-spinner {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border: 2px solid var(--player-muted-fg);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: audio-player-song-spin 0.7s linear infinite;
+}
+
+@keyframes audio-player-song-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-player-song-spinner {
+    animation-duration: 2s;
+  }
+}
+
 .audio-player-song-progress-bg {
   position: absolute;
   left: 0;

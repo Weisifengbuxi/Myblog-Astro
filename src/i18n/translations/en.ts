@@ -389,6 +389,9 @@ export const uiStrings: UIStrings = {
   'audio.empty': 'No tracks',
   'audio.listTab': 'List {index}',
   'audio.closePanel': 'Close panel',
+  'audio.vipUnavailable': 'This track requires a QQ Music membership and cannot play here',
+  'audio.openInQq': 'Open in QQ Music',
+  'audio.streamUnavailable': 'Could not fetch a playable stream',
 
   // ── Table of Contents ───────────────────────────────────────
   'toc.title': 'Table of Contents',

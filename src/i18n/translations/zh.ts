@@ -387,6 +387,9 @@ export const uiStrings = {
   'audio.empty': '暂无曲目',
   'audio.listTab': '列表 {index}',
   'audio.closePanel': '关闭面板',
+  'audio.vipUnavailable': '这首歌需要 QQ 音乐会员，无法在这里播放',
+  'audio.openInQq': '去 QQ 音乐听',
+  'audio.streamUnavailable': '暂时无法获取播放地址',
 
   // ── Table of Contents ───────────────────────────────────────
   'toc.title': '文章目录',

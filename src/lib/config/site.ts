@@ -17,6 +17,7 @@ import { normalizeClickShowTextConfig, normalizeMotionConfig } from './motion';
 import { RESERVED_ROUTES } from './reserved-routes';
 import { normalizeRightClickMenuConfig } from './right-click-menu';
 import type {
+  BgmAudioGroup,
   I18nConfig,
   ResolvedClickShowTextConfig,
   ResolvedContentConfig,
@@ -63,6 +64,19 @@ export const fcircleConfig: ResolvedFcircleConfig = normalizeFcircleConfig(yamlC
 
 /** Custom right-click (context) menu. */
 export const rightClickMenuConfig: ResolvedRightClickMenuConfig = normalizeRightClickMenuConfig(yamlConfig.rightClickMenu);
+
+/**
+ * Background music + shared Meting API endpoint (`bgm:` in site.yaml).
+ *
+ * `metingApi` is the single Meting endpoint used by both the background player
+ * and every `{% media audio %}` playlist; when it is empty the player falls back
+ * to the public demo instance in `src/lib/meting.ts`.
+ */
+export const bgmConfig: { enabled: boolean; metingApi?: string; audio: BgmAudioGroup[] } = {
+  enabled: yamlConfig.bgm?.enabled ?? (yamlConfig.bgm?.audio?.length ?? 0) > 0,
+  metingApi: yamlConfig.bgm?.metingApi,
+  audio: yamlConfig.bgm?.audio ?? [],
+};
 
 /**
  * Site timezone in IANA format.

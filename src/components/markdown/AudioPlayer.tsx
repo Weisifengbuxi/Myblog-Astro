@@ -8,8 +8,10 @@
 import { useAudioPlayer } from '@hooks/useAudioPlayer';
 import { useTranslation } from '@hooks/useTranslation';
 import type { MetingSong } from '@lib/meting';
-import { resolvePlaylist } from '@lib/meting';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { parseMusicUrl, resolvePlaylist } from '@lib/meting';
+import { fetchQqLyric, fetchQqPlaylist, isQqPlaylistUrl, qqLazySongMid } from '@lib/qq-music';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { PlayerPlaylist } from './audio-player/PlayerPlaylist';
 import { PlayerPreview } from './audio-player/PlayerPreview';
 import { MediaControls } from './shared/MediaControls';
@@ -29,6 +31,27 @@ interface AudioPlayerProps {
   element: HTMLElement;
 }
 
+/**
+ * Resolve one group into tracks, in the order the URLs were written.
+ *
+ * QQ Music playlist links are resolved through QQ Music's own endpoints rather
+ * than the Meting API, because every public Meting instance returns an empty
+ * stream for `server=tencent`.
+ */
+async function resolveGroupSongs(group: AudioGroup, apiUrl: string | undefined): Promise<MetingSong[]> {
+  const parts = await Promise.all(
+    group.list.map(async (url) => {
+      if (isQqPlaylistUrl(url)) {
+        const parsed = parseMusicUrl(url);
+        return parsed ? fetchQqPlaylist(parsed.id) : [];
+      }
+      return resolvePlaylist([url], apiUrl);
+    }),
+  );
+
+  return parts.flat();
+}
+
 async function resolveGroupsSequentially(
   groups: AudioGroup[],
   apiUrl: string | undefined,
@@ -37,7 +60,7 @@ async function resolveGroupsSequentially(
 ): Promise<MetingSong[][]> {
   if (index >= groups.length) return resolved;
 
-  const songs = await resolvePlaylist(groups[index].list, apiUrl);
+  const songs = await resolveGroupSongs(groups[index], apiUrl);
   return resolveGroupsSequentially(groups, apiUrl, index + 1, [...resolved, songs]);
 }
 
@@ -60,6 +83,16 @@ export function AudioPlayer({ element }: AudioPlayerProps) {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  /** Index currently resolving its stream (QQ tracks resolve on demand). */
+  const [pendingIndex, setPendingIndex] = useState<number | null>(null);
+
+  /** Mirror of `tracks` for the player, which updates tracks outside React state. */
+  const tracksRef = useRef<MetingSong[]>([]);
+
+  const handleTracksResolved = useCallback((next: MetingSong[]) => {
+    tracksRef.current = next;
+    setTracks(next);
+  }, []);
 
   // Resolve all URLs via Meting API
   // biome-ignore lint/correctness/useExhaustiveDependencies: retryCount is an intentional trigger to re-run the effect
@@ -105,14 +138,56 @@ export function AudioPlayer({ element }: AudioPlayerProps) {
     };
   }, [audioGroups, apiUrl, retryCount]);
 
-  const player = useAudioPlayer(tracks);
+  const player = useAudioPlayer(tracks, handleTracksResolved);
   const currentTrack = tracks[player.state.currentIndex] ?? null;
+  const playerRef = useRef(player);
+  playerRef.current = player;
+  tracksRef.current = tracks;
 
+  /**
+   * QQ Music streams are fetched when a track is played, not upfront: the list
+   * load stays a single request, and no `vkey` is left to expire unused. The
+   * player handles the stream itself (click *and* auto-advance); this fills in
+   * the lyrics for the preview.
+   */
   const handleTrackSelect = useCallback(
-    (index: number) => {
-      player.play(index);
+    async (index: number) => {
+      const track = tracksRef.current[index];
+      if (!track) return;
+
+      if (track.vip) {
+        toast(t('audio.vipUnavailable'), {
+          description: track.name,
+          action: track.sourceUrl
+            ? { label: t('audio.openInQq'), onClick: () => window.open(track.sourceUrl, '_blank', 'noopener,noreferrer') }
+            : undefined,
+        });
+        return;
+      }
+
+      const songMid = qqLazySongMid(track.url);
+      if (!songMid) {
+        playerRef.current.play(index);
+        return;
+      }
+
+      setPendingIndex(index);
+      try {
+        const lrc = await fetchQqLyric(songMid);
+        if (lrc) {
+          const nextTracks = tracksRef.current.map((item, i) => (i === index ? { ...item, lrc } : item));
+          tracksRef.current = nextTracks;
+          setTracks(nextTracks);
+        }
+      } catch {
+        // Lyrics are optional — playback still proceeds without them.
+      } finally {
+        setPendingIndex(null);
+      }
+
+      playerRef.current.play(index);
     },
-    [player.play],
+    [t],
   );
 
   if (loading) {
@@ -167,6 +242,7 @@ export function AudioPlayer({ element }: AudioPlayerProps) {
         currentIndex={player.state.currentIndex}
         timeStore={player.timeStore}
         activeTab={activeTab}
+        pendingIndex={pendingIndex}
         onTabChange={setActiveTab}
         onTrackSelect={handleTrackSelect}
         onSeek={player.seek}

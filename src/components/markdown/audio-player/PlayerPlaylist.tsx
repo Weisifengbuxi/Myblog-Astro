@@ -26,6 +26,8 @@ interface PlayerPlaylistProps {
   currentIndex: number;
   timeStore: PlaybackTimeStore;
   activeTab: number;
+  /** Index whose stream is being resolved (QQ tracks resolve on demand). */
+  pendingIndex?: number | null;
   onTabChange: (tab: number) => void;
   onTrackSelect: (index: number) => void;
   onSeek: (time: number) => void;
@@ -42,6 +44,7 @@ export const PlayerPlaylist = memo(function PlayerPlaylist({
   currentIndex,
   timeStore,
   activeTab,
+  pendingIndex,
   onTabChange,
   onTrackSelect,
   onSeek,
@@ -90,18 +93,39 @@ export const PlayerPlaylist = memo(function PlayerPlaylist({
         {visibleTracks.map((track, localIdx) => {
           const globalIdx = (activeGroup?.startIndex ?? 0) + localIdx;
           const isCurrent = globalIdx === currentIndex;
+          const isPending = globalIdx === pendingIndex;
 
           return (
             <button
-              key={track.url}
+              key={track.url || `${globalIdx}-${track.name}`}
               type="button"
-              className={cn('audio-player-song-item', isCurrent && 'current')}
+              className={cn(
+                'audio-player-song-item',
+                isCurrent && 'current',
+                track.vip && 'audio-player-song-item--vip',
+                isPending && 'audio-player-song-item--pending',
+              )}
+              disabled={isPending}
               onClick={(e) => handleClick(e, globalIdx)}
             >
               {/* Progress background for current track */}
               {isCurrent && <div ref={progressBgRef} className="audio-player-song-progress-bg" style={{ width: '0%' }} />}
-              <span className="audio-player-song-index">{isCurrent ? <Icon icon="ri:play-fill" /> : localIdx + 1}</span>
+              <span className="audio-player-song-index">
+                {isPending ? (
+                  <span className="audio-player-song-spinner" />
+                ) : isCurrent ? (
+                  <Icon icon="ri:play-fill" />
+                ) : (
+                  localIdx + 1
+                )}
+              </span>
               <span className="audio-player-song-title">{track.name}</span>
+              {/* Paid tracks stay listed but cannot stream without a VIP cookie. */}
+              {track.vip && (
+                <span className="audio-player-song-vip" title={t('audio.vipUnavailable')}>
+                  VIP
+                </span>
+              )}
               <span className="audio-player-song-artist">
                 {isCurrent ? <TrackTimeDisplay timeStore={timeStore} /> : track.artist}
               </span>

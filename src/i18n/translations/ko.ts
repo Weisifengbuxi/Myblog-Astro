@@ -389,6 +389,9 @@ export const uiStrings = {
   'audio.empty': '등록된 곡이 없어요',
   'audio.listTab': '목록 {index}',
   'audio.closePanel': '패널 닫기',
+  'audio.vipUnavailable': '이 곡은 QQ Music 멤버십이 필요해 여기서 재생할 수 없습니다',
+  'audio.openInQq': 'QQ Music에서 듣기',
+  'audio.streamUnavailable': '재생 주소를 가져오지 못했습니다',
 
   // ── Table of Contents ───────────────────────────────────────
   'toc.title': '목차',

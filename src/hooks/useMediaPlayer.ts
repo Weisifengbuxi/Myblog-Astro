@@ -34,9 +34,18 @@ export interface UseMediaPlayerOptions<T> {
   tracks: T[];
   getUrl: (track: T) => string;
   getElement: () => HTMLMediaElement | null;
+  /**
+   * Resolve a playable URL for a track whose `getUrl` result is empty, then hand
+   * the updated track back. Needed for sources whose stream URL is signed and
+   * short-lived (QQ Music), where the URL is fetched only at play time — both on
+   * click and on auto-advance.
+   */
+  resolveUrl?: (track: T) => Promise<{ url: string; track: T } | null>;
+  /** Notifies the owner when a deferred track was updated, so it can re-render. */
+  onTracksResolved?: (tracks: T[]) => void;
 }
 
-export function useMediaPlayer<T>({ tracks, getUrl, getElement }: UseMediaPlayerOptions<T>) {
+export function useMediaPlayer<T>({ tracks, getUrl, getElement, resolveUrl, onTracksResolved }: UseMediaPlayerOptions<T>) {
   const playerId = useId();
   const activeId = useStore($activePlayerId);
 
@@ -47,6 +56,8 @@ export function useMediaPlayer<T>({ tracks, getUrl, getElement }: UseMediaPlayer
   const tracksRef = useRef(tracks);
   const getUrlRef = useRef(getUrl);
   const getElementRef = useRef(getElement);
+  const resolveUrlRef = useRef(resolveUrl);
+  const onTracksResolvedRef = useRef<((tracks: T[]) => void) | undefined>(undefined);
   const loadAndPlayRef = useRef<(index: number) => void>(() => {});
   const [timeStore] = useState(() => createPlaybackTimeStore());
 
@@ -62,15 +73,43 @@ export function useMediaPlayer<T>({ tracks, getUrl, getElement }: UseMediaPlayer
   const stateRef = useRef(state);
 
   const loadAndPlay = useCallback(
-    (index: number) => {
+    async (index: number) => {
       const el = getElementRef.current();
       const currentTracks = tracksRef.current;
-      if (!el || !currentTracks[index]) return;
-      el.src = getUrlRef.current(currentTracks[index]);
-      el.play().catch(() => {});
+      const track = currentTracks[index];
+      if (!el || !track) return;
+
+      setState((s) => ({ ...s, currentIndex: index, loading: true, error: null }));
       $activePlayerId.set(playerId);
       timeStore.reset();
-      setState((s) => ({ ...s, currentIndex: index, loading: true, error: null }));
+
+      let url = getUrlRef.current(track);
+
+      // Deferred sources (e.g. signed QQ Music streams) resolve here, covering
+      // both the click path and auto-advance from a finished track.
+      if (!url && resolveUrlRef.current) {
+        try {
+          const resolved = await resolveUrlRef.current(track);
+          if (resolved) {
+            url = resolved.url;
+            const updated = [...tracksRef.current];
+            updated[index] = resolved.track;
+            tracksRef.current = updated;
+            onTracksResolvedRef.current?.(updated);
+          }
+        } catch {
+          setState((s) => ({ ...s, loading: false, error: 'Failed to resolve media' }));
+          return;
+        }
+      }
+
+      if (!url) {
+        setState((s) => ({ ...s, loading: false, error: 'Failed to resolve media' }));
+        return;
+      }
+
+      el.src = url;
+      el.play().catch(() => {});
     },
     [playerId, timeStore],
   );
@@ -79,7 +118,9 @@ export function useMediaPlayer<T>({ tracks, getUrl, getElement }: UseMediaPlayer
     tracksRef.current = tracks;
     getUrlRef.current = getUrl;
     getElementRef.current = getElement;
-  }, [tracks, getUrl, getElement]);
+    resolveUrlRef.current = resolveUrl;
+    onTracksResolvedRef.current = onTracksResolved;
+  }, [tracks, getUrl, getElement, resolveUrl, onTracksResolved]);
 
   useLayoutEffect(() => {
     stateRef.current = state;
