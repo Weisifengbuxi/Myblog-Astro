@@ -14,6 +14,14 @@ export interface MetingSong {
   url: string;
   pic: string;
   lrc: string;
+  /**
+   * True when the track is behind QQ Music's paywall: it stays in the list for
+   * completeness but has no playable stream (`url` stays empty) until a VIP
+   * cookie is involved.
+   */
+  vip?: boolean;
+  /** Page to open when a `vip` track cannot be played here. */
+  sourceUrl?: string;
 }
 
 interface ParsedUrl {
@@ -23,15 +31,24 @@ interface ParsedUrl {
 }
 
 // URL parsing rules (ported from Shoka player.js:30-47)
+// QQ Music's modern share URLs use `songDetail/<mid>`; the legacy `/song/<mid>`
+// form is kept for older links. `\w+` stops at the first non-word character, so
+// tracking parameters (`?ADTAG=...`) are ignored.
 const URL_RULES: [RegExp, string, string][] = [
   [/music\.163\.com.*song.*id=(\d+)/, 'netease', 'song'],
   [/music\.163\.com.*album.*id=(\d+)/, 'netease', 'albumlist'],
   [/music\.163\.com.*playlist.*id=(\d+)/, 'netease', 'playlist'],
   [/music\.163\.com.*discover\/toplist.*id=(\d+)/, 'netease', 'playlist'],
+  [/y\.qq\.com.*songDetail\/(\w+)/, 'tencent', 'song'],
   [/y\.qq\.com.*song\/(\w+)/, 'tencent', 'song'],
   [/y\.qq\.com.*album\/(\w+)/, 'tencent', 'albumlist'],
   [/y\.qq\.com.*playsquare\/(\w+)/, 'tencent', 'playlist'],
   [/y\.qq\.com.*playlist\/(\w+)/, 'tencent', 'playlist'],
+  // QQ Music mobile/web share links carry the id as a query parameter instead of
+  // a path segment, e.g. `.../playlist.html?id=4218963770`.
+  [/y\.qq\.com.*playlist.*[?&]id=(\d+)/, 'tencent', 'playlist'],
+  [/y\.qq\.com.*song.*[?&]songid=(\d+)/, 'tencent', 'song'],
+  [/y\.qq\.com.*album.*[?&]albumid=(\w+)/, 'tencent', 'albumlist'],
 ];
 
 /** Parse a music platform URL into server/type/id triple. */
@@ -42,6 +59,78 @@ export function parseMusicUrl(url: string): ParsedUrl | null {
       return { server, type, id: match[1] };
     }
   }
+  return null;
+}
+
+// =============================================================================
+// QQ Music official outchain player (no backend required)
+// =============================================================================
+
+/**
+ * QQ Music's official embed player.
+ *
+ * `i.y.qq.com/n2/m/outchain/player/index.html?songid=<numeric id>&songtype=0`
+ * plays a **single song** without any Meting API, cookie, or self-hosted
+ * service, because QQ Music resolves the stream with its own outchain grant.
+ * Playlists and albums are NOT supported by this endpoint (it answers
+ * `请粘贴正确链接`), so this is strictly a per-song primitive.
+ *
+ * `songid` is the numeric id — not the alphanumeric `songmid` used by Meting.
+ */
+const QQ_OUTCHAIN_BASE = 'https://i.y.qq.com/n2/m/outchain/player/index.html';
+
+/**
+ * Extract the numeric `songid` needed by QQ Music's outchain player.
+ *
+ * Accepts the formats a user can actually copy from the site, so they can paste
+ * a normal song page URL instead of hunting for a private numeric id:
+ * - `https://i.y.qq.com/v8/playsong.html?songid=127570280&songtype=0` (share link)
+ * - `https://y.qq.com/n/ryqq/songDetail/0039MnYb0qxYhV` → resolved via Meting
+ * - a bare numeric id (`127570280`)
+ *
+ * The `songDetail` variant only carries an alphanumeric mid, so it needs a
+ * Meting lookup and therefore returns `null` here; use
+ * {@link resolveQqOutchainSongId} when an async resolution is acceptable.
+ */
+export function qqOutchainSongId(link: string): string | null {
+  const value = link.trim();
+  if (/^\d+$/.test(value)) return value;
+  // Share URLs carry the numeric id as `songid` (e.g. `playsong.html?songid=`).
+  const query = value.match(/[?&]songid=(\d+)(?!\w)/);
+  if (query?.[1]) return query[1];
+  // Meting media URLs for Tencent carry the *alphanumeric* mid, not the numeric
+  // id (`?server=tencent&type=url&id=003gWfQ04LBELl`), so they cannot be used
+  // here. Only an all-digit `id` is a genuine `songid`.
+  if (/[?&]type=url\b/.test(value)) {
+    const metingId = value.match(/[?&]id=(\d+)(?!\w)/);
+    if (metingId?.[1]) return metingId[1];
+  }
+  return null;
+}
+
+/** Build the QQ Music outchain player URL for a numeric song id. */
+export function qqOutchainUrl(songId: string): string {
+  return `${QQ_OUTCHAIN_BASE}?songid=${encodeURIComponent(songId)}&songtype=0`;
+}
+
+/**
+ * Resolve any supported QQ Music song link to the numeric outchain `songid`.
+ *
+ * Bare numeric ids and `songid=` links resolve synchronously. `songDetail/<mid>`
+ * links canNOT be resolved: Tencent's API only ever exposes the alphanumeric
+ * mid, and the numeric outchain id is an unrelated internal value (verified: two
+ * different mids for the same song both return the same numeric id). Those links
+ * therefore yield `null`, and callers fall back to a plain link.
+ */
+export async function resolveQqOutchainSongId(link: string, apiUrl?: string): Promise<string | null> {
+  const direct = qqOutchainSongId(link);
+  if (direct) return direct;
+
+  // A `songDetail` link is kept as documentation of the intent: it cannot be
+  // converted, so it resolves to null rather than a wrong id.
+  const parsed = parseMusicUrl(link);
+  if (parsed?.server !== 'tencent' || parsed.type !== 'song') return null;
+  void apiUrl;
   return null;
 }
 

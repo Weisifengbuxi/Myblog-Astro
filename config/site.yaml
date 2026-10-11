@@ -1117,11 +1117,14 @@ seo:
 # 背景音乐 - 配置 audio 后自动启用
 # =============================================================================
 # metingApi: Meting API 地址，默认为 https://163.hyc.moe/，推荐自部署
+#   这个地址同时作用于「歌单」页面（/music 里的 {% media audio %}）和左下角背景音乐。
+#   公共实例对 QQ 音乐只能取到歌单列表、取不到播放直链（播放会失败，需自部署并配置
+#   QQ 音乐 cookie），网易云一般可直接播放。详见 docs 或 Meting 项目说明。
 # audio: 歌单列表，每项包含 title 与 list（歌单链接数组）
 # -----------------------------------------------------------------------------
 bgm:
   enabled: false  # 没有配置 audio 时保持关闭
-  # metingApi: https://163.hyc.moe/  # Meting API 地址，推荐自部署
+  # metingApi: https://163.hyc.moe/  # Meting API 地址，推荐自部署（改这里会同时改 /music 页面）
   # audio:
   #   - title: 最爱山山
   #     list:
