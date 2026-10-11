@@ -256,6 +256,31 @@ test('the repository Shoka feature article renders its complete set of documente
   assert.doesNotMatch(html, /data-password=/);
 });
 
+test('QQ Music outchain entries render the official iframe player', async () => {
+  const { html } = await renderEditorMarkdown('{% media audio %}\n- name: 测试单曲\n  songid: "127570280"\n{% endmedia %}');
+  assert.match(html, /class="qq-outchain-player"/);
+  assert.match(html, /<iframe/);
+  assert.match(html, /i\.y\.qq\.com\/n2\/m\/outchain\/player\/index\.html\?songid=127570280/);
+  assert.match(html, /class="qq-outchain-caption">测试单曲</);
+  // Outchain entries must not be routed into the Meting player.
+  assert.doesNotMatch(html, /data-audio-player/);
+});
+
+test('a mixed media block renders both the Meting player and outchain embeds', async () => {
+  const { html } = await renderEditorMarkdown(
+    '{% media audio %}\n- name: 测试单曲\n  songid: "127570280"\n- title: 网易云歌单\n  list:\n    - https://music.163.com/#/playlist?id=8676645748\n{% endmedia %}',
+  );
+  assert.match(html, /data-audio-player/);
+  assert.match(html, /class="qq-outchain-player"/);
+});
+
+test('iframes other than the QQ Music outchain player are dropped', async () => {
+  const { html } = await renderEditorMarkdown(
+    '<iframe src="https://evil.example.com/track"></iframe>\n\n<iframe src="https://i.y.qq.com/n2/m/outchain/player/index.html?playlistid=1"></iframe>',
+  );
+  assert.doesNotMatch(html, /<iframe/);
+});
+
 test('diagrams preserve source for the actual Mermaid and infographic enhancers', async () => {
   const { html } = await renderEditorMarkdown(
     '```mermaid\ngraph TD\nA-->B\n```\n\n```plain\ninfographic list-row-simple-horizontal\ndata\n  items\n    - label 示例\n```',

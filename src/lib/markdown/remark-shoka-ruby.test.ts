@@ -26,8 +26,8 @@ async function render(source: string, { enableSuperSub = true, enableRuby = true
   return (await processor.render(source)).code;
 }
 
-test('the guide example preserves both Ruby expressions before parsing', () => {
-  assert.equal(preprocessShokaSyntax(guideExample), guideExample);
+test('the guide example preserves both Ruby expressions before parsing', async () => {
+  assert.equal(await preprocessShokaSyntax(guideExample), guideExample);
 });
 
 test('the guide example renders two independent Ruby annotations', async () => {
@@ -53,9 +53,9 @@ test('Ruby can be directly surrounded by superscript and subscript', async () =>
   );
 });
 
-test('preprocessing leaves super/subscript-like text inside Ruby intact', () => {
+test('preprocessing leaves super/subscript-like text inside Ruby intact', async () => {
   const source = '{漢字^か~ん~じ}{式^=x^2^}';
-  assert.equal(preprocessShokaSyntax(source), source);
+  assert.equal(await preprocessShokaSyntax(source), source);
 });
 
 test('carets inside Ruby stay annotation text', async () => {
@@ -71,7 +71,7 @@ test('code and math preserve Ruby and super/subscript source', async () => {
     '$a^{x^2}+b^{y^3}$',
     '$$\na^{x^2}+b^{y^3}\n$$',
   ].join('\n\n');
-  assert.equal(preprocessShokaSyntax(source), source);
+  assert.equal(await preprocessShokaSyntax(source), source);
   const html = await render(source);
   assert.match(html, /<code>\{漢字\^かんじ\}x\^2\^H~2~O<\/code>/);
   assert.match(html, /class="language-math math-inline"/);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shoka syntax preprocessor
  *
  * Transforms Shoka-specific syntax in raw Markdown BEFORE the remark parser
@@ -29,6 +29,8 @@ import { SHOKA_RUBY_PATTERN } from './shoka-ruby-pattern';
 interface ContainerOptions {
   enableContainers?: boolean;
   enableHexoTags?: boolean;
+  /** Meting API endpoint forwarded to `{% media audio %}` players. */
+  audioApiUrl?: string;
 }
 
 /** Maximum nesting depth for recursive container processing */
@@ -37,8 +39,11 @@ const MAX_CONTAINER_DEPTH = 10;
 /**
  * Process container syntax (:::, +++, ;;;) and Hexo tags in raw markdown text.
  * Returns the text with containers/tags replaced by HTML blocks.
+ *
+ * Async because `{% media audio %}` QQ Music outchain entries may need a Meting
+ * lookup to learn their numeric `songid`.
  */
-function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0): string {
+async function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0): Promise<string> {
   // Guard against excessive nesting (malicious or accidental)
   if (_depth >= MAX_CONTAINER_DEPTH) return text;
   const containers = opts.enableContainers !== false;
@@ -52,7 +57,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
   let pendingTabId: string | null = null;
   let pendingTabs: { name: string; lines: string[] }[] = [];
 
-  function flushTabs() {
+  async function flushTabs() {
     if (pendingTabs.length === 0 || !pendingTabId) return;
     const groupId = pendingTabId;
 
@@ -71,7 +76,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
       output.push(`<div class="tab-panel${isActive ? ' active' : ''}" role="tabpanel" data-tab-index="${t}">`);
       output.push('');
       // Recursively process inner content
-      output.push(processContainers(pendingTabs[t].lines.join('\n'), opts, _depth + 1));
+      output.push(await processContainers(pendingTabs[t].lines.join('\n'), opts, _depth + 1));
       output.push('');
       output.push('</div>');
     }
@@ -99,7 +104,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
         inCodeFence = true;
         codeFenceChar = matchChar;
         codeFenceLen = matchLen;
-        flushTabs();
+        await flushTabs();
         output.push(line);
         i++;
         continue;
@@ -115,7 +120,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
       }
     }
 
-    // Inside code fence → pass through unchanged
+    // Inside code fence 鈫?pass through unchanged
     if (inCodeFence) {
       output.push(line);
       i++;
@@ -125,7 +130,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
     // ::: note block
     const noteMatch = containers && line.match(/^:::(\w+)(?:\s+(no-icon))?\s*$/);
     if (noteMatch) {
-      flushTabs();
+      await flushTabs();
       const style = noteMatch[1];
       const noIcon = noteMatch[2] === 'no-icon';
       const innerLines: string[] = [];
@@ -148,7 +153,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
       output.push('');
       output.push(`<div class="note-block note-${style}${noIconClass}">`);
       output.push('');
-      output.push(processContainers(innerLines.join('\n'), opts, _depth + 1));
+      output.push(await processContainers(innerLines.join('\n'), opts, _depth + 1));
       output.push('');
       output.push('</div>');
       output.push('');
@@ -158,7 +163,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
     // +++ collapse block
     const collapseMatch = containers && line.match(/^\+\+\+(\w+)\s+(.+)$/);
     if (collapseMatch) {
-      flushTabs();
+      await flushTabs();
       const style = collapseMatch[1];
       const title = collapseMatch[2];
       const innerLines: string[] = [];
@@ -182,7 +187,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
       output.push(`<summary>${escapeHtml(title)}</summary>`);
       output.push(`<div class="collapse-content">`);
       output.push('');
-      output.push(processContainers(innerLines.join('\n'), opts, _depth + 1));
+      output.push(await processContainers(innerLines.join('\n'), opts, _depth + 1));
       output.push('');
       output.push('</div>');
       output.push('</details>');
@@ -215,7 +220,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
       if (pendingTabId === tabId) {
         pendingTabs.push({ name: tabName, lines: innerLines });
       } else {
-        flushTabs();
+        await flushTabs();
         pendingTabId = tabId;
         pendingTabs = [{ name: tabName, lines: innerLines }];
       }
@@ -224,7 +229,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
 
     // {% links %} ... {% endlinks %}
     if (hexoTags && line.trim() === '{% links %}') {
-      flushTabs();
+      await flushTabs();
       const yamlLines: string[] = [];
       i++;
       while (i < lines.length && lines[i].trim() !== '{% endlinks %}') {
@@ -249,7 +254,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
     // {% media audio/video %} ... {% endmedia %}
     const mediaMatch = hexoTags && line.trim().match(/^{% media (audio|video) %}$/);
     if (mediaMatch) {
-      flushTabs();
+      await flushTabs();
       const mediaType = mediaMatch[1];
       const yamlLines: string[] = [];
       i++;
@@ -264,7 +269,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
         if (Array.isArray(data)) {
           if (mediaType === 'audio') {
             output.push('');
-            output.push(renderAudioMedia(data));
+            output.push(await renderAudioMedia(data, { apiUrl: opts.audioApiUrl }));
             output.push('');
           } else {
             output.push('');
@@ -278,18 +283,18 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
       continue;
     }
 
-    // Don't flush pending tabs on empty lines — consecutive ;;; blocks
+    // Don't flush pending tabs on empty lines 鈥?consecutive ;;; blocks
     // are separated by blank lines but should still group together.
     if (pendingTabId && line.trim() === '') {
       i++;
       continue;
     }
-    flushTabs();
+    await flushTabs();
     output.push(line);
     i++;
   }
 
-  flushTabs();
+  await flushTabs();
   return output.join('\n');
 }
 
@@ -298,7 +303,7 @@ function processContainers(text: string, opts: ContainerOptions = {}, _depth = 0
  * to break token pairing. Must run before remark parsing since `\` escapes
  * are consumed by the Markdown parser before remark plugins see the text.
  *
- * `\++` or `\+\+` → `+<!-- -->+` (breaks ++ token matching, renders as ++)
+ * `\++` or `\+\+` 鈫?`+<!-- -->+` (breaks ++ token matching, renders as ++)
  */
 function processEscapedDelimiters(text: string): string {
   // Per-character escapes (\+\+, \=\=, \!\!) must run before delimiter escapes
@@ -316,9 +321,9 @@ function processInlineSuperSub(text: string): string {
   return processOutsideProtectedRegions(
     text,
     (segment) => {
-      // Replace ~sub~ (single tilde, not ~~) with <sub> — escape content to prevent XSS
+      // Replace ~sub~ (single tilde, not ~~) with <sub> 鈥?escape content to prevent XSS
       segment = segment.replace(/(?<![~\\])~([^~\s]+)~(?!~)/g, (_, content) => `<sub>${escapeHtml(content)}</sub>`);
-      // Replace ^sup^ with <sup> — escape content to prevent XSS
+      // Replace ^sup^ with <sup> 鈥?escape content to prevent XSS
       segment = segment.replace(/(?<![\\^])\^([^^\s]+)\^/g, (_, content) => `<sup>${escapeHtml(content)}</sup>`);
       return segment;
     },
@@ -357,22 +362,27 @@ function processOutsideProtectedRegions(text: string, fn: (segment: string) => s
 /**
  * Main preprocessor function.
  * Transforms raw Markdown source text before remark parsing.
+ *
+ * Async because `{% media audio %}` may contain QQ Music outchain entries whose
+ * numeric `songid` has to be resolved through the Meting API.
  */
-export function preprocessShokaSyntax(
+export async function preprocessShokaSyntax(
   source: string,
   options?: {
     enableContainers?: boolean;
     enableHexoTags?: boolean;
     enableSuperSub?: boolean;
+    audioApiUrl?: string;
   },
-): string {
+): Promise<string> {
   let result = source;
 
   // Process block-level containers and Hexo tags
   if (options?.enableContainers !== false || options?.enableHexoTags !== false) {
-    result = processContainers(result, {
+    result = await processContainers(result, {
       enableContainers: options?.enableContainers,
       enableHexoTags: options?.enableHexoTags,
+      audioApiUrl: options?.audioApiUrl,
     });
   }
 

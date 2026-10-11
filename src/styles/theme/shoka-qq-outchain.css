@@ -1,0 +1,59 @@
+/**
+ * QQ Music official outchain player (`{% media audio %}` with `songid`).
+ *
+ * The embed itself is a third-party iframe, so styling stops at the wrapper:
+ * page margins, the optional per-song caption, and the placeholder shown when an
+ * entry cannot be resolved to a numeric song id.
+ */
+
+.qq-outchain-player {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  margin: 1.5em 0;
+}
+
+.qq-outchain-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+.qq-outchain-item iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 0.5em;
+  background: hsl(var(--muted));
+}
+
+.qq-outchain-caption {
+  font-size: 0.9em;
+  color: hsl(var(--muted-foreground));
+}
+
+.qq-outchain-item--link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  align-items: center;
+  padding: 0.75em 1em;
+  border: 1px dashed hsl(var(--border));
+  border-radius: 0.5em;
+  font-size: 0.9em;
+}
+
+.qq-outchain-empty {
+  padding: 0.9em 1em;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5em;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+  .qq-outchain-player {
+    gap: 0.75em;
+    margin: 1em 0;
+  }
+}

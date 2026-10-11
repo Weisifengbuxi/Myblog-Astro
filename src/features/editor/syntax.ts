@@ -139,6 +139,18 @@ export const syntaxEntries: SyntaxEntry[] = [
     notes: ['title 是列表标题，list 下逐行填写链接。网易云内容的可用性取决于配置的 Meting 服务与歌曲权限。'],
   },
   {
+    id: 'qq-outchain',
+    label: 'QQ 音乐外链单曲',
+    category: '链接与媒体',
+    description: '用 QQ 音乐官方外链播放器嵌入单曲，不需要 Meting 服务。',
+    source: '{% media audio %}\n- name: 曲名\n  songid: https://y.qq.com/n/ryqq/songDetail/001csVKf12pKXN\n{% endmedia %}',
+    notes: [
+      'songid 填 QQ 音乐单曲链接或数字 ID；填 songDetail 链接时会自动通过 Meting 查出数字 ID，查不到则降级为普通链接。',
+      '官方外链播放器只支持单曲，不支持歌单与专辑，因此一首歌一个播放器。',
+      '同一个 {% media audio %} 里可以同时混用 songid 外链单曲与 list 歌单。',
+    ],
+  },
+  {
     id: 'video',
     label: '视频',
     category: '链接与媒体',

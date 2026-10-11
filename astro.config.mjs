@@ -69,11 +69,7 @@ function loadLegacyRedirects() {
   const manifestPath = path.join(process.cwd(), '.migration', 'manifest.json');
   if (!fs.existsSync(manifestPath)) return {};
   const { posts = [] } = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  return Object.fromEntries(
-    posts.flatMap((p) =>
-      (p.oldUrls ?? []).map((old) => [old, p.draft === true ? '/' : p.newUrl])
-    )
-  );
+  return Object.fromEntries(posts.flatMap((p) => (p.oldUrls ?? []).map((old) => [old, p.draft === true ? '/' : p.newUrl])));
 }
 const legacyRedirects = loadLegacyRedirects();
 
@@ -186,6 +182,9 @@ if (contentConfig.enableShokaContainers || contentConfig.enableShokaHexoTags || 
       enableSuperSub: contentConfig.enableShokaEffects,
       enableMath: contentConfig.enableMath,
       enableEncryptedBlock: contentConfig.enableEncryptedBlock,
+      // Same Meting endpoint as the background player: `{% media audio %}`
+      // playlists (QQ Music included) resolve through it at runtime.
+      audioApiUrl: yamlConfig.bgm?.metingApi,
     },
   ]);
 }

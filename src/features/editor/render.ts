@@ -44,7 +44,7 @@ const safeTags = new Set(
   (
     'a abbr b bdi bdo blockquote br caption code col colgroup dd del details div dl dt em figcaption figure ' +
     'h1 h2 h3 h4 h5 h6 hr i img input ins kbd li mark ol p pre q rp rt ruby s samp section small span ' +
-    'strong sub summary sup table tbody td th thead tr u ul var button spoiler-span audio video source ' +
+    'strong sub summary sup table tbody td th thead tr u ul var button spoiler-span audio video source iframe ' +
     'math annotation semantics mrow mi mn mo mtext mspace msup msub msubsup mfrac msqrt mroot mtable ' +
     'mtr mtd mover munder munderover mpadded mphantom menclose svg g path rect circle ellipse line polyline ' +
     'polygon text tspan defs clipPath use symbol title desc'
@@ -52,6 +52,13 @@ const safeTags = new Set(
     .toLowerCase()
     .split(' '),
 );
+
+/**
+ * Embeds allowed as `<iframe>`. An iframe renders third-party content inside the
+ * page, so only the QQ Music official outchain player is accepted — arbitrary
+ * iframes are dropped rather than trusted.
+ */
+const safeIframePattern = /^https:\/\/i\.y\.qq\.com\/n2\/m\/outchain\/player\/index\.html\?songid=\d+&songtype=0$/;
 
 const urlProperties = new Set(['href', 'src', 'poster', 'xlinkhref', 'cite']);
 
@@ -71,6 +78,8 @@ function sanitizeTree(node: HastRoot | Element): void {
     if (child.type === 'comment' || child.type === 'doctype' || child.type === 'raw') return false;
     if (child.type !== 'element') return true;
     if (!safeTags.has(child.tagName.toLowerCase())) return false;
+    // Only the QQ Music outchain player may be embedded as an iframe.
+    if (child.tagName === 'iframe' && !safeIframePattern.test(String(child.properties.src ?? ''))) return false;
     if (
       child.tagName === 'input' &&
       (String(child.properties.type).toLowerCase() !== 'checkbox' || child.properties.disabled !== true)

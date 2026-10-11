@@ -30,6 +30,8 @@ interface RemarkShokaPreprocessOptions {
   enableSuperSub?: boolean;
   enableMath?: boolean;
   enableEncryptedBlock?: boolean;
+  /** Meting API endpoint baked into `{% media audio %}` players as `data-api`. */
+  audioApiUrl?: string;
 }
 
 export function remarkShokaPreprocess(options?: RemarkShokaPreprocessOptions) {
@@ -43,14 +45,15 @@ export function remarkShokaPreprocess(options?: RemarkShokaPreprocessOptions) {
     pipeline.use(remarkDirective);
   }
 
-  return (tree: Root, file: VFile) => {
+  return async (tree: Root, file: VFile) => {
     const raw = String(file.value);
     if (!raw) return;
 
-    const processed = preprocessShokaSyntax(raw, {
+    const processed = await preprocessShokaSyntax(raw, {
       enableContainers: options?.enableContainers,
       enableHexoTags: options?.enableHexoTags,
       enableSuperSub: options?.enableSuperSub,
+      audioApiUrl: options?.audioApiUrl,
     });
 
     // If no changes, skip re-parse
