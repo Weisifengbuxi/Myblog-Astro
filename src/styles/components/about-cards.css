@@ -137,6 +137,33 @@
   background: hsl(var(--card, var(--background)));
   font-size: 0.78rem;
   white-space: nowrap;
+  /* 轻轻上下浮动，同一侧的标签按 --i 依次错开，形成波浪感 */
+  animation: ab-tag-float 3.6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.45s);
+  will-change: transform;
+}
+
+@keyframes ab-tag-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.ab-hero-tags .ab-tag:nth-child(1) {
+  --i: 0;
+}
+.ab-hero-tags .ab-tag:nth-child(2) {
+  --i: 1;
+}
+.ab-hero-tags .ab-tag:nth-child(3) {
+  --i: 2;
+}
+.ab-hero-tags .ab-tag:nth-child(4) {
+  --i: 3;
 }
 
 .ab-hero-title {
@@ -251,29 +278,92 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：彩色方色块 + 图标 ────────────────────────────────── */
+/* ── 技能：默认横向无限轮播，hover 切换为完整列表 ──────────────
+   与旧博客 #skills-tags-group-all 的做法一致：轨道内容复制一份，
+   平移到 -50% 时正好回到起点，因此循环无缝。 */
 .ab-skills {
   min-height: 450px;
 }
 
-.ab-tiles {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1rem;
+.ab-skill-marquee {
+  position: relative;
   margin-top: 1.5rem;
+  /* 上下各留 20px，给下移的偶数块留空间，避免被裁掉 */
+  padding-block: 20px;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.ab-skill-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: ab-skill-row 22s linear infinite;
+}
+
+.ab-skill-track .ab-tile {
+  flex-shrink: 0;
+}
+
+/* 偶数块下移，形成交错排布（旧博客用「配对 + 位移」实现，这里用整齐的错行，
+   避免相邻块互相压住） */
+.ab-skill-track .ab-tile:nth-child(even) {
+  transform: translateY(16px);
+}
+
+@keyframes ab-skill-row {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ab-skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* hover：轮播淡出、完整列表淡入（同旧博客 .skills:hover 行为） */
+.ab-skills:hover .ab-skill-marquee {
+  opacity: 0;
+}
+
+.ab-skills:hover .ab-skill-list {
+  opacity: 1;
+}
+
+.ab-skill-chip {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+}
+
+.ab-skill-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex-shrink: 0;
+  border-radius: 50%;
 }
 
 .ab-tile {
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
-  border-radius: 1rem;
-  transition: transform 0.2s ease;
-}
-
-.ab-tile:hover {
-  transform: translateY(-3px);
+  width: 5.25rem;
+  height: 5.25rem;
+  border-radius: 1.1rem;
 }
 
 .ab-tile img {
@@ -283,6 +373,16 @@
   /* simple-icons 的 svg 自带 fill，这里统一压成白色 */
   filter: brightness(0) invert(1);
   opacity: 0.92;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ab-skill-track {
+    animation: none;
+  }
+
+  .ab-tag {
+    animation: none;
+  }
 }
 
 /* ── 生涯：时间轴 ───────────────────────────────────────────── */
@@ -301,6 +401,26 @@
   margin: 0.15rem 0 0;
   font-size: 0.85rem;
   color: hsl(var(--muted-foreground));
+}
+
+/* 生涯图片位（careers.image 留空时显示占位提示） */
+.ab-career-img {
+  width: 100%;
+  height: 8rem;
+  margin-top: 1rem;
+  border-radius: 0.75rem;
+  object-fit: contain;
+  object-position: right center;
+}
+
+.ab-career-img--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed color-mix(in oklab, currentColor 18%, transparent);
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
 }
 
 .ab-timeline {
@@ -394,47 +514,35 @@
   opacity: 0.85;
 }
 
-/* ── 地图 + 个人信息 ───────────────────────────────────────── */
+/* ── 地图位：换成自己的图片（location.image 留空时显示占位提示） ── */
 .ab-map {
   min-height: 223px;
   padding: 0;
   overflow: hidden;
 }
 
-.ab-map-frame {
-  display: none;
-}
-
-/* 瓦片拼图：3 列 × 256px，外层裁剪出固定高度 */
-.ab-map-tiles {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, 256px);
+.ab-map-img {
+  width: 100%;
   height: 170px;
-  overflow: hidden;
-  background: hsl(var(--muted));
-}
-
-.ab-map-tiles img {
-  width: 256px;
-  height: 256px;
   object-fit: cover;
-  /* 瓦片本身是浅色底图，压一点饱和避免抢注意力 */
-  filter: saturate(0.85);
 }
 
-.ab-map-pin {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -100%;
-  color: hsl(var(--primary));
-  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 35%));
+.ab-map-img--empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  background-image: radial-gradient(color-mix(in oklab, currentColor 12%, transparent) 1px, transparent 1px);
+  background-size: 12px 12px;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
 }
 
-.ab-map-pin :global(svg) {
-  width: 1.75rem;
-  height: 1.75rem;
+.ab-map-img--empty :global(svg) {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .ab-map-caption {
@@ -566,20 +674,11 @@
   pointer-events: none;
 }
 
-/* ── 游戏 / 小说 / 关注偏好 / 音乐偏好 ─────────────────────── */
-.ab-game,
-.ab-comic,
-.ab-like {
-  justify-content: flex-start;
-}
-
+/* ── 游戏 / 小说 ───────────────────────────────────────────── */
 .ab-game,
 .ab-comic {
+  justify-content: flex-start;
   min-height: 300px;
-}
-
-.ab-like {
-  min-height: 400px;
 }
 
 /* ── 十年之约 / 赞赏名单 ───────────────────────────────────── */
@@ -673,8 +772,9 @@
     gap: 1rem;
   }
 
-  .ab-tiles {
-    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  .ab-tile {
+    width: 4.5rem;
+    height: 4.5rem;
   }
 
   .ab-hero-title {

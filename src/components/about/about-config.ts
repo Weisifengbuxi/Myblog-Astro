@@ -24,7 +24,13 @@ export const pursuit = {
   tips: '追求',
   line1: '源于',
   line2: '热爱而去 感受',
-  words: ['学习', '生活', '程序', '体验'],
+  /** 每个词一个颜色，轮换时颜色也跟着变，避免整卡只有一个色。 */
+  words: [
+    { text: '学习', color: '#4f7cff' },
+    { text: '生活', color: '#2fb37a' },
+    { text: '程序', color: '#e9536a' },
+    { text: '体验', color: '#f0a020' },
+  ],
 };
 
 export const skills = {
@@ -52,15 +58,15 @@ export const careers = {
   tips: '生涯',
   title: '无限进步',
   timeline: { startYear: '2025', endLabel: '现在', desc: '北师香港浸会大学，计算机科学与技术' },
+  /** 换成你自己的图片地址即可；留空则不显示图片。 */
+  image: '',
 };
 
-/** 所在地。lon/lat 用于拼静态地图瓦片，label 用于文案。 */
+/** 所在地。图片换成你自己的即可；留空则显示占位块。 */
 export const location = {
   tips: '我现在住在',
-  city: '珠海市',
   label: '中国，广东省，珠海市',
-  lon: 113.5767,
-  lat: 22.2707,
+  image: '',
 };
 
 export const selfInfo = [
@@ -85,8 +91,6 @@ export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', 
 
 export const game = { tips: '爱好的游戏', title: '王者荣耀 英雄联盟', uid: 'ID(微信): 未似风不息　ID(QQ): Keepsilent' };
 export const comic = { tips: '爱看小说', title: '在追小说', count: 5 };
-export const likeTech = { tips: '关注偏好', title: '科技', bottom: '手机、电脑软件' };
-export const likeMusic = { tips: '音乐偏好', title: '流行音乐、电音', bottom: '跟未似风不息一起欣赏更多音乐', link: '/music' };
 export const tenyear = { tips: '十年之约', title: '一个人的寂寞，一群人的狂欢。', range: '2025/07/18 — 2035/07/18' };
 
 export const rewardList = [

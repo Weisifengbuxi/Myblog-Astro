@@ -20,8 +20,6 @@ import {
   comic,
   game,
   hello,
-  likeMusic,
-  likeTech,
   location,
   maxim,
   personality,
@@ -39,35 +37,9 @@ import {
 // 全局累计值（实测 4900 万量级，严重失真）。
 const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
 
-/**
- * 静态地图：用高德瓦片拼一张图（3×2 瓦片，256px/块），中心落在 `location`。
- *
- * 为什么不用地图 iframe：`uri.amap.com` 的嵌入页会弹滑块验证（实测显示
- * “请按住滑块”），百度/Google/OSM 在本网络下不可达，高德静态图 API 需要 Key。
- * 瓦片接口无需 Key 且返回真正的中文地图图块。
- */
-const MAP_ZOOM = 11;
-const MAP_COLS = 3;
-const MAP_ROWS = 2;
-
-/** 经纬度 → 瓦片坐标。未配置经纬度时退回珠海市中心。 */
-const lon = location.lon ?? 113.5767;
-const lat = location.lat ?? 22.2707;
-const tileX = Math.floor(((lon + 180) / 360) * 2 ** MAP_ZOOM);
-const latRad = (lat * Math.PI) / 180;
-const tileY = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * 2 ** MAP_ZOOM);
-
-// 左上角瓦片，让「中心」大致落在整张图的中间
-const originX = tileX - Math.floor(MAP_COLS / 2);
-const originY = tileY - Math.floor(MAP_ROWS / 2);
-
-const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
-  const col = index % MAP_COLS;
-  const row = Math.floor(index / MAP_COLS);
-  const x = originX + col;
-  const y = originY + row;
-  return `https://webrd0${(row % 4) + 1}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${x}&y=${y}&z=${MAP_ZOOM}`;
-});
+// 技能轮播：把列表复制一遍，marquee 平移到 -50% 时正好回到起点，形成无缝循环
+// （与旧博客 #skills-tags-group-all 的做法一致）。hover 时切换为完整列表。
+const skillLoop = [...skills.list, ...skills.list];
 ---
 
 <div class="ab" data-site-url={siteUrl}>
@@ -101,7 +73,7 @@ const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
       <br />
       {pursuit.line2}
       <span class="ab-pursuit-mask" data-pursuit-words>
-        {pursuit.words.map((word) => <span class="ab-pursuit-word">{word}</span>)}
+        {pursuit.words.map((word) => <span class="ab-pursuit-word" style={`color:${word.color}`}>{word.text}</span>)}
       </span>
     </h2>
   </section>
@@ -136,15 +108,29 @@ const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
   <section class="ab-card ab-span-12 ab-skills">
     <p class="ab-tips">{skills.tips}</p>
     <h2 class="ab-title">{skills.title}</h2>
-    <div class="ab-tiles">
+    <!-- 默认：横向无限轮播；hover 时淡出，切换为下面那份完整列表 -->
+    <div class="ab-skill-marquee" aria-hidden="true">
+      <div class="ab-skill-track">
+        {
+          skillLoop.map((skill) => (
+            <span class="ab-tile" style={`background:${skill.color}`}>
+              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt="" loading="lazy" />
+            </span>
+          ))
+        }
+      </div>
+    </div>
+    <!-- 完整列表（hover 时显示，可点击/可读） -->
+    <ul class="ab-skill-list">
       {
         skills.list.map((skill) => (
-          <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
-            <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
-          </span>
+          <li class="ab-skill-chip" title={skill.name}>
+            <span class="ab-skill-dot" style={`background:${skill.color}`} />
+            <span>{skill.name}</span>
+          </li>
         ))
       }
-    </div>
+    </ul>
   </section>
 
   <section class="ab-card ab-span-12 ab-careers">
@@ -152,6 +138,15 @@ const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
     <h2 class="ab-title">{careers.title}</h2>
     <p class="ab-career-edu">EDU</p>
     <p class="ab-career-desc">{careers.timeline.desc}</p>
+    {
+      careers.image ? (
+        <img class="ab-career-img" src={careers.image} alt="" loading="lazy" />
+      ) : (
+        <div class="ab-career-img ab-career-img--empty" aria-hidden="true">
+          <span>在 about-config.ts 的 careers.image 填入你的图片</span>
+        </div>
+      )
+    }
     <div class="ab-timeline" aria-hidden="true">
       <span class="ab-timeline-bar" />
       <div class="ab-timeline-labels">
@@ -191,12 +186,16 @@ const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
 
   <div class="ab-stack ab-span-14">
     <section class="ab-card ab-map">
-      <div class="ab-map-tiles" aria-hidden="true">
-        {mapTiles.map((src) => <img src={src} alt="" loading="lazy" />)}
-        <span class="ab-map-pin">
-          <Icon name="ri:map-pin-2-fill" />
-        </span>
-      </div>
+      {
+        location.image ? (
+          <img class="ab-map-img" src={location.image} alt="" loading="lazy" />
+        ) : (
+          <div class="ab-map-img ab-map-img--empty" aria-hidden="true">
+            <Icon name="ri:image-add-line" />
+            <span>在 about-config.ts 的 location.image 填入你的图片</span>
+          </div>
+        )
+      }
       <p class="ab-map-caption">
         {location.tips} <strong>{location.label}</strong>
       </p>
@@ -260,24 +259,6 @@ const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
     <h2 class="ab-title ab-title-lg">{comic.title}</h2>
     <p class="ab-card-bottom">已追 {comic.count} 本</p>
     <Icon name="ri:book-2-fill" class="ab-card-icon" />
-  </section>
-
-  <!-- 第七排：关注偏好 49% + 音乐偏好 49% ---------------------------- -->
-  <section class="ab-card ab-span-12 ab-like">
-    <p class="ab-tips">{likeTech.tips}</p>
-    <h2 class="ab-title ab-title-lg">{likeTech.title}</h2>
-    <p class="ab-card-bottom">{likeTech.bottom}</p>
-    <Icon name="ri:cpu-line" class="ab-card-icon" />
-  </section>
-
-  <section class="ab-card ab-span-12 ab-like">
-    <p class="ab-tips">{likeMusic.tips}</p>
-    <h2 class="ab-title ab-title-lg">{likeMusic.title}</h2>
-    <a class="ab-button" href={likeMusic.link}>
-      <Icon name="ri:arrow-right-circle-line" />
-      <span>更多推荐</span>
-    </a>
-    <Icon name="ri:music-2-fill" class="ab-card-icon" />
   </section>
 
   <!-- 十年之约 + 赞赏名单 -------------------------------------------- -->
