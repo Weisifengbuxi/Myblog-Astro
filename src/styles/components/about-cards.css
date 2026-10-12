@@ -621,6 +621,147 @@
   pointer-events: none;
 }
 
+/* ── 倒计时（移植自 blog.bsgun.cn/posts/68c5cdb9）───────────── */
+.ab-countdown {
+  justify-content: center;
+  min-height: 240px;
+}
+
+.cd-inner {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.cd-left {
+  flex-shrink: 0;
+  min-width: 7.5rem;
+}
+
+.cd-sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.cd-name {
+  margin: 0.15rem 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: hsl(var(--primary));
+}
+
+.cd-days {
+  margin: 0;
+  font-size: 0.9rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.cd-days [data-cd-days] {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-date {
+  margin: 0.1rem 0 0;
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-right {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.cd-item {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.cd-item-name {
+  width: 2.6rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.cd-item-progress {
+  position: relative;
+  flex: 1;
+  height: 1.55rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 8%, transparent);
+}
+
+.cd-bar {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  transition: width 0.4s ease;
+}
+
+/* 百分比与「还剩 X」各贴进度条一端，hover 时互换（同原版行为） */
+.cd-percentage,
+.cd-remaining {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.cd-percentage {
+  right: 0.6rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-percentage.cd-many {
+  color: hsl(var(--primary-foreground, 0 0% 100%));
+}
+
+.cd-remaining {
+  left: 0.6rem;
+  opacity: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.cd-remaining.cd-many {
+  color: hsl(var(--primary-foreground, 0 0% 100%));
+}
+
+.cd-tip {
+  margin: 0 0.15rem;
+  font-size: 0.65rem;
+}
+
+.cd-item-progress:hover .cd-percentage {
+  opacity: 0;
+}
+
+.cd-item-progress:hover .cd-remaining {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .cd-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
 /* ── 十年之约：进度条 ───────────────────────────────────────
    移植自 https://blog.gbfun.cc/posts/5498433.html（原版是 Solitude 主题的效果）。
    进度由 JS 写入 CSS 变量后，用关键帧做入场动画。 */

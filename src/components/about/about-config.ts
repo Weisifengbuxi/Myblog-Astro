@@ -104,6 +104,28 @@ export const tenyear = {
   end: '2035/07/18',
 };
 
+/**
+ * 倒计时卡片。
+ *
+ * 移植自 https://blog.bsgun.cn/posts/68c5cdb9（原版是安知鱼主题的侧边栏组件）。
+ * 左侧显示目标事件与剩余天数，右侧是今日/本周/本月/本年的进度条，
+ * hover 时百分比与「还剩 X」互换。
+ *
+ * targetDate 请用 `Y/M/D` 或 `YYYY-MM-DD` 书写；脚本会统一转成 `Y/M/D` 再交给
+ * Date 解析——带连字符的 `YYYY-MM-DD` 会被当成 UTC，东八区会差一天。
+ */
+export const countdown = {
+  tips: '倒计时',
+  targetDate: '2027/02/06',
+  targetName: '春节',
+  units: {
+    day: { text: '今日', unit: '小时' },
+    week: { text: '本周', unit: '天' },
+    month: { text: '本月', unit: '天' },
+    year: { text: '本年', unit: '天' },
+  },
+};
+
 export const rewardList = [
   { name: '嘟乐妈', amount: 1125.6, date: '2025-10-16' },
   { name: '老孙', amount: 1, date: '2025-07-27' },

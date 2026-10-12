@@ -17,6 +17,7 @@ import { Icon } from 'astro-icon/components';
 import {
   buff,
   careers,
+  countdown,
   hello,
   location,
   maxim,
@@ -238,11 +239,30 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <img src={photo} alt="照片" loading="lazy" />
   </section>
 
-  <!-- 第五排：座右铭 39% + 特长 59% ---------------------------------- -->
+  <!-- 第五排：座右铭 39% + 倒计时 59% -------------------------------- -->
   <section class="ab-card ab-span-10 ab-quote">
     <p class="ab-tips">{maxim.tips}</p>
     <h2 class="ab-quote-line">{maxim.line1}</h2>
     <h2 class="ab-quote-line">{maxim.line2}</h2>
+  </section>
+
+  <!-- 倒计时（移植自 blog.bsgun.cn/posts/68c5cdb9）--------------------- -->
+  <section
+    class="ab-card ab-span-14 ab-countdown"
+    data-countdown
+    data-target={countdown.targetDate}
+    data-target-name={countdown.targetName}
+    data-units={JSON.stringify(countdown.units)}>
+    <p class="ab-tips">{countdown.tips}</p>
+    <div class="cd-inner">
+      <div class="cd-left">
+        <p class="cd-sub">距离</p>
+        <h2 class="cd-name" data-cd-name>{countdown.targetName}</h2>
+        <p class="cd-days"><span data-cd-days>—</span> 天</p>
+        <p class="cd-date" data-cd-date>{countdown.targetDate}</p>
+      </div>
+      <div class="cd-right" data-cd-right />
+    </div>
   </section>
 
   <section class="ab-card ab-span-14 ab-buff">
@@ -402,11 +422,105 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     labelEl.style.visibility = 'visible';
   }
 
+  /**
+   * 把 `YYYY-MM-DD` / `Y/M/D` 统一成 `Y/M/D` 再解析。
+   *
+   * `new Date('2026-02-17')` 会按 UTC 解析，东八区实际落在 02-17 08:00，
+   * 与本地零点比较就会差一天，剩余天数/是否已过期都会错。改成斜杠形式后
+   * Date 按本地时间解析（与十年之约进度条同一处理）。
+   */
+  function parseLocalDate(value: string): Date | null {
+    const match = value.trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (!match) return null;
+    const [, year, month, day] = match;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  /**
+   * 倒计时卡片。
+   *
+   * 移植自 blog.bsgun.cn/posts/68c5cdb9：左侧是剩余天数，右侧按「今日/本周/本月/本年」
+   * 四条进度渲染。百分比 ≥46% 时换色、≥60% 时「还剩」提示也换色（同原版阈值）。
+   */
+  function initCountdown() {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-countdown]')) {
+      if (root.dataset.countdownBound === 'true') continue;
+      root.dataset.countdownBound = 'true';
+
+      const target = parseLocalDate(root.dataset.target ?? '');
+      if (!target) continue;
+
+      const nameEl = root.querySelector<HTMLElement>('[data-cd-name]');
+      const daysEl = root.querySelector<HTMLElement>('[data-cd-days]');
+      const dateEl = root.querySelector<HTMLElement>('[data-cd-date]');
+      const rightEl = root.querySelector<HTMLElement>('[data-cd-right]');
+      if (!nameEl || !daysEl || !dateEl || !rightEl) continue;
+
+      let units: Record<string, { text: string; unit: string }> = {};
+      try {
+        units = JSON.parse(root.dataset.units ?? '{}');
+      } catch {
+        units = {};
+      }
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      nameEl.textContent = root.dataset.targetName ?? '';
+      dateEl.textContent = `${target.getFullYear()}/${target.getMonth() + 1}/${target.getDate()}`;
+      daysEl.textContent = String(Math.round((target.getTime() - today.getTime()) / 86_400_000));
+
+      const calculators: Record<string, () => { remaining: number; percentage: number }> = {
+        day: () => {
+          const hours = new Date().getHours();
+          return { remaining: 24 - hours, percentage: (hours / 24) * 100 };
+        },
+        week: () => {
+          const weekday = new Date().getDay();
+          const passed = weekday === 0 ? 6 : weekday - 1;
+          return { remaining: 6 - passed, percentage: ((passed + 1) / 7) * 100 };
+        },
+        month: () => {
+          const cursor = new Date();
+          const total = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+          const passed = cursor.getDate() - 1;
+          return { remaining: total - passed, percentage: (passed / total) * 100 };
+        },
+        year: () => {
+          const cursor = new Date();
+          const start = new Date(cursor.getFullYear(), 0, 1);
+          const total = 365 + (cursor.getFullYear() % 4 === 0 ? 1 : 0);
+          const passed = Math.floor((cursor.getTime() - start.getTime()) / 86_400_000);
+          return { remaining: total - passed, percentage: (passed / total) * 100 };
+        },
+      };
+
+      rightEl.innerHTML = Object.entries(units)
+        .map(([key, { text, unit }]) => {
+          const calculator = calculators[key];
+          if (!calculator) return '';
+          const { remaining, percentage } = calculator();
+          return `<div class="cd-item">
+            <span class="cd-item-name">${text}</span>
+            <div class="cd-item-progress">
+              <span class="cd-bar" style="width:${percentage}%;opacity:${percentage / 100}"></span>
+              <span class="cd-percentage${percentage >= 46 ? ' cd-many' : ''}">${percentage.toFixed(2)}%</span>
+              <span class="cd-remaining${percentage >= 60 ? ' cd-many' : ''}">
+                <span class="cd-tip">还剩</span>${remaining}<span class="cd-tip">${unit}</span>
+              </span>
+            </div>
+          </div>`;
+        })
+        .join('');
+    }
+  }
+
   function initAbout() {
     initHelloBig();
     initPursuit();
     initVisitor();
     initTenYearProgress();
+    initCountdown();
   }
 
   initAbout();
