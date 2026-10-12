@@ -113,15 +113,15 @@ const targetDate = toLocalDate(countdown.targetDate);
           const { remaining, percentage } = calculator();
           const manyClass = percentage >= 46 ? ' sc-many' : '';
           const manyClassRemaining = percentage >= 60 ? ' sc-many' : '';
-          return `<div class="sc-item">
+          return `<div class="sc-item" data-sc-item>
             <span class="sc-item-name">${text}</span>
             <div class="sc-item-progress">
               <span class="sc-bar" style="width:${percentage}%"></span>
-              <span class="sc-percentage${manyClass}">${percentage.toFixed(2)}%</span>
               <span class="sc-remaining${manyClassRemaining}">
                 <span class="sc-tip">还剩</span>${remaining}<span class="sc-tip">${unit}</span>
               </span>
             </div>
+            <span class="sc-percentage${manyClass}">${percentage.toFixed(2)}%</span>
           </div>`;
         })
         .join('');

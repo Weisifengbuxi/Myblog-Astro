@@ -86,51 +86,52 @@
   transition: width 0.4s ease;
 }
 
-/* 百分比与「还剩 X」各贴进度条一端，hover 时互换（同原版行为） */
-.sc-percentage,
-.sc-remaining {
-  position: absolute;
-  top: 50%;
-  translate: 0 -50%;
+/* 百分比放在进度条**外侧**的固定列里。
+   之前放在条内右端，而四行的填充宽度差异很大（4%~78%），同一列文字底下
+   时而浅灰、时而粉红、时而半粉半灰，观感上就"有的清楚有的糊"。
+   移到条外后四种情况底色一致，颜色也就统一了。 */
+.sc-percentage {
+  width: 2.9rem;
+  flex-shrink: 0;
   font-size: 0.65rem;
-  white-space: nowrap;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  text-align: right;
+  font-variant-numeric: tabular-nums;
   transition: opacity 0.2s ease;
 }
 
-.sc-percentage {
-  right: 0.5rem;
-  font-weight: 600;
-  color: hsl(var(--muted-foreground));
-  font-variant-numeric: tabular-nums;
-}
-
-/* 文字落在已填充的进度上时改纯白：本主题的 --primary-foreground 是淡粉
-   （355.7 100% 97.3%），压在 --primary 上对比度几乎为零，这里不能用它。 */
 .sc-percentage.sc-many {
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  color: hsl(var(--foreground));
 }
 
+/* 「还剩 X」只在悬停时出现，压在进度条左端。
+   加一层半透明深色底：无论落在填充上还是轨道上都能读清。 */
 .sc-remaining {
-  left: 0.5rem;
+  position: absolute;
+  top: 50%;
+  left: 0.35rem;
+  translate: 0 -50%;
+  padding: 0.1rem 0.4rem;
+  border-radius: 9999px;
   opacity: 0;
-  color: hsl(var(--muted-foreground));
-}
-
-.sc-remaining.sc-many {
   color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  font-size: 0.65rem;
+  white-space: nowrap;
+  background: rgb(0 0 0 / 32%);
+  transition: opacity 0.2s ease;
 }
 
 .sc-tip {
-  margin: 0 0.1rem;
+  margin: 0 0.15rem;
   font-size: 0.6rem;
 }
 
-.sc-item-progress:hover .sc-percentage {
+/* 悬停：该行数字隐去、「还剩 X」淡入 */
+.sc-item:hover .sc-percentage {
   opacity: 0;
 }
 
-.sc-item-progress:hover .sc-remaining {
+.sc-item:hover .sc-remaining {
   opacity: 1;
 }
