@@ -99,7 +99,6 @@ export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', 
 export const tenyear = {
   tips: '十年之约',
   title: '一个人的寂寞，一群人的狂欢。',
-  text: '2025 年 7 月 18 日，我加入了十年之约。',
   start: '2025/07/18',
   end: '2035/07/18',
 };

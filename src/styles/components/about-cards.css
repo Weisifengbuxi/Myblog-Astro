@@ -770,12 +770,6 @@
   min-height: 160px;
 }
 
-.ab-tenyear-text {
-  margin: 0.5rem 0 0;
-  font-size: 0.85rem;
-  color: hsl(var(--muted-foreground));
-}
-
 .ab-tenyear-timeline {
   position: relative;
   width: 100%;
