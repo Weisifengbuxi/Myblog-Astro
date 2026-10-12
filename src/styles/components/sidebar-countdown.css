@@ -1,0 +1,136 @@
+/**
+ * 侧边栏倒计时卡片。
+ *
+ * 移植自 https://blog.bsgun.cn/posts/68c5cdb9（原版是安知鱼主题的侧边栏组件）。
+ * 这里按侧边栏 18rem 的宽度重排：上方是事件与剩余天数，下方是四条紧凑进度。
+ */
+
+.sc-countdown {
+  padding: 0.85rem 1rem 1rem;
+  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+  border-radius: 12px;
+  background: hsl(var(--card, var(--background)));
+}
+
+.sc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sc-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: hsl(var(--primary));
+}
+
+.sc-days {
+  display: flex;
+  gap: 0.2rem;
+  align-items: baseline;
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.sc-days-num {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.sc-date {
+  margin: 0.2rem 0 0.7rem;
+  font-size: 0.68rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.sc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sc-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.sc-item-name {
+  width: 2.2rem;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.sc-item-progress {
+  position: relative;
+  flex: 1;
+  height: 1.35rem;
+  min-width: 0;
+  border-radius: 9999px;
+  background: color-mix(in oklab, currentColor 8%, transparent);
+}
+
+.sc-bar {
+  display: block;
+  height: 100%;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  transition: width 0.4s ease;
+}
+
+/* 百分比与「还剩 X」各贴进度条一端，hover 时互换（同原版行为） */
+.sc-percentage,
+.sc-remaining {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.sc-percentage {
+  right: 0.5rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* 文字落在已填充的进度上时改纯白：本主题的 --primary-foreground 是淡粉
+   （355.7 100% 97.3%），压在 --primary 上对比度几乎为零，这里不能用它。 */
+.sc-percentage.sc-many {
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+
+.sc-remaining {
+  left: 0.5rem;
+  opacity: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.sc-remaining.sc-many {
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+
+.sc-tip {
+  margin: 0 0.1rem;
+  font-size: 0.6rem;
+}
+
+.sc-item-progress:hover .sc-percentage {
+  opacity: 0;
+}
+
+.sc-item-progress:hover .sc-remaining {
+  opacity: 1;
+}

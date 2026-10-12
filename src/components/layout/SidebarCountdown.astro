@@ -1,0 +1,141 @@
+---
+/**
+ * 侧边栏倒计时卡片。
+ *
+ * 移植自 https://blog.bsgun.cn/posts/68c5cdb9（原版是安知鱼主题的侧边栏组件）。
+ * 数据在 `@components/about/about-config.ts` 的 `countdown` 里改。
+ *
+ * 渲染时把日期规范化成 `Y/M/D` 并写入 data-date：带连字符的 `YYYY-MM-DD`
+ * 会被 `new Date()` 当成 UTC 解析，东八区会差一天（剩余天数与是否过期都会错）。
+ */
+import { countdown } from '@components/about/about-config';
+
+/** 规范成本地可解析的 `Y/M/D`。 */
+function toLocalDate(value: string): string {
+  const match = value.trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+  if (!match) return value;
+  const [, year, month, day] = match;
+  return `${Number(year)}/${Number(month)}/${Number(day)}`;
+}
+
+const targetDate = toLocalDate(countdown.targetDate);
+---
+
+<div
+  class="sc-countdown"
+  data-sidebar-countdown
+  data-target={targetDate}
+  data-target-name={countdown.targetName}
+  data-units={JSON.stringify(countdown.units)}
+>
+  <div class="sc-head">
+    <h2 class="sc-name" data-cd-name>{countdown.targetName}</h2>
+    <span class="sc-days"><span class="sc-days-num" data-cd-days>—</span>天</span>
+  </div>
+  <p class="sc-date" data-cd-date>{targetDate}</p>
+  <div class="sc-list" data-sidebar-countdown-list />
+</div>
+
+<script>
+  type CountdownUnit = { text: string; unit: string };
+  type CountdownResult = { remaining: number; percentage: number };
+
+  /**
+   * 把 `YYYY-MM-DD` / `Y/M/D` 规范成 `Y/M/D` 再解析。
+   *
+   * `new Date('2026-02-17')` 按 UTC 解析，东八区实际是 02-17 08:00，
+   * 与本地零点比较会差一天，剩余天数与是否过期都会错。
+   */
+  function parseLocalDate(value: string): Date | null {
+    const match = value.trim().match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (!match) return null;
+    const [, year, month, day] = match;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
+  const calculators: Record<string, () => CountdownResult> = {
+    day: () => {
+      const hours = new Date().getHours();
+      return { remaining: 24 - hours, percentage: (hours / 24) * 100 };
+    },
+    week: () => {
+      const weekday = new Date().getDay();
+      const passed = weekday === 0 ? 6 : weekday - 1;
+      return { remaining: 6 - passed, percentage: ((passed + 1) / 7) * 100 };
+    },
+    month: () => {
+      const cursor = new Date();
+      const total = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+      const passed = cursor.getDate() - 1;
+      return { remaining: total - passed, percentage: (passed / total) * 100 };
+    },
+    year: () => {
+      const cursor = new Date();
+      const start = new Date(cursor.getFullYear(), 0, 1);
+      const total = 365 + (cursor.getFullYear() % 4 === 0 ? 1 : 0);
+      const passed = Math.floor((cursor.getTime() - start.getTime()) / 86_400_000);
+      return { remaining: total - passed, percentage: (passed / total) * 100 };
+    },
+  };
+
+  function initSidebarCountdown() {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-sidebar-countdown]')) {
+      if (root.dataset.scBound === 'true') continue;
+      root.dataset.scBound = 'true';
+
+      const target = parseLocalDate(root.dataset.target ?? '');
+      if (!target) continue;
+
+      const nameEl = root.querySelector<HTMLElement>('[data-cd-name]');
+      const daysEl = root.querySelector<HTMLElement>('[data-cd-days]');
+      const dateEl = root.querySelector<HTMLElement>('[data-cd-date]');
+      const listEl = root.querySelector<HTMLElement>('[data-sidebar-countdown-list]');
+      if (!nameEl || !daysEl || !dateEl || !listEl) continue;
+
+      let units: Record<string, CountdownUnit> = {};
+      try {
+        units = JSON.parse(root.dataset.units ?? '{}') as Record<string, CountdownUnit>;
+      } catch {
+        units = {};
+      }
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      nameEl.textContent = root.dataset.targetName ?? '';
+      dateEl.textContent = `${target.getFullYear()}/${target.getMonth() + 1}/${target.getDate()}`;
+      daysEl.textContent = String(Math.round((target.getTime() - today.getTime()) / 86_400_000));
+
+      listEl.innerHTML = Object.entries(units)
+        .map(([key, { text, unit }]) => {
+          const calculator = calculators[key];
+          if (!calculator) return '';
+          const { remaining, percentage } = calculator();
+          const manyClass = percentage >= 46 ? ' sc-many' : '';
+          const manyClassRemaining = percentage >= 60 ? ' sc-many' : '';
+          return `<div class="sc-item">
+            <span class="sc-item-name">${text}</span>
+            <div class="sc-item-progress">
+              <span class="sc-bar" style="width:${percentage}%"></span>
+              <span class="sc-percentage${manyClass}">${percentage.toFixed(2)}%</span>
+              <span class="sc-remaining${manyClassRemaining}">
+                <span class="sc-tip">还剩</span>${remaining}<span class="sc-tip">${unit}</span>
+              </span>
+            </div>
+          </div>`;
+        })
+        .join('');
+    }
+  }
+
+  function boot() {
+    initSidebarCountdown();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+  document.addEventListener('astro:page-load', boot);
+</script>
