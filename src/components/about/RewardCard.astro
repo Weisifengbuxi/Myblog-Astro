@@ -1,0 +1,29 @@
+---
+/**
+ * 赞赏名单卡片。
+ *
+ * 单独成组件是因为它不跟随卡片墙排布，而是放在「关于本站」正文**之后**，
+ * 由 `AboutPage.astro` 渲染。
+ *
+ * 样式复用 about-cards.css 里的 `.ab-card` / `.ab-reward*`。
+ */
+import { rewardList } from './about-config';
+---
+
+<div class="ab ab-reward-standalone">
+  <section class="ab-card ab-span-24 ab-reward">
+    <p class="ab-tips">赞赏名单</p>
+    <p class="ab-reward-thanks">感谢因为有你们，让我更加有创作的动力。</p>
+    <ul class="ab-reward-list">
+      {
+        rewardList.map((item) => (
+          <li class="ab-reward-item">
+            <span class="ab-reward-name">{item.name}</span>
+            <span class="ab-reward-amount">{item.amount} 贝壳</span>
+            <span class="ab-reward-date">{item.date}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>

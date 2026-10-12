@@ -74,22 +74,6 @@
   line-height: 1.15;
 }
 
-.ab-card-bottom {
-  margin: auto 0 0;
-  font-size: 0.82rem;
-  color: hsl(var(--muted-foreground));
-}
-
-.ab-card-icon {
-  position: absolute;
-  right: 1.5rem;
-  bottom: 1.25rem;
-  width: 4.5rem;
-  height: 4.5rem;
-  opacity: 0.1;
-  pointer-events: none;
-}
-
 /* ── 作者头部：头像居中 + 左右标签 + 页面大标题 ──────────────── */
 .ab-hero {
   display: flex;
@@ -385,11 +369,6 @@
   }
 }
 
-/* ── 生涯：时间轴 ───────────────────────────────────────────── */
-.ab-careers {
-  min-height: 450px;
-}
-
 .ab-career-edu {
   margin: 1.75rem 0 0;
   font-size: 1rem;
@@ -421,38 +400,6 @@
   font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
   text-align: center;
-}
-
-.ab-timeline {
-  margin-top: auto;
-}
-
-.ab-timeline-bar {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  width: 100%;
-  height: 2.75rem;
-  border-radius: 9999px;
-  background: color-mix(in oklab, currentColor 8%, transparent);
-}
-
-.ab-timeline-bar::after {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 55%;
-  border-radius: 9999px;
-  background: hsl(var(--primary));
-}
-
-.ab-timeline-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.4rem;
-  font-size: 0.78rem;
-  color: hsl(var(--muted-foreground));
 }
 
 /* ── 访问统计（39%，380px）─────────────────────────────────── */
@@ -674,13 +621,6 @@
   pointer-events: none;
 }
 
-/* ── 游戏 / 小说 ───────────────────────────────────────────── */
-.ab-game,
-.ab-comic {
-  justify-content: flex-start;
-  min-height: 300px;
-}
-
 /* ── 十年之约 / 赞赏名单 ───────────────────────────────────── */
 .ab-tenyear {
   justify-content: center;
@@ -696,6 +636,11 @@
 
 .ab-reward {
   min-height: 200px;
+}
+
+/* 独立放在正文之后的赞赏名单（RewardCard.astro） */
+.ab-reward-standalone {
+  margin-top: 2rem;
 }
 
 .ab-reward-thanks {

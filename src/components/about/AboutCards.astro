@@ -17,8 +17,6 @@ import { Icon } from 'astro-icon/components';
 import {
   buff,
   careers,
-  comic,
-  game,
   hello,
   location,
   maxim,
@@ -26,7 +24,6 @@ import {
   photo,
   profile,
   pursuit,
-  rewardList,
   SKILL_ICON_BASE,
   selfInfo,
   skills,
@@ -137,7 +134,7 @@ const skillLoop = [...skills.list, ...skills.list];
     <p class="ab-tips">{careers.tips}</p>
     <h2 class="ab-title">{careers.title}</h2>
     <p class="ab-career-edu">EDU</p>
-    <p class="ab-career-desc">{careers.timeline.desc}</p>
+    <p class="ab-career-desc">{careers.desc}</p>
     {
       careers.image ? (
         <img class="ab-career-img" src={careers.image} alt="" loading="lazy" />
@@ -147,13 +144,6 @@ const skillLoop = [...skills.list, ...skills.list];
         </div>
       )
     }
-    <div class="ab-timeline" aria-hidden="true">
-      <span class="ab-timeline-bar" />
-      <div class="ab-timeline-labels">
-        <span>{careers.timeline.startYear}</span>
-        <span>{careers.timeline.endLabel}</span>
-      </div>
-    </div>
   </section>
 
   <!-- 第三排：访问统计 39% + 右侧（地图 + 个人信息）59% ---------------- -->
@@ -246,42 +236,11 @@ const skillLoop = [...skills.list, ...skills.list];
     <Icon name="ri:gamepad-fill" class="ab-buff-icon" />
   </section>
 
-  <!-- 第六排：爱好的游戏 59% + 在追小说 39% -------------------------- -->
-  <section class="ab-card ab-span-14 ab-game">
-    <p class="ab-tips">{game.tips}</p>
-    <h2 class="ab-title ab-title-lg">{game.title}</h2>
-    <p class="ab-card-bottom">{game.uid}</p>
-    <Icon name="ri:gamepad-fill" class="ab-card-icon" />
-  </section>
-
-  <section class="ab-card ab-span-10 ab-comic">
-    <p class="ab-tips">{comic.tips}</p>
-    <h2 class="ab-title ab-title-lg">{comic.title}</h2>
-    <p class="ab-card-bottom">已追 {comic.count} 本</p>
-    <Icon name="ri:book-2-fill" class="ab-card-icon" />
-  </section>
-
-  <!-- 十年之约 + 赞赏名单 -------------------------------------------- -->
+  <!-- 十年之约 ------------------------------------------------------ -->
   <section class="ab-card ab-span-24 ab-tenyear">
     <p class="ab-tips">{tenyear.tips}</p>
     <h2 class="ab-title ab-title-lg">{tenyear.title}</h2>
     <p class="ab-tenyear-range">{tenyear.range}</p>
-  </section>
-
-  <section class="ab-card ab-span-24 ab-reward">
-    <p class="ab-tips">赞赏名单</p>
-    <p class="ab-reward-thanks">感谢因为有你们，让我更加有创作的动力。</p>
-    <ul class="ab-reward-list">
-      {
-        rewardList.map((item) => (
-          <li class="ab-reward-item">
-            <span class="ab-reward-name">{item.name}</span>
-            <span class="ab-reward-amount">{item.amount} 贝壳</span>
-            <span class="ab-reward-date">{item.date}</span>
-          </li>
-        ))
-      }
-    </ul>
   </section>
 </div>
 

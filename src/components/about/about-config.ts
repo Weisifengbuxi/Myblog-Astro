@@ -57,7 +57,7 @@ export const SKILL_ICON_BASE = 'https://unpkg.com/simple-icons@13/icons';
 export const careers = {
   tips: '生涯',
   title: '无限进步',
-  timeline: { startYear: '2025', endLabel: '现在', desc: '北师香港浸会大学，计算机科学与技术' },
+  desc: '北师香港浸会大学，计算机科学与技术',
   /** 换成你自己的图片地址即可；留空则不显示图片。 */
   image: '',
 };
@@ -89,8 +89,6 @@ export const photo = 'https://s21.ax1x.com/2025/09/02/pVgQUpj.jpg';
 export const maxim = { tips: '座右铭', line1: '谁无狂风劲雨时', line2: '拨开云雾见天日' };
 export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', line2: '意识流编写代码' };
 
-export const game = { tips: '爱好的游戏', title: '王者荣耀 英雄联盟', uid: 'ID(微信): 未似风不息　ID(QQ): Keepsilent' };
-export const comic = { tips: '爱看小说', title: '在追小说', count: 5 };
 export const tenyear = { tips: '十年之约', title: '一个人的寂寞，一群人的狂欢。', range: '2025/07/18 — 2035/07/18' };
 
 export const rewardList = [

@@ -1,15 +1,18 @@
 ---
 /**
- * 关于页内容 —— 卡片墙 + 正文。
+ * 关于页内容 —— 卡片墙 + 正文 + 赞赏名单。
  *
  * 由 `src/pages/about/index.astro` 与 `src/pages/[lang]/about.astro` 共同引用，
  * 保证两种路由渲染结果完全一致。
  *
  * 正文用 `.md` 而不是 `.mdx`：`.mdx` 被 `.astro` 导入时不会编译，页面会把
  * `import ...` 语句当正文打印出来（实测踩过），`.md` 则正常渲染成 HTML。
+ *
+ * 顺序：卡片墙 → 正文（关于本站）→ 赞赏名单。
  */
 import AboutBody from '../../pages/_shared/about-body.md';
 import AboutCards from './AboutCards.astro';
+import RewardCard from './RewardCard.astro';
 ---
 
 <AboutCards />
@@ -17,3 +20,5 @@ import AboutCards from './AboutCards.astro';
 <div class="prose dark:prose-invert mt-8 max-w-full">
   <AboutBody />
 </div>
+
+<RewardCard />
