@@ -1,0 +1,578 @@
+/**
+ * 关于页卡片墙 —— 版式按旧 Hexo 博客实测值复刻，视觉使用本站设计令牌。
+ *
+ * 尺寸来源（旧站实测）：
+ *   容器 1352px · 圆角 24px · 内边距 1rem 2rem · tips 12px · 大字 36px
+ *   行内配比：59%+39% / 49%+49% / 100%
+ * 用 24 列网格表达：14+10、12+12、24。
+ */
+
+.ab {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 1352px;
+  margin: 1.5rem auto;
+}
+
+/* 跨列工具类 */
+.ab-span-24 {
+  grid-column: span 24;
+}
+.ab-span-18 {
+  grid-column: span 18;
+}
+.ab-span-14 {
+  grid-column: span 14;
+}
+.ab-span-12 {
+  grid-column: span 12;
+}
+.ab-span-10 {
+  grid-column: span 10;
+}
+.ab-span-6 {
+  grid-column: span 6;
+}
+
+/* 右列纵向堆叠（地图 + 个人信息） */
+.ab-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ab-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 2rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+  border-radius: 24px;
+  background: hsl(var(--card, var(--background)));
+}
+
+.ab-tips {
+  margin: 0 0 0.5rem;
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0.8;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.ab-title-lg {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* ── 第一排左：自我介绍（59%）───────────────────────────────── */
+.ab-hello {
+  justify-content: center;
+  min-height: 196px;
+  /* 旧站是蓝紫→青的渐变背景，这里改用主题色低透明度，保持站点色调 */
+  background: linear-gradient(120deg, hsl(var(--primary) / 0.14), hsl(var(--primary) / 0.04));
+}
+
+.ab-hello-name {
+  margin: 0.5rem 0;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ab-hello-word {
+  background: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--primary) / 0.55));
+  background-clip: text;
+  color: transparent;
+}
+
+.ab-hello-sub {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.ab-hello-avatar {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ── 第一排右：追求（39%）───────────────────────────────────── */
+.ab-pursuit {
+  justify-content: center;
+  min-height: 196px;
+}
+
+.ab-pursuit-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.ab-pursuit-mask {
+  position: relative;
+  display: block;
+  height: 1.3em;
+  overflow: hidden;
+}
+
+.ab-pursuit-word {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  color: hsl(var(--primary));
+  opacity: 0;
+  transform: translateY(110%);
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease;
+}
+
+.ab-pursuit-word.is-current {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ab-pursuit-word.is-previous {
+  opacity: 0;
+  transform: translateY(-110%);
+}
+
+/* ── Hello there!：色块在字母笔画里游走（SVG mask）─────────────
+   文字作为 SVG mask（黑色底 + 白色文字），mask 之内显示的是渐变底色与
+   几个色块；色块随鼠标平移，于是看起来像从字母里穿过去。
+   底色与色块都用主题色，圆的半径写在 SVG 属性里（mask 单位下不随 CSS 变）。 */
+.ab-hello-big {
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 1.5rem 2rem;
+}
+
+.ab-hello-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 200px;
+  overflow: visible;
+  /* mask 内文字的底色（未被动效色块覆盖的部分）——调淡以突出移动的色块 */
+  --ab-hello-base: hsl(var(--primary) / 0.32);
+}
+
+.ab-hello-svg .ab-blob,
+.ab-hello-svg .ab-blob-cursor {
+  fill: hsl(var(--primary) / 0.7);
+  will-change: transform;
+}
+
+.ab-hello-svg .ab-blob-2 {
+  fill: hsl(var(--primary) / 0.85);
+}
+
+.ab-hello-svg .ab-blob-3 {
+  fill: hsl(var(--primary));
+}
+
+.ab-hello-svg .ab-blob-cursor {
+  fill: hsl(var(--primary));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ab-hello-svg .ab-blob,
+  .ab-hello-svg .ab-blob-cursor {
+    will-change: auto;
+  }
+}
+
+/* ── 技能：5 个一排的大方色块 ───────────────────────────────── */
+.ab-skills {
+  min-height: 450px;
+}
+
+.ab-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.ab-tile {
+  display: flex;
+  align-items: flex-end;
+  height: 4.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 1rem;
+  background: var(--tile, hsl(var(--primary)));
+}
+
+.ab-tile-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+}
+
+/* ── 生涯（49%，450px）─────────────────────────────────────── */
+.ab-careers {
+  min-height: 450px;
+}
+
+.ab-career-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ab-career-item {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.ab-career-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: hsl(var(--primary) / 0.6);
+}
+
+/* ── 访问统计（39%，380px）─────────────────────────────────── */
+.ab-statistic {
+  min-height: 380px;
+}
+
+.ab-stat-numbers {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.25rem;
+}
+
+.ab-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ab-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ab-stat-label {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-stat-source {
+  margin: auto 0 0;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* 胶囊按钮（旧站的 banner-button） */
+.ab-button {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  align-self: flex-end;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground, 0 0% 100%));
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.ab-button:hover {
+  opacity: 0.85;
+}
+
+/* ── 地图（59%，223px）+ 个人信息（149px）──────────────────── */
+.ab-map {
+  min-height: 223px;
+}
+
+.ab-map-graphic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 4rem;
+  margin-top: 0.75rem;
+  border: 1px dashed color-mix(in oklab, currentColor 18%, transparent);
+  border-radius: 0.75rem;
+  background-image: radial-gradient(color-mix(in oklab, currentColor 12%, transparent) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+.ab-map-graphic :global(svg) {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: hsl(var(--primary));
+}
+
+.ab-self {
+  flex-direction: row;
+  gap: 2rem;
+  align-items: center;
+  /* 地图 223 + 间距 16 + 本卡 149 ≈ 388，与左侧「访问统计」380 对齐 */
+  min-height: 149px;
+}
+
+.ab-self-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ab-self-tips {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-self-content {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+/* ── 性格（59%，240px）+ 图片位（39%）──────────────────────── */
+.ab-personality {
+  min-height: 240px;
+}
+
+.ab-personality-name {
+  margin: 0.5rem 0 0;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.ab-personality-type {
+  margin: 0.25rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--muted-foreground));
+  letter-spacing: 0.02em;
+}
+
+.ab-personality-icon {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+}
+
+.ab-personality-link {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+}
+
+.ab-personality-link:hover {
+  color: hsl(var(--primary));
+}
+
+/* 图片位：图片用绝对定位占满卡片，避免图片把整行网格撑高 */
+.ab-photo {
+  min-height: 240px;
+  padding: 0;
+}
+
+.ab-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── 座右铭（49%，200px）+ 特长（49%）────────────────────── */
+.ab-quote {
+  justify-content: center;
+  min-height: 200px;
+}
+
+.ab-quote-top,
+.ab-quote-bottom {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.ab-quote-bottom {
+  margin-top: 0.35rem;
+}
+
+.ab-buff {
+  justify-content: center;
+  min-height: 200px;
+  background: linear-gradient(120deg, hsl(var(--primary) / 0.16), hsl(var(--primary) / 0.05));
+}
+
+/* ── 游戏（59%，300px）+ 小说（39%）────────────────────────── */
+.ab-game,
+.ab-comic {
+  min-height: 300px;
+  justify-content: flex-start;
+}
+
+.ab-game-uid {
+  margin: auto 0 0;
+  font-size: 0.82rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.ab-comic-count {
+  margin: auto 0 0;
+  font-size: 0.82rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-game-icon {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.25rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* ── 关注偏好 / 音乐偏好（各 49%，400px）───────────────────── */
+.ab-like {
+  min-height: 400px;
+  justify-content: flex-start;
+}
+
+.ab-like-bottom {
+  margin: auto 0 0;
+  font-size: 0.9rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── 十年之约（100%）──────────────────────────────────────── */
+.ab-tenyear {
+  justify-content: center;
+  min-height: 160px;
+}
+
+.ab-tenyear-range {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 赞赏名单（100%，371px）────────────────────────────────── */
+.ab-reward {
+  min-height: 200px;
+}
+
+.ab-reward-thanks {
+  margin: 0;
+  font-size: 0.88rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-reward-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ab-reward-item {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid color-mix(in oklab, currentColor 10%, transparent);
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.ab-reward-name {
+  font-weight: 600;
+}
+
+.ab-reward-amount {
+  color: hsl(var(--primary));
+}
+
+.ab-reward-date {
+  margin-inline-start: auto;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 响应式：窄屏单列 ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ab {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ab-card,
+  .ab-stack {
+    grid-column: span 1;
+  }
+
+  .ab-hello,
+  .ab-pursuit,
+  .ab-skills,
+  .ab-careers,
+  .ab-statistic,
+  .ab-map,
+  .ab-quote,
+  .ab-buff,
+  .ab-game,
+  .ab-comic,
+  .ab-like {
+    min-height: 0;
+  }
+
+  .ab-self {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .ab-tiles {
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  }
+
+  .ab-hello-text {
+    font-size: 3.5rem;
+  }
+}

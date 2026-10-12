@@ -1,0 +1,394 @@
+---
+import { siteConfig } from '@constants/site-config';
+/**
+ * 关于页卡片墙。
+ *
+ * 版式与尺寸**按旧 Hexo 博客（anzhiyu 主题）实测值复刻**：
+ *   容器宽 1352px、卡片圆角 24px、内边距 1rem 2rem、tips 12px、大数字号 36px。
+ *   行内配比：第一排 59%+39%，其余 49%+49%，另有 49% / 59%+39% / 完整 100% 三种横排。
+ *   用 24 列网格实现：59%≈14 列、39%≈10 列、49%≈12 列、76%≈18 列、100%=24 列。
+ *
+ * 视觉**不使用旧主题的图片背景与渐变**，改用本站的 border/rounded/bg 与主题色，
+ * 因此自动跟随明暗模式。唯一按旧站做法保留的是 hello-about 的「大色块跟随鼠标
+ * 挖空露字」——那是这张卡片的核心视觉，去掉就只剩一行大字了。
+ */
+import { Icon } from 'astro-icon/components';
+
+// 访问统计必须上报线上站点地址：本地/预览域名会被 busuanzi 视作未知站点并返回
+// 全局累计值（实测 4900 万量级，严重失真）。
+const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
+
+const profile = {
+  hello: '你好，很高兴认识你👋',
+  name: '未似风不息',
+  description: '是一名 学生、博主',
+  avatar: 'https://images.weserv.nl/?url=https://raw.githubusercontent.com/Weisifengbuxi/tuchuang/main/img/Wechat.jpg',
+};
+
+const pursuit = { tips: '追求', line1: '源于', line2: '热爱而去 感受', words: ['学习', '生活', '程序', '体验'] };
+
+const skillTiles = [
+  { name: 'HTML', color: '#e34c26' },
+  { name: 'CSS', color: '#264de4' },
+  { name: 'JavaScript', color: '#f1e05a' },
+  { name: 'TypeScript', color: '#3178c6' },
+  { name: 'Vue', color: '#41b883' },
+  { name: 'React', color: '#61dafb' },
+  { name: 'Node.js', color: '#339933' },
+  { name: 'Python', color: '#3572a5' },
+  { name: 'Java', color: '#b07219' },
+  { name: 'Git', color: '#f05032' },
+];
+
+const careers = {
+  tips: '生涯',
+  title: '无限进步',
+  list: ['EDU,计算机科学与技术', 'EDU,计算机科学与技术'],
+};
+
+const selfInfo = [
+  { tips: '生于', content: '2006' },
+  { tips: '北师香港浸会大学', content: '计算机科学与技术' },
+  { tips: '现在职业', content: '大三学生👨‍🎓' },
+];
+
+const personality = {
+  tips: '性格',
+  name: '提倡者',
+  type: 'INFJ-A',
+  img: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/INFJ-A.svg',
+  name_url: 'https://www.16personalities.com/ch/infj-%E4%BA%BA%E6%A0%BC',
+};
+
+const maxim = { tips: '座右铭', top: '谁无狂风劲雨时', bottom: '拨开云雾见天日' };
+const buff = { tips: '特长', top: 'MOBA，非射击类竞技游戏（专精射手，全能辅助）', bottom: '意识流编写代码' };
+
+const game = { tips: '爱好的游戏', title: '王者荣耀 英雄联盟', uid: 'ID(微信): 未似风不息　ID(QQ): Keepsilent' };
+const comic = { tips: '爱看小说', title: '在追小说', count: 5 };
+const likeTech = { tips: '关注偏好', title: '科技', bottom: '手机、电脑软件' };
+const likeMusic = { tips: '音乐偏好', title: '流行音乐、电音', bottom: '跟未似风不息一起欣赏更多音乐', link: '/music' };
+const tenyear = { tips: '十年之约', title: '一个人的寂寞，一群人的狂欢。', range: '2025/07/18 — 2035/07/18' };
+
+const rewardList = [
+  { name: '嘟乐妈', amount: 1125.6, date: '2025-10-16' },
+  { name: '老孙', amount: 1, date: '2025-07-27' },
+  { name: '*哥', amount: 1, date: '2025-07-27' },
+  { name: '孙点点', amount: 200, date: '2025-07-29' },
+  { name: '华', amount: 500, date: '2025-07-30' },
+  { name: '睡觉哇', amount: 6, date: '2025-07-30' },
+];
+---
+
+<div class="ab" data-site-url={siteUrl}>
+  <!-- 第一排：自我介绍 59% + 追求 39% -------------------------------- -->
+  <section class="ab-card ab-span-14 ab-hello">
+    <p class="ab-tips">{profile.hello}</p>
+    <p class="ab-hello-name">
+      我叫 <span class="ab-hello-word">{profile.name}</span>
+    </p>
+    <p class="ab-hello-sub">{profile.description}</p>
+    <img class="ab-hello-avatar" src={profile.avatar} alt={profile.name} loading="lazy" />
+  </section>
+
+  <section class="ab-card ab-span-10 ab-pursuit">
+    <p class="ab-tips">{pursuit.tips}</p>
+    <h2 class="ab-pursuit-title">
+      {pursuit.line1}
+      <br />
+      {pursuit.line2}
+      <span class="ab-pursuit-mask" data-pursuit-words>
+        {pursuit.words.map((word) => <span class="ab-pursuit-word">{word}</span>)}
+      </span>
+    </h2>
+  </section>
+
+  <!-- Hello there!：色块在字母笔画里游走（SVG mask 实现）------------- -->
+  <section class="ab-card ab-span-24 ab-hello-big" data-hello-card>
+    <svg class="ab-hello-svg" viewBox="0 0 1000 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <mask id="ab-hello-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="200">
+          <rect x="0" y="0" width="1000" height="200" fill="#000" />
+          <text
+            x="500"
+            y="100"
+            text-anchor="middle"
+            dominant-baseline="central"
+            font-size="150"
+            font-weight="800"
+            fill="#fff">Hello there!</text>
+        </mask>
+      </defs>
+      <g mask="url(#ab-hello-mask)">
+        <rect x="0" y="0" width="1000" height="200" fill="var(--ab-hello-base)" />
+        <circle class="ab-blob ab-blob-1" r="110" cx="500" cy="100" />
+        <circle class="ab-blob ab-blob-2" r="80" cx="500" cy="100" />
+        <circle class="ab-blob ab-blob-3" r="52" cx="500" cy="100" />
+        <circle class="ab-blob-cursor" r="22" cx="500" cy="100" />
+      </g>
+    </svg>
+  </section>
+
+  <!-- 第二排：技能 49% + 生涯 49% ------------------------------------- -->
+  <section class="ab-card ab-span-12 ab-skills">
+    <p class="ab-tips">技能</p>
+    <h2 class="ab-title">开启创造力</h2>
+    <div class="ab-tiles">
+      {
+        skillTiles.map((tile) => (
+          <span class="ab-tile" style={`--tile:${tile.color}`} title={tile.name}>
+            <span class="ab-tile-text">{tile.name}</span>
+          </span>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="ab-card ab-span-12 ab-careers">
+    <p class="ab-tips">{careers.tips}</p>
+    <h2 class="ab-title">{careers.title}</h2>
+    <ul class="ab-career-list">
+      {
+        careers.list.map((item) => (
+          <li class="ab-career-item">
+            <span class="ab-career-dot" />
+            <span>{item}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- 第三排：访问统计 39% + 右侧（地图+个人信息）59% ------------------ -->
+  <section class="ab-card ab-span-10 ab-statistic">
+    <p class="ab-tips">数据</p>
+    <h2 class="ab-title">访问统计</h2>
+    <div class="ab-stat-numbers">
+      <div class="ab-stat">
+        <span class="ab-stat-value" data-visitor-value="uv">—</span>
+        <span class="ab-stat-label">访问人数</span>
+      </div>
+      <div class="ab-stat">
+        <span class="ab-stat-value" data-visitor-value="pv">—</span>
+        <span class="ab-stat-label">总访问量</span>
+      </div>
+    </div>
+    <p class="ab-stat-source">统计信息来自 51la</p>
+    <a class="ab-button" href="/archives">
+      <Icon name="ri:arrow-right-circle-line" />
+      <span>文章隧道</span>
+    </a>
+  </section>
+
+  <div class="ab-stack ab-span-14">
+    <section class="ab-card ab-map">
+      <p class="ab-tips">{'我现在住在'}</p>
+      <h2 class="ab-title">中国，广东省，珠海市</h2>
+      <div class="ab-map-graphic" aria-hidden="true">
+        <Icon name="ri:map-pin-2-fill" />
+      </div>
+    </section>
+    <section class="ab-card ab-self">
+      {
+        selfInfo.map((item) => (
+          <div class="ab-self-col">
+            <span class="ab-self-tips">{item.tips}</span>
+            <span class="ab-self-content">{item.content}</span>
+          </div>
+        ))
+      }
+    </section>
+  </div>
+
+  <!-- 第四排：性格 59% + 图片位 39% ----------------------------------- -->
+  <section class="ab-card ab-span-14 ab-personality">
+    <p class="ab-tips">{personality.tips}</p>
+    <h2 class="ab-personality-name">{personality.name}</h2>
+    <p class="ab-personality-type">{personality.type}</p>
+    <img class="ab-personality-icon" src={personality.img} alt={personality.type} loading="lazy" />
+    <a class="ab-personality-link" href={personality.name_url} target="_blank" rel="noopener noreferrer">
+      在 16personalities 了解更多关于 {personality.name}
+    </a>
+  </section>
+
+  <section class="ab-card ab-span-10 ab-photo">
+    <img src={personality.img} alt={personality.name} loading="lazy" />
+  </section>
+  <!-- 第五排：座右铭 49% + 特长 49% ----------------------------------- -->
+  <section class="ab-card ab-span-10 ab-quote">
+    <p class="ab-tips">{maxim.tips}</p>
+    <h2 class="ab-quote-top">{maxim.top}</h2>
+    <h2 class="ab-quote-bottom">{maxim.bottom}</h2>
+  </section>
+
+  <section class="ab-card ab-span-14 ab-buff">
+    <p class="ab-tips">{buff.tips}</p>
+    <h2 class="ab-quote-top">{buff.top}</h2>
+    <h2 class="ab-quote-bottom">{buff.bottom}</h2>
+  </section>
+
+  <!-- 第六排：爱好的游戏 59% + 在追小说 39% --------------------------- -->
+  <section class="ab-card ab-span-14 ab-game">
+    <p class="ab-tips">{game.tips}</p>
+    <h2 class="ab-title ab-title-lg">{game.title}</h2>
+    <p class="ab-game-uid">{game.uid}</p>
+    <Icon name="ri:gamepad-fill" class="ab-game-icon" />
+  </section>
+
+  <section class="ab-card ab-span-10 ab-comic">
+    <p class="ab-tips">{comic.tips}</p>
+    <h2 class="ab-title ab-title-lg">{comic.title}</h2>
+    <p class="ab-comic-count">已追 {comic.count} 本</p>
+    <Icon name="ri:book-2-fill" class="ab-game-icon" />
+  </section>
+
+  <!-- 第七排：关注偏好 49% + 音乐偏好 49% ----------------------------- -->
+  <section class="ab-card ab-span-12 ab-like">
+    <p class="ab-tips">{likeTech.tips}</p>
+    <h2 class="ab-title ab-title-lg">{likeTech.title}</h2>
+    <p class="ab-like-bottom">{likeTech.bottom}</p>
+    <Icon name="ri:cpu-line" class="ab-game-icon" />
+  </section>
+
+  <section class="ab-card ab-span-12 ab-like">
+    <p class="ab-tips">{likeMusic.tips}</p>
+    <h2 class="ab-title ab-title-lg">{likeMusic.title}</h2>
+    <a class="ab-button" href={likeMusic.link}>
+      <Icon name="ri:arrow-right-circle-line" />
+      <span>更多推荐</span>
+    </a>
+    <Icon name="ri:music-2-fill" class="ab-game-icon" />
+  </section>
+
+  <!-- 第十年之约 100% + 赞赏名单 100% -------------------------------- -->
+  <section class="ab-card ab-span-24 ab-tenyear">
+    <p class="ab-tips">{tenyear.tips}</p>
+    <h2 class="ab-title ab-title-lg">{tenyear.title}</h2>
+    <p class="ab-tenyear-range">{tenyear.range}</p>
+  </section>
+
+  <section class="ab-card ab-span-24 ab-reward">
+    <p class="ab-tips">赞赏名单</p>
+    <p class="ab-reward-thanks">感谢因为有你们，让我更加有创作的动力。</p>
+    <ul class="ab-reward-list">
+      {
+        rewardList.map((item) => (
+          <li class="ab-reward-item">
+            <span class="ab-reward-name">{item.name}</span>
+            <span class="ab-reward-amount">{item.amount} 贝壳</span>
+            <span class="ab-reward-date">{item.date}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>
+
+<script>
+  /**
+   * hello-about：几个色块随鼠标在字母笔画里游走。
+   *
+   * 可视范围由 SVG mask（白色 "Hello there!" 文字）决定，色块只在该 mask 内可见，
+   * 因此视觉上像色块从字母里穿过去。每个色块跟随速度不同，形成拖尾；
+   * `prefers-reduced-motion` 下保持静止。
+   *
+   * 用 SVG 的 transform 属性而非 CSS transform：对 <circle> 的兼容性更稳。
+   */
+  function initHelloBig() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    for (const card of document.querySelectorAll<HTMLElement>('[data-hello-card]')) {
+      if (card.dataset.helloBound === 'true') continue;
+      card.dataset.helloBound = 'true';
+
+      const blobs = [...card.querySelectorAll<SVGCircleElement>('.ab-blob, .ab-blob-cursor')];
+      if (blobs.length === 0) continue;
+
+      // 跟随系数：越靠后的色块跟得越慢
+      const factors = [1, 0.72, 0.5, 1.25];
+      const posX = blobs.map(() => 0);
+      const posY = blobs.map(() => 0);
+      let targetX = 0;
+      let targetY = 0;
+
+      const tick = () => {
+        blobs.forEach((blob, i) => {
+          const factor = factors[i] ?? 1;
+          posX[i] += (targetX * factor - posX[i]) * 0.12;
+          posY[i] += (targetY * factor - posY[i]) * 0.12;
+          blob.setAttribute('transform', `translate(${posX[i].toFixed(2)} ${posY[i].toFixed(2)})`);
+        });
+        requestAnimationFrame(tick);
+      };
+
+      // SVG 的 viewBox 是 1000x200，色块位移必须用同一套坐标：
+      // 水平 ±330 足以横跨文字（文字宽约 800），垂直 ±55 覆盖字高。
+      const SPAN_X = 330;
+      const SPAN_Y = 55;
+      card.addEventListener('mousemove', (event: MouseEvent) => {
+        const rect = card.getBoundingClientRect();
+        const offsetX = (event.clientX - rect.left - rect.width / 2) / Math.max(rect.width / 2, 1);
+        const offsetY = (event.clientY - rect.top - rect.height / 2) / Math.max(rect.height / 2, 1);
+        targetX = Math.max(-1, Math.min(1, offsetX)) * SPAN_X;
+        targetY = Math.max(-1, Math.min(1, offsetY)) * SPAN_Y;
+      });
+
+      requestAnimationFrame(tick);
+    }
+  }
+
+  /** 追求卡片文案轮换。 */
+  function initPursuit() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const mask of document.querySelectorAll<HTMLElement>('[data-pursuit-words]')) {
+      if (mask.dataset.pursuitBound === 'true') continue;
+      mask.dataset.pursuitBound = 'true';
+
+      const words = [...mask.querySelectorAll<HTMLElement>('.ab-pursuit-word')];
+      if (words.length < 2) continue;
+      let index = Math.max(0, words.findIndex((w) => w.classList.contains('is-current')));
+      const apply = () => {
+        words.forEach((word, i) => {
+          word.classList.toggle('is-current', i === index);
+          word.classList.toggle('is-previous', i === (index - 1 + words.length) % words.length);
+        });
+      };
+      apply();
+      setInterval(() => {
+        index = (index + 1) % words.length;
+        apply();
+      }, 2000);
+    }
+  }
+
+  /** 访问人数（busuanzi / vercount，上报线上站点地址）。 */
+  function initVisitor() {
+    const box = document.querySelector<HTMLElement>('[data-visitor-value="uv"]');
+    if (!box) return;
+    const host = (
+      document.querySelector<HTMLElement>('[data-site-url]')?.dataset.siteUrl || location.origin
+    ).replace(/\/+$/, '');
+    const url = `${host}${location.pathname}`.split(/[?#]/)[0];
+
+    fetch(`https://events.vercount.one/api/v2/log?url=${encodeURIComponent(url)}&referrer=&title=${encodeURIComponent(document.title)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((payload) => {
+        const data = payload && payload.data ? payload.data : null;
+        if (!data) return;
+        const map: Record<string, number | undefined> = { uv: data.site_uv, pv: data.site_pv };
+        for (const [key, value] of Object.entries(map)) {
+          const el = document.querySelector<HTMLElement>(`[data-visitor-value="${key}"]`);
+          if (el && typeof value === 'number') el.textContent = value.toLocaleString('zh-CN');
+        }
+      })
+      .catch(() => {});
+  }
+
+  function initAbout() {
+    initHelloBig();
+    initPursuit();
+    initVisitor();
+  }
+
+  initAbout();
+  document.addEventListener('astro:page-load', initAbout);
+</script>

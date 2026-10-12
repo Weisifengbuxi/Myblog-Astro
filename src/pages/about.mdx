@@ -1,12 +1,17 @@
 ---
-layout: ../layouts/PageLayout.astro
+layout: ../layouts/AboutLayout.astro
 title: "关于本人"
 coverTitle: "关于本人"
-date: 2025-07-26 15:57:51
-updated: 2026-07-05 13:02:05
 description: "关于未似风不息：一名就读于北师香港浸会大学计算机科学与技术专业的学生，这里是记录生活、分享兴趣与沉淀知识的地方。"
+prose: false
 comments: false
 ---
+
+import AboutCards from '@components/about/AboutCards.astro';
+
+<AboutCards />
+
+<div class="prose dark:prose-invert mt-8 max-w-full">
 
 欢迎来到我的博客！这是我用来**记录生活**、**分享兴趣**和**沉淀知识**的地方，也希望它能成为一个能帮助更多人的空间。
 
@@ -44,3 +49,5 @@ comments: false
 这里大多是**技术向**的文章，可能不会有很多人看，就当是自我记录吧。一般我研究什么、发现了什么都会分享在这里。当然，如果某篇文章能够帮助到你，我也会感到很开心。
 
 这些就是创建这个小站的本意，也是我**分享生活**的方式。有幸能和你相遇在这里，相信我们能共同留下一段**美好的记忆**。
+
+</div>

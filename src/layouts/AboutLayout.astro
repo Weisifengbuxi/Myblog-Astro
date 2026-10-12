@@ -1,0 +1,59 @@
+---
+/**
+ * 关于页外壳 —— 与 `ComponentPageLayout` 的唯一区别是**不带左侧作者栏**。
+ *
+ * 关于页是一整片 1352px 宽的卡片墙（第一排 59%+39%、Hello there! 占满整宽），
+ * 塞进两栏布局后卡片会被压窄，因此这里走单列。其余（封面、标题、评论区）与
+ * `PageLayout` 一致。
+ *
+ * `prose` 默认开启，卡片墙需在页面里用 `.not-prose` 包住，避免 prose 的
+ * 段落外边距与字号规则把网格和卡片尺寸改掉。
+ */
+import CustomContent from '@components/common/CustomContent.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { CONTENT_PADDING } from '@constants/layout';
+import { seoConfig } from '@constants/site-config';
+import { cn } from '@lib/utils';
+import { Comment } from '@/components/comment';
+import Layout from './Layout.astro';
+
+export interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+    coverTitle?: string;
+    comments?: boolean;
+    /** Wrap the slot in `prose` typography. Defaults to true. */
+    prose?: boolean;
+  };
+}
+
+const { frontmatter } = Astro.props;
+const showComments = frontmatter.comments ?? true;
+const isProse = frontmatter.prose ?? true;
+---
+
+<Layout title={`${frontmatter.title} | ${seoConfig.title}`} description={frontmatter.description}>
+  <Cover slot="cover" title={frontmatter.coverTitle ?? frontmatter.title} />
+  <div
+    class={cn(
+      'shadow-box bg-gradient-start mx-0 flex min-w-0 w-full max-w-full flex-col gap-8 overflow-x-clip',
+      CONTENT_PADDING.standard
+    )}
+  >
+    {
+      isProse ? (
+        <div class="prose dark:prose-invert w-full max-w-full" data-pagefind-body>
+          <CustomContent>
+            <slot />
+          </CustomContent>
+        </div>
+      ) : (
+        <div class="w-full max-w-full" data-pagefind-body>
+          <slot />
+        </div>
+      )
+    }
+    {showComments && <Comment />}
+  </div>
+</Layout>
