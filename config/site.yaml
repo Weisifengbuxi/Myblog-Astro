@@ -841,11 +841,13 @@ navigation:
       - name: 统计
         path: /charts
         icon: ri:line-chart-line
-  - name: 友链
+  - name: 友人帐
     nameKey: nav.friends
-    path: /friends
     icon: ri:links-line
     children:
+      - name: 友人帐
+        path: /friends
+        icon: ri:book-2-line
       - name: 朋友圈
         path: /fcircle
         icon: ri:chat-smile-2-line
@@ -886,8 +888,6 @@ footerLinkGroups:
     links:
       - name: 关于本人
         path: /about
-      - name: 友情链接
-        path: /friends
       - name: 朋友圈
         path: /fcircle
       - name: 友链申请

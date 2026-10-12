@@ -621,17 +621,99 @@
   pointer-events: none;
 }
 
-/* ── 十年之约 / 赞赏名单 ───────────────────────────────────── */
+/* ── 十年之约：进度条 ───────────────────────────────────────
+   移植自 https://blog.gbfun.cc/posts/5498433.html（原版是 Solitude 主题的效果）。
+   进度由 JS 写入 CSS 变量后，用关键帧做入场动画。 */
 .ab-tenyear {
   justify-content: center;
   min-height: 160px;
 }
 
-.ab-tenyear-range {
+.ab-tenyear-text {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
   color: hsl(var(--muted-foreground));
+}
+
+.ab-tenyear-timeline {
+  position: relative;
+  width: 100%;
+  height: 2.5rem;
+  margin: 1.25rem 0 0.5rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, currentColor 8%, transparent);
+}
+
+/* 已达进度：从 0 动画到 --ab-progress */
+.ab-tenyear-progress {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0;
+  border-radius: 0.5rem;
+  background: hsl(var(--primary));
+  animation: ab-tenyear-progress 2s linear forwards;
+}
+
+/* 进度末端的一道竖线（对应原版的 .past-time） */
+.ab-tenyear-past {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0;
+  transform-origin: left;
+  border-inline-end: 2px solid hsl(var(--background));
+  animation: ab-tenyear-past 3s linear forwards;
+}
+
+/* 跟随进度的百分比标签 */
+.ab-tenyear-label {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  translate: 0 -50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: hsl(var(--primary-foreground, 0 0% 100%));
+  white-space: nowrap;
+  visibility: hidden;
+  transition: left 0.5s linear;
+}
+
+.ab-tenyear-times {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.78rem;
+  color: hsl(var(--muted-foreground));
   font-variant-numeric: tabular-nums;
+}
+
+@keyframes ab-tenyear-progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--ab-progress, 0);
+  }
+}
+
+@keyframes ab-tenyear-past {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--ab-past, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ab-tenyear-progress,
+  .ab-tenyear-past {
+    animation: none;
+    width: var(--ab-progress, 0);
+  }
 }
 
 .ab-reward {

@@ -89,7 +89,20 @@ export const photo = 'https://s21.ax1x.com/2025/09/02/pVgQUpj.jpg';
 export const maxim = { tips: '座右铭', line1: '谁无狂风劲雨时', line2: '拨开云雾见天日' };
 export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', line2: '意识流编写代码' };
 
-export const tenyear = { tips: '十年之约', title: '一个人的寂寞，一群人的狂欢。', range: '2025/07/18 — 2035/07/18' };
+/**
+ * 十年之约进度条。
+ *
+ * 移植自 https://blog.gbfun.cc/posts/5498433.html（原版是 Solitude 主题的效果）。
+ * 按其「8-25 修正版」实现：日期在渲染阶段格式化成 `Y/M/D` 并写入 data-date，
+ * 避免 `new Date(文本)` 在不同系统语言下被解析成 M/D/YYYY。
+ */
+export const tenyear = {
+  tips: '十年之约',
+  title: '一个人的寂寞，一群人的狂欢。',
+  text: '2025 年 7 月 18 日，我加入了十年之约。',
+  start: '2025/07/18',
+  end: '2035/07/18',
+};
 
 export const rewardList = [
   { name: '嘟乐妈', amount: 1125.6, date: '2025-10-16' },

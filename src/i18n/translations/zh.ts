@@ -29,7 +29,7 @@ export const uiStrings = {
   'nav.categories': '分类',
   'nav.tags': '标签',
   'nav.archives': '归档',
-  'nav.friends': '友链',
+  'nav.friends': '友人帐',
   'nav.about': '关于',
   'nav.music': '歌单',
   'nav.equipment': '装备',

@@ -37,6 +37,22 @@ const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
 // 技能轮播：把列表复制一遍，marquee 平移到 -50% 时正好回到起点，形成无缝循环
 // （与旧博客 #skills-tags-group-all 的做法一致）。hover 时切换为完整列表。
 const skillLoop = [...skills.list, ...skills.list];
+
+/**
+ * 十年之约的日期格式化。
+ *
+ * 渲染阶段就把日期定成 `Y/M/D` 并写进 `data-date`，脚本读这个属性而不是显示文本
+ * ——否则 `new Date('2025/7/18')` 在部分系统语言下会被解析成 M/D/YYYY。
+ * （这是移植方案 8-25 修正版的核心改动。）
+ */
+function formatTenYearDate(value: string): string {
+  const [year, month, day] = value.split('/').map((part) => Number.parseInt(part, 10));
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return value;
+  return `${year}/${month}/${day}`;
+}
+
+const tenyearStart = formatTenYearDate(tenyear.start);
+const tenyearEnd = formatTenYearDate(tenyear.end);
 ---
 
 <div class="ab" data-site-url={siteUrl}>
@@ -236,11 +252,20 @@ const skillLoop = [...skills.list, ...skills.list];
     <Icon name="ri:gamepad-fill" class="ab-buff-icon" />
   </section>
 
-  <!-- 十年之约 ------------------------------------------------------ -->
+  <!-- 十年之约：进度条（移植自 blog.gbfun.cc/posts/5498433.html）-------- -->
   <section class="ab-card ab-span-24 ab-tenyear">
     <p class="ab-tips">{tenyear.tips}</p>
     <h2 class="ab-title ab-title-lg">{tenyear.title}</h2>
-    <p class="ab-tenyear-range">{tenyear.range}</p>
+    {tenyear.text && <p class="ab-tenyear-text">{tenyear.text}</p>}
+    <div class="ab-tenyear-timeline">
+      <span class="ab-tenyear-progress" />
+      <span class="ab-tenyear-past" />
+      <span class="ab-tenyear-label" data-tenyear-label />
+    </div>
+    <div class="ab-tenyear-times">
+      <span data-tenyear-start data-date={tenyearStart}>{tenyearStart}</span>
+      <span data-tenyear-end data-date={tenyearEnd}>{tenyearEnd}</span>
+    </div>
   </section>
 </div>
 
@@ -342,10 +367,46 @@ const skillLoop = [...skills.list, ...skills.list];
       .catch(() => {});
   }
 
+  /**
+   * 十年之约进度条。
+   *
+   * 按移植方案（blog.gbfun.cc/posts/5498433.html）实现：进度 = 已过时间 / 总时长，
+   * 用 CSS 变量驱动宽度，靠 keyframes 做入场动画；百分比标签跟随进度横向移动。
+   * 日期从 `data-date` 读，避免系统语言影响 `new Date(文本)` 的解析。
+   */
+  function initTenYearProgress() {
+    const root = document.querySelector<HTMLElement>('.ab-tenyear');
+    if (!root) return;
+
+    const progressEl = root.querySelector<HTMLElement>('.ab-tenyear-progress');
+    const pastEl = root.querySelector<HTMLElement>('.ab-tenyear-past');
+    const labelEl = root.querySelector<HTMLElement>('[data-tenyear-label]');
+    const startEl = root.querySelector<HTMLElement>('[data-tenyear-start]');
+    const endEl = root.querySelector<HTMLElement>('[data-tenyear-end]');
+    if (!progressEl || !pastEl || !labelEl || !startEl || !endEl) return;
+
+    const start = new Date(startEl.dataset.date ?? startEl.textContent ?? '').getTime();
+    const end = new Date(endEl.dataset.date ?? endEl.textContent ?? '').getTime();
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return;
+
+    const progress = ((Date.now() - start) / (end - start)) * 100;
+    const clamped = Math.max(0, Math.min(progress, 100));
+
+    pastEl.style.setProperty('--ab-past', `${clamped}%`);
+    progressEl.style.setProperty('--ab-progress', `${clamped}%`);
+
+    if (progress > 5) {
+      labelEl.textContent = `${progress.toFixed(0)}%`;
+      labelEl.style.left = `calc(${clamped}% - 35px)`;
+    }
+    labelEl.style.visibility = 'visible';
+  }
+
   function initAbout() {
     initHelloBig();
     initPursuit();
     initVisitor();
+    initTenYearProgress();
   }
 
   initAbout();
