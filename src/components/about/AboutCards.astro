@@ -1,93 +1,97 @@
 ---
 import { siteConfig } from '@constants/site-config';
 /**
- * 关于页卡片墙。
+ * 关于页卡片墙 —— 形态参照 anheyu 官方关于页（https://blog.anheyu.com/about）。
  *
- * 版式与尺寸**按旧 Hexo 博客（anzhiyu 主题）实测值复刻**：
- *   容器宽 1352px、卡片圆角 24px、内边距 1rem 2rem、tips 12px、大数字号 36px。
- *   行内配比：第一排 59%+39%，其余 49%+49%，另有 49% / 59%+39% / 完整 100% 三种横排。
- *   用 24 列网格实现：59%≈14 列、39%≈10 列、49%≈12 列、76%≈18 列、100%=24 列。
+ * 版式实测自该页：容器 1352px、卡片圆角 12px、内边距 16px 32px；
+ * 行内配比 59%+39% / 49%+49% / 100%，用 24 列网格表达为 14+10、12+12、24。
  *
- * 视觉**不使用旧主题的图片背景与渐变**，改用本站的 border/rounded/bg 与主题色，
- * 因此自动跟随明暗模式。唯一按旧站做法保留的是 hello-about 的「大色块跟随鼠标
- * 挖空露字」——那是这张卡片的核心视觉，去掉就只剩一行大字了。
+ * 内容全部来自 ./about-config.ts，改内容不用动本文件。
+ *
+ * 交互三处（均无外部依赖）：
+ *   1. Hello there! 色块随鼠标在字母笔画里游走（SVG mask）。
+ *   2. 追求卡片文案轮换。
+ *   3. 访问人数用 busuanzi（vercount）实时取。
  */
 import { Icon } from 'astro-icon/components';
+import {
+  buff,
+  careers,
+  comic,
+  game,
+  hello,
+  likeMusic,
+  likeTech,
+  location,
+  maxim,
+  personality,
+  photo,
+  profile,
+  pursuit,
+  rewardList,
+  SKILL_ICON_BASE,
+  selfInfo,
+  skills,
+  tenyear,
+} from './about-config';
 
 // 访问统计必须上报线上站点地址：本地/预览域名会被 busuanzi 视作未知站点并返回
 // 全局累计值（实测 4900 万量级，严重失真）。
 const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
 
-const profile = {
-  hello: '你好，很高兴认识你👋',
-  name: '未似风不息',
-  description: '是一名 学生、博主',
-  avatar: 'https://images.weserv.nl/?url=https://raw.githubusercontent.com/Weisifengbuxi/tuchuang/main/img/Wechat.jpg',
-};
+/**
+ * 静态地图：用高德瓦片拼一张图（3×2 瓦片，256px/块），中心落在 `location`。
+ *
+ * 为什么不用地图 iframe：`uri.amap.com` 的嵌入页会弹滑块验证（实测显示
+ * “请按住滑块”），百度/Google/OSM 在本网络下不可达，高德静态图 API 需要 Key。
+ * 瓦片接口无需 Key 且返回真正的中文地图图块。
+ */
+const MAP_ZOOM = 11;
+const MAP_COLS = 3;
+const MAP_ROWS = 2;
 
-const pursuit = { tips: '追求', line1: '源于', line2: '热爱而去 感受', words: ['学习', '生活', '程序', '体验'] };
+/** 经纬度 → 瓦片坐标。未配置经纬度时退回珠海市中心。 */
+const lon = location.lon ?? 113.5767;
+const lat = location.lat ?? 22.2707;
+const tileX = Math.floor(((lon + 180) / 360) * 2 ** MAP_ZOOM);
+const latRad = (lat * Math.PI) / 180;
+const tileY = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * 2 ** MAP_ZOOM);
 
-const skillTiles = [
-  { name: 'HTML', color: '#e34c26' },
-  { name: 'CSS', color: '#264de4' },
-  { name: 'JavaScript', color: '#f1e05a' },
-  { name: 'TypeScript', color: '#3178c6' },
-  { name: 'Vue', color: '#41b883' },
-  { name: 'React', color: '#61dafb' },
-  { name: 'Node.js', color: '#339933' },
-  { name: 'Python', color: '#3572a5' },
-  { name: 'Java', color: '#b07219' },
-  { name: 'Git', color: '#f05032' },
-];
+// 左上角瓦片，让「中心」大致落在整张图的中间
+const originX = tileX - Math.floor(MAP_COLS / 2);
+const originY = tileY - Math.floor(MAP_ROWS / 2);
 
-const careers = {
-  tips: '生涯',
-  title: '无限进步',
-  list: ['EDU,计算机科学与技术', 'EDU,计算机科学与技术'],
-};
-
-const selfInfo = [
-  { tips: '生于', content: '2006' },
-  { tips: '北师香港浸会大学', content: '计算机科学与技术' },
-  { tips: '现在职业', content: '大三学生👨‍🎓' },
-];
-
-const personality = {
-  tips: '性格',
-  name: '提倡者',
-  type: 'INFJ-A',
-  img: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/INFJ-A.svg',
-  name_url: 'https://www.16personalities.com/ch/infj-%E4%BA%BA%E6%A0%BC',
-};
-
-const maxim = { tips: '座右铭', top: '谁无狂风劲雨时', bottom: '拨开云雾见天日' };
-const buff = { tips: '特长', top: 'MOBA，非射击类竞技游戏（专精射手，全能辅助）', bottom: '意识流编写代码' };
-
-const game = { tips: '爱好的游戏', title: '王者荣耀 英雄联盟', uid: 'ID(微信): 未似风不息　ID(QQ): Keepsilent' };
-const comic = { tips: '爱看小说', title: '在追小说', count: 5 };
-const likeTech = { tips: '关注偏好', title: '科技', bottom: '手机、电脑软件' };
-const likeMusic = { tips: '音乐偏好', title: '流行音乐、电音', bottom: '跟未似风不息一起欣赏更多音乐', link: '/music' };
-const tenyear = { tips: '十年之约', title: '一个人的寂寞，一群人的狂欢。', range: '2025/07/18 — 2035/07/18' };
-
-const rewardList = [
-  { name: '嘟乐妈', amount: 1125.6, date: '2025-10-16' },
-  { name: '老孙', amount: 1, date: '2025-07-27' },
-  { name: '*哥', amount: 1, date: '2025-07-27' },
-  { name: '孙点点', amount: 200, date: '2025-07-29' },
-  { name: '华', amount: 500, date: '2025-07-30' },
-  { name: '睡觉哇', amount: 6, date: '2025-07-30' },
-];
+const mapTiles = Array.from({ length: MAP_COLS * MAP_ROWS }, (_, index) => {
+  const col = index % MAP_COLS;
+  const row = Math.floor(index / MAP_COLS);
+  const x = originX + col;
+  const y = originY + row;
+  return `https://webrd0${(row % 4) + 1}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x=${x}&y=${y}&z=${MAP_ZOOM}`;
+});
 ---
 
 <div class="ab" data-site-url={siteUrl}>
+  <!-- 作者头部：头像居中，标签左右各 4 个，下方页面大标题 --------------- -->
+  <header class="ab-hero ab-span-24">
+    <div class="ab-hero-row">
+      <div class="ab-hero-tags ab-hero-tags--left">
+        {profile.tagsLeft.map((tag) => <span class="ab-tag">{tag}</span>)}
+      </div>
+      <img class="ab-hero-avatar" src={profile.avatar} alt="头像" loading="lazy" />
+      <div class="ab-hero-tags ab-hero-tags--right">
+        {profile.tagsRight.map((tag) => <span class="ab-tag">{tag}</span>)}
+      </div>
+    </div>
+    <h1 class="ab-hero-title">{profile.heading}</h1>
+  </header>
+
   <!-- 第一排：自我介绍 59% + 追求 39% -------------------------------- -->
   <section class="ab-card ab-span-14 ab-hello">
-    <p class="ab-tips">{profile.hello}</p>
+    <p class="ab-hello-greeting">{hello.greeting}</p>
     <p class="ab-hello-name">
-      我叫 <span class="ab-hello-word">{profile.name}</span>
+      我叫 <span class="ab-hello-word">{hello.name}</span>
     </p>
-    <p class="ab-hello-sub">{profile.description}</p>
-    <img class="ab-hello-avatar" src={profile.avatar} alt={profile.name} loading="lazy" />
+    <p class="ab-hello-sub">{hello.subtitle}</p>
   </section>
 
   <section class="ab-card ab-span-10 ab-pursuit">
@@ -102,7 +106,7 @@ const rewardList = [
     </h2>
   </section>
 
-  <!-- Hello there!：色块在字母笔画里游走（SVG mask 实现）------------- -->
+  <!-- Hello there!：色块在字母笔画里游走（SVG mask）------------------- -->
   <section class="ab-card ab-span-24 ab-hello-big" data-hello-card>
     <svg class="ab-hello-svg" viewBox="0 0 1000 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       <defs>
@@ -128,15 +132,15 @@ const rewardList = [
     </svg>
   </section>
 
-  <!-- 第二排：技能 49% + 生涯 49% ------------------------------------- -->
+  <!-- 第二排：技能 49% + 生涯 49% ------------------------------------ -->
   <section class="ab-card ab-span-12 ab-skills">
-    <p class="ab-tips">技能</p>
-    <h2 class="ab-title">开启创造力</h2>
+    <p class="ab-tips">{skills.tips}</p>
+    <h2 class="ab-title">{skills.title}</h2>
     <div class="ab-tiles">
       {
-        skillTiles.map((tile) => (
-          <span class="ab-tile" style={`--tile:${tile.color}`} title={tile.name}>
-            <span class="ab-tile-text">{tile.name}</span>
+        skills.list.map((skill) => (
+          <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+            <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
           </span>
         ))
       }
@@ -146,47 +150,58 @@ const rewardList = [
   <section class="ab-card ab-span-12 ab-careers">
     <p class="ab-tips">{careers.tips}</p>
     <h2 class="ab-title">{careers.title}</h2>
-    <ul class="ab-career-list">
-      {
-        careers.list.map((item) => (
-          <li class="ab-career-item">
-            <span class="ab-career-dot" />
-            <span>{item}</span>
-          </li>
-        ))
-      }
-    </ul>
+    <p class="ab-career-edu">EDU</p>
+    <p class="ab-career-desc">{careers.timeline.desc}</p>
+    <div class="ab-timeline" aria-hidden="true">
+      <span class="ab-timeline-bar" />
+      <div class="ab-timeline-labels">
+        <span>{careers.timeline.startYear}</span>
+        <span>{careers.timeline.endLabel}</span>
+      </div>
+    </div>
   </section>
 
-  <!-- 第三排：访问统计 39% + 右侧（地图+个人信息）59% ------------------ -->
+  <!-- 第三排：访问统计 39% + 右侧（地图 + 个人信息）59% ---------------- -->
   <section class="ab-card ab-span-10 ab-statistic">
     <p class="ab-tips">数据</p>
     <h2 class="ab-title">访问统计</h2>
-    <div class="ab-stat-numbers">
+    <div class="ab-stat-grid">
       <div class="ab-stat">
-        <span class="ab-stat-value" data-visitor-value="uv">—</span>
         <span class="ab-stat-label">访问人数</span>
+        <span class="ab-stat-value" data-visitor-value="uv">—</span>
       </div>
       <div class="ab-stat">
-        <span class="ab-stat-value" data-visitor-value="pv">—</span>
         <span class="ab-stat-label">总访问量</span>
+        <span class="ab-stat-value" data-visitor-value="pv">—</span>
+      </div>
+      <div class="ab-stat">
+        <span class="ab-stat-label">本页阅读</span>
+        <span class="ab-stat-value" data-visitor-value="page">—</span>
       </div>
     </div>
-    <p class="ab-stat-source">统计信息来自 51la</p>
+    <p class="ab-stat-source">
+      <Icon name="ri:shield-check-line" />
+      <span>数据来自 busuanzi</span>
+    </p>
     <a class="ab-button" href="/archives">
       <Icon name="ri:arrow-right-circle-line" />
-      <span>文章隧道</span>
+      <span>文章统计</span>
     </a>
   </section>
 
   <div class="ab-stack ab-span-14">
     <section class="ab-card ab-map">
-      <p class="ab-tips">{'我现在住在'}</p>
-      <h2 class="ab-title">中国，广东省，珠海市</h2>
-      <div class="ab-map-graphic" aria-hidden="true">
-        <Icon name="ri:map-pin-2-fill" />
+      <div class="ab-map-tiles" aria-hidden="true">
+        {mapTiles.map((src) => <img src={src} alt="" loading="lazy" />)}
+        <span class="ab-map-pin">
+          <Icon name="ri:map-pin-2-fill" />
+        </span>
       </div>
+      <p class="ab-map-caption">
+        {location.tips} <strong>{location.label}</strong>
+      </p>
     </section>
+
     <section class="ab-card ab-self">
       {
         selfInfo.map((item) => (
@@ -199,54 +214,60 @@ const rewardList = [
     </section>
   </div>
 
-  <!-- 第四排：性格 59% + 图片位 39% ----------------------------------- -->
+  <!-- 第四排：性格 59% + 照片 39% ------------------------------------ -->
   <section class="ab-card ab-span-14 ab-personality">
     <p class="ab-tips">{personality.tips}</p>
-    <h2 class="ab-personality-name">{personality.name}</h2>
-    <p class="ab-personality-type">{personality.type}</p>
-    <img class="ab-personality-icon" src={personality.img} alt={personality.type} loading="lazy" />
-    <a class="ab-personality-link" href={personality.name_url} target="_blank" rel="noopener noreferrer">
+    <div class="ab-personality-body">
+      <div class="ab-personality-text">
+        <h2 class="ab-personality-name">{personality.name}</h2>
+        <p class="ab-personality-type">{personality.type}</p>
+      </div>
+      <img class="ab-personality-img" src={personality.image} alt={personality.type} loading="lazy" />
+    </div>
+    <a class="ab-personality-link" href={personality.link} target="_blank" rel="noopener noreferrer">
       在 16personalities 了解更多关于 {personality.name}
     </a>
   </section>
 
   <section class="ab-card ab-span-10 ab-photo">
-    <img src={personality.img} alt={personality.name} loading="lazy" />
+    <img src={photo} alt="照片" loading="lazy" />
   </section>
-  <!-- 第五排：座右铭 49% + 特长 49% ----------------------------------- -->
+
+  <!-- 第五排：座右铭 39% + 特长 59% ---------------------------------- -->
   <section class="ab-card ab-span-10 ab-quote">
     <p class="ab-tips">{maxim.tips}</p>
-    <h2 class="ab-quote-top">{maxim.top}</h2>
-    <h2 class="ab-quote-bottom">{maxim.bottom}</h2>
+    <h2 class="ab-quote-line">{maxim.line1}</h2>
+    <h2 class="ab-quote-line">{maxim.line2}</h2>
   </section>
 
   <section class="ab-card ab-span-14 ab-buff">
     <p class="ab-tips">{buff.tips}</p>
-    <h2 class="ab-quote-top">{buff.top}</h2>
-    <h2 class="ab-quote-bottom">{buff.bottom}</h2>
+    <h2 class="ab-quote-line">{buff.line1}</h2>
+    <h2 class="ab-quote-line">{buff.line2}</h2>
+    <Icon name="ri:gamepad-fill" class="ab-buff-icon" />
   </section>
 
-  <!-- 第六排：爱好的游戏 59% + 在追小说 39% --------------------------- -->
+  <!-- 第六排：爱好的游戏 59% + 在追小说 39% -------------------------- -->
   <section class="ab-card ab-span-14 ab-game">
     <p class="ab-tips">{game.tips}</p>
     <h2 class="ab-title ab-title-lg">{game.title}</h2>
-    <p class="ab-game-uid">{game.uid}</p>
-    <Icon name="ri:gamepad-fill" class="ab-game-icon" />
+    <p class="ab-card-bottom">{game.uid}</p>
+    <Icon name="ri:gamepad-fill" class="ab-card-icon" />
   </section>
 
   <section class="ab-card ab-span-10 ab-comic">
     <p class="ab-tips">{comic.tips}</p>
     <h2 class="ab-title ab-title-lg">{comic.title}</h2>
-    <p class="ab-comic-count">已追 {comic.count} 本</p>
-    <Icon name="ri:book-2-fill" class="ab-game-icon" />
+    <p class="ab-card-bottom">已追 {comic.count} 本</p>
+    <Icon name="ri:book-2-fill" class="ab-card-icon" />
   </section>
 
-  <!-- 第七排：关注偏好 49% + 音乐偏好 49% ----------------------------- -->
+  <!-- 第七排：关注偏好 49% + 音乐偏好 49% ---------------------------- -->
   <section class="ab-card ab-span-12 ab-like">
     <p class="ab-tips">{likeTech.tips}</p>
     <h2 class="ab-title ab-title-lg">{likeTech.title}</h2>
-    <p class="ab-like-bottom">{likeTech.bottom}</p>
-    <Icon name="ri:cpu-line" class="ab-game-icon" />
+    <p class="ab-card-bottom">{likeTech.bottom}</p>
+    <Icon name="ri:cpu-line" class="ab-card-icon" />
   </section>
 
   <section class="ab-card ab-span-12 ab-like">
@@ -256,10 +277,10 @@ const rewardList = [
       <Icon name="ri:arrow-right-circle-line" />
       <span>更多推荐</span>
     </a>
-    <Icon name="ri:music-2-fill" class="ab-game-icon" />
+    <Icon name="ri:music-2-fill" class="ab-card-icon" />
   </section>
 
-  <!-- 第十年之约 100% + 赞赏名单 100% -------------------------------- -->
+  <!-- 十年之约 + 赞赏名单 -------------------------------------------- -->
   <section class="ab-card ab-span-24 ab-tenyear">
     <p class="ab-tips">{tenyear.tips}</p>
     <h2 class="ab-title ab-title-lg">{tenyear.title}</h2>
@@ -285,13 +306,10 @@ const rewardList = [
 
 <script>
   /**
-   * hello-about：几个色块随鼠标在字母笔画里游走。
+   * Hello there!：色块随鼠标在字母笔画里游走。
    *
-   * 可视范围由 SVG mask（白色 "Hello there!" 文字）决定，色块只在该 mask 内可见，
-   * 因此视觉上像色块从字母里穿过去。每个色块跟随速度不同，形成拖尾；
-   * `prefers-reduced-motion` 下保持静止。
-   *
-   * 用 SVG 的 transform 属性而非 CSS transform：对 <circle> 的兼容性更稳。
+   * 可视范围由 SVG mask（白色文字）决定，色块只在该 mask 内可见，因此视觉上
+   * 像色块从字母里穿过去。位移用 viewBox(1000x200) 坐标，故与元素像素尺寸无关。
    */
   function initHelloBig() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -303,7 +321,6 @@ const rewardList = [
       const blobs = [...card.querySelectorAll<SVGCircleElement>('.ab-blob, .ab-blob-cursor')];
       if (blobs.length === 0) continue;
 
-      // 跟随系数：越靠后的色块跟得越慢
       const factors = [1, 0.72, 0.5, 1.25];
       const posX = blobs.map(() => 0);
       const posY = blobs.map(() => 0);
@@ -320,16 +337,12 @@ const rewardList = [
         requestAnimationFrame(tick);
       };
 
-      // SVG 的 viewBox 是 1000x200，色块位移必须用同一套坐标：
-      // 水平 ±330 足以横跨文字（文字宽约 800），垂直 ±55 覆盖字高。
-      const SPAN_X = 330;
-      const SPAN_Y = 55;
       card.addEventListener('mousemove', (event: MouseEvent) => {
         const rect = card.getBoundingClientRect();
-        const offsetX = (event.clientX - rect.left - rect.width / 2) / Math.max(rect.width / 2, 1);
-        const offsetY = (event.clientY - rect.top - rect.height / 2) / Math.max(rect.height / 2, 1);
-        targetX = Math.max(-1, Math.min(1, offsetX)) * SPAN_X;
-        targetY = Math.max(-1, Math.min(1, offsetY)) * SPAN_Y;
+        const nx = (event.clientX - rect.left - rect.width / 2) / Math.max(rect.width / 2, 1);
+        const ny = (event.clientY - rect.top - rect.height / 2) / Math.max(rect.height / 2, 1);
+        targetX = Math.max(-1, Math.min(1, nx)) * 330;
+        targetY = Math.max(-1, Math.min(1, ny)) * 55;
       });
 
       requestAnimationFrame(tick);
@@ -345,7 +358,7 @@ const rewardList = [
 
       const words = [...mask.querySelectorAll<HTMLElement>('.ab-pursuit-word')];
       if (words.length < 2) continue;
-      let index = Math.max(0, words.findIndex((w) => w.classList.contains('is-current')));
+      let index = 0;
       const apply = () => {
         words.forEach((word, i) => {
           word.classList.toggle('is-current', i === index);
@@ -369,12 +382,18 @@ const rewardList = [
     ).replace(/\/+$/, '');
     const url = `${host}${location.pathname}`.split(/[?#]/)[0];
 
-    fetch(`https://events.vercount.one/api/v2/log?url=${encodeURIComponent(url)}&referrer=&title=${encodeURIComponent(document.title)}`)
+    fetch(
+      `https://events.vercount.one/api/v2/log?url=${encodeURIComponent(url)}&referrer=&title=${encodeURIComponent(document.title)}`,
+    )
       .then((r) => (r.ok ? r.json() : null))
       .then((payload) => {
         const data = payload && payload.data ? payload.data : null;
         if (!data) return;
-        const map: Record<string, number | undefined> = { uv: data.site_uv, pv: data.site_pv };
+        const map: Record<string, number | undefined> = {
+          uv: data.site_uv,
+          pv: data.site_pv,
+          page: data.page_pv,
+        };
         for (const [key, value] of Object.entries(map)) {
           const el = document.querySelector<HTMLElement>(`[data-visitor-value="${key}"]`);
           if (el && typeof value === 'number') el.textContent = value.toLocaleString('zh-CN');
