@@ -1,6 +1,25 @@
 ---
+/**
+ * `[lang]/about` mirror —— 与默认语言页渲染同一个 `AboutPage` 组件。
+ *
+ * 注意不要在这里 `import '../about.mdx'`：`.mdx` 被 `.astro` 导入时不会编译，
+ * 页面会把 `import ...` 语句当正文打印出来、组件也不渲染（实测踩过）。
+ */
+import AboutPage from '@components/about/AboutPage.astro';
+import AboutLayout from '../../layouts/AboutLayout.astro';
 import { getLocaleStaticPaths } from '../_shared/utils';
-import AboutPage from '../about.mdx';
+
 export const getStaticPaths = getLocaleStaticPaths;
+
+const frontmatter = {
+  title: '关于本人',
+  coverTitle: '关于本人',
+  description: '记录生活、分享兴趣与沉淀知识的地方。',
+  comments: false,
+  prose: false,
+};
 ---
-<AboutPage />
+
+<AboutLayout frontmatter={frontmatter}>
+  <AboutPage />
+</AboutLayout>

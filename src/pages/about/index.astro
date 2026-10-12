@@ -1,0 +1,20 @@
+---
+/**
+ * 关于页（默认语言）。`[lang]/about.astro` 是其他语言的镜像，两者都渲染同一个
+ * `AboutPage` 组件，避免内容写两份。
+ */
+import AboutPage from '@components/about/AboutPage.astro';
+import AboutLayout from '../../layouts/AboutLayout.astro';
+
+const frontmatter = {
+  title: '关于本人',
+  coverTitle: '关于本人',
+  description: '记录生活、分享兴趣与沉淀知识的地方。',
+  comments: false,
+  prose: false,
+};
+---
+
+<AboutLayout frontmatter={frontmatter}>
+  <AboutPage />
+</AboutLayout>
