@@ -1,0 +1,114 @@
+/**
+ * 侧边栏日历卡片样式。
+ *
+ * 版式来自旧博客的 schedule.css（原为安知鱼主题侧边栏组件）：
+ * 左侧一列显示周次/日期/公历/农历，右侧是当月网格。
+ * 配色改用本站主题变量，因此自动跟随明暗模式。
+ */
+
+.sidebar-calendar {
+  padding: 0.85rem 1rem 1rem;
+  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+  border-radius: 12px;
+  background: hsl(var(--card, var(--background)));
+}
+
+.cal-inner {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+/* ── 左侧：周次 / 大号日期 / 公历 / 农历 ─────────────────────── */
+.cal-left {
+  display: flex;
+  width: 42%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  text-align: center;
+}
+
+.cal-week {
+  margin-bottom: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.cal-date {
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: hsl(var(--primary));
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-solar {
+  margin-top: 0.45rem;
+  font-size: 0.68rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.cal-lunar {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+/* ── 右侧：当月网格 ───────────────────────────────────────── */
+.cal-right {
+  display: flex;
+  width: 55%;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+.cal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.cal-row {
+  display: flex;
+}
+
+.cal-cell {
+  display: flex;
+  width: calc(100% / 7);
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-cell span {
+  display: flex;
+  width: 1.35rem;
+  height: 1.35rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.66rem;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+/* 今天 */
+.cal-cell.is-today span {
+  background: hsl(var(--primary));
+  color: #fff;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cal-cell.is-today span {
+    transition: background 0.3s ease;
+  }
+}

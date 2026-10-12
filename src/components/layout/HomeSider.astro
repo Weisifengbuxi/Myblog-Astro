@@ -12,6 +12,7 @@ import { cn } from '@lib/utils';
 import type { BlogPost } from 'types/blog';
 import { getLocaleFromUrl } from '@/i18n';
 import HomeInfo from './HomeInfo.astro';
+import SidebarCalendar from './SidebarCalendar.astro';
 import SidebarCountdown from './SidebarCountdown.astro';
 import { TableOfContents } from './TableOfContents/index';
 
@@ -64,6 +65,7 @@ const seriesName = post && type === HomeSiderType.POST ? translateCategoryName(g
   >
     <div slot="info" class="sider-slot" data-slot-type="info">
       <HomeInfo isDrawer={isDrawer} />
+      {type === HomeSiderType.HOME && <SidebarCalendar />}
       {type === HomeSiderType.HOME && <SidebarCountdown />}
       <WelcomeCard />
     </div>

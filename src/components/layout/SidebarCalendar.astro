@@ -1,0 +1,115 @@
+---
+/**
+ * 侧边栏日历卡片。
+ *
+ * 版式来自旧博客的 schedule.js / schedule.css（原为安知鱼主题的侧边栏组件）：
+ * 左侧「第 N 周 + 星期」/ 大号日期 / 公历 / 农历，右侧是当月网格并高亮今天。
+ *
+ * 农历用 `chinese-lunar`（npm，与旧博客的 chineselunar.js 同源）在客户端计算，
+ * 避免构建时写死日期导致长时间不重新部署就过期。
+ */
+---
+
+<div class="sidebar-calendar" data-sidebar-calendar>
+  <div class="cal-inner">
+    <div class="cal-left">
+      <div class="cal-week" data-cal-week></div>
+      <div class="cal-date" data-cal-date>--</div>
+      <div class="cal-solar" data-cal-solar></div>
+      <div class="cal-lunar" data-cal-lunar></div>
+    </div>
+    <div class="cal-right">
+      <div class="cal-grid" data-cal-grid></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { format, solarToLunar } from 'chinese-lunar';
+
+  const WEEK_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+  /** 每月天数（2 月按闰年）。 */
+  function daysInMonth(year: number, month: number): number {
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    return [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+  }
+
+  function initSidebarCalendar() {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-sidebar-calendar]')) {
+      if (root.dataset.calBound === 'true') continue;
+      root.dataset.calBound = 'true';
+
+      const weekEl = root.querySelector<HTMLElement>('[data-cal-week]');
+      const dateEl = root.querySelector<HTMLElement>('[data-cal-date]');
+      const solarEl = root.querySelector<HTMLElement>('[data-cal-solar]');
+      const lunarEl = root.querySelector<HTMLElement>('[data-cal-lunar]');
+      const gridEl = root.querySelector<HTMLElement>('[data-cal-grid]');
+      if (!weekEl || !dateEl || !solarEl || !lunarEl || !gridEl) continue;
+
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const day = now.getDate();
+      const weekday = now.getDay();
+      const total = daysInMonth(year, month);
+
+      // 今天是一年中的第几天（旧博客用本地零点相减，同算法）
+      const yearStart = new Date(year, 0, 1);
+      const today = new Date(year, month, day);
+      const dayOfYear = Math.round((today.getTime() - yearStart.getTime()) / 86_400_000) + 1;
+
+      // 周次：与旧博客一致，按「已过天数 + 当天星期」推算
+      const weekNum = weekday - (dayOfYear % 7) >= 0 ? Math.ceil(dayOfYear / 7) : Math.ceil(dayOfYear / 7) + 1;
+
+      weekEl.textContent = `第${weekNum}周 ${WEEK_NAMES[weekday]}`;
+      dateEl.textContent = String(day).padStart(2, '0');
+      solarEl.textContent = `${year}年${month + 1}月 · 第${dayOfYear}天`;
+
+      // 农历：生肖 + 干支年 + 月 + 日（用 · 分隔，避免侧栏里折行）
+      try {
+        const lunar = solarToLunar(today);
+        const ganzhi = format(lunar, 'T').replace(/年$/, '');
+        lunarEl.textContent = `${ganzhi}${format(lunar, 'A')}年 · ${format(lunar, 'M')}${format(lunar, 'd')}`;
+      } catch {
+        lunarEl.textContent = '';
+      }
+
+      // 当月网格：1 号前的空格 + 本月各天，按 7 列铺开
+      const firstWeekday = new Date(year, month, 1).getDay();
+      const rows = Math.ceil((firstWeekday + total) / 7);
+
+      // 行数少的月份把日期字号调大一点，与旧博客的分档一致
+      dateEl.style.fontSize = ['3.2rem', '2.6rem', '2.2rem'][Math.min(rows - 4, 2)] ?? '3.2rem';
+
+      const cells: string[] = [];
+      for (let i = 0; i < rows * 7; i++) {
+        const dayNumber = i - firstWeekday + 1;
+        if (dayNumber < 1 || dayNumber > total) {
+          cells.push('<div class="cal-cell"><span></span></div>');
+          continue;
+        }
+        const isToday = dayNumber === day;
+        cells.push(
+          `<div class="cal-cell${isToday ? ' is-today' : ''}"><span>${dayNumber}</span></div>`,
+        );
+      }
+
+      gridEl.innerHTML = Array.from({ length: rows }, (_, row) => {
+        const slice = cells.slice(row * 7, row * 7 + 7).join('');
+        return `<div class="cal-row">${slice}</div>`;
+      }).join('');
+    }
+  }
+
+  function boot() {
+    initSidebarCalendar();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+  document.addEventListener('astro:page-load', boot);
+</script>

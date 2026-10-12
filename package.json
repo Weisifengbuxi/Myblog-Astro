@@ -112,6 +112,7 @@
     "astro-robots-txt": "^1.0.0",
     "astro-seo": "^1.1.0",
     "astro-tooltips": "^0.6.2",
+    "chinese-lunar": "0.1.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "codemirror": "^6.0.2",
