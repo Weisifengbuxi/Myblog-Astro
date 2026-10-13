@@ -10,7 +10,7 @@
 
 .ab {
   /* 技能卡与生涯卡所在那一行的统一高度 */
-  --ab-pair-h: 21rem;
+  --ab-pair-h: 24rem;
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
   gap: 1rem;
@@ -276,7 +276,9 @@
   position: absolute;
   inset-inline: 0;
   top: 50%;
-  translate: 0 -50%;
+  /* 往下挪一点：横带本身居中，再整体下移 0.5rem，让两行与标题拉开一些，
+     同时上下留白接近 */
+  translate: 0 calc(-50% + 1.25rem);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -290,11 +292,13 @@
   animation: ab-skill-row 30s linear infinite;
 }
 
-/* 第二行：右移半块形成错缝；与第一行错速，避免完全同步显得呆板。
-   两行都保持默认方向 —— translateX 从 0 到 -50%，即内容自右向左移动。 */
+/* 第二行：右移半块形成错缝。
+   两行的移动距离都是"自身轨道的一半"，所以**时长必须相同**才能看起来一样快
+   （之前给这行单独设 36s，导致它比第一行慢）。方向也一致：translateX 0 → -50%，
+   即内容自右向左。 */
 .ab-skill-track--offset {
-  margin-inline-start: calc(5.5rem / 2);
-  animation-duration: 36s;
+  margin-inline-start: calc(6.25rem / 2);
+  animation-duration: 30s;
 }
 
 .ab-skill-track:hover {
@@ -311,8 +315,8 @@
 
 .ab-tile {
   display: flex;
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 6.25rem;
+  height: 6.25rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
