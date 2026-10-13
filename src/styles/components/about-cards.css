@@ -276,6 +276,8 @@
 .ab-skill-marquee {
   margin-top: 2rem;
   overflow: hidden;
+  /* 给下移半块的那一行留出空间 */
+  padding-block: 1.5rem;
 }
 
 .ab-skill-track {
@@ -311,10 +313,11 @@
   transition: box-shadow 0.25s ease;
 }
 
-/* 每对里的第二个：下移 + 左移，形成原版那种斜向交错 */
+/* 每隔一个下移半块 = 砖块错缝，方块之间不重叠。
+   之前照搬原版的 translateX(-60px)（横向负位移）会把相邻块拉到只差 65px，
+   再叠加垂直错位就叠在一起，看着并不像"错开"，所以这里去掉横向压缩。 */
 .ab-tile--odd {
-  margin-top: 1rem;
-  transform: translateX(-2.4rem);
+  transform: translateY(50%);
 }
 
 .ab-tile:hover {
