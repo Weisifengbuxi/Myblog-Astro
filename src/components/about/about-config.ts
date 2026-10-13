@@ -92,21 +92,14 @@ export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', 
 /**
  * 爱好的游戏。
  *
- * 与 `comic` 同一套版式与交互（旧博客 anzhiyu 的 .comic-content 卡片）：
- * 封面斜切排列，悬停那张横向展开并把封面放大。cover 留空时显示占位块。
+ * 这张卡就放**一张图片**（版式对齐 anheyu 的 .game-yuanshen 卡：整块铺满）。
+ * 图片换成你自己的即可；留空时显示占位提示。href 可留空。
  */
 export const game = {
   tips: '爱好的游戏',
   title: '王者荣耀 英雄联盟',
-  /** 卡片左下角的小字，可留空。 */
-  date: '',
-  list: [
-    { name: '游戏一', cover: '', href: '#' },
-    { name: '游戏二', cover: '', href: '#' },
-    { name: '游戏三', cover: '', href: '#' },
-    { name: '游戏四', cover: '', href: '#' },
-    { name: '游戏五', cover: '', href: '#' },
-  ],
+  image: 'https://s21.ax1x.com/2025/10/23/pVXmmND.png',
+  href: '',
 };
 
 /**
@@ -123,29 +116,29 @@ export const comic = {
   date: '',
   list: [
     {
-      name: '蛊真人',
-      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/guzhenren.webp',
-      href: '#',
+      name: '怪谈游戏设计师',
+      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/guaitan.webp',
+      href: 'https://www.qidian.com/book/1036804203/',
     },
     {
       name: '仙宫开物',
       cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/xiangongkaiwu.webp',
-      href: '#',
+      href: 'https://www.qidian.com/book/1039889503/',
     },
     {
       name: '异兽迷城',
       cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/yishoumicheng.jpg',
-      href: '#',
+      href: 'https://fanqienovel.com/page/7081535608648109069?enter_from=search',
     },
     {
-      name: '怪谈游戏设计师',
+      name: '万劫之主',
       cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wanjiejiezhu.jpg',
-      href: 'https://www.qidian.com/book/1036804203/',
+      href: 'https://www.tadu.com/book/1033848/',
     },
     {
       name: '十日终焉',
       cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/shirizhongyan.webp',
-      href: '#',
+      href: 'https://fanqienovel.com/page/7143038691944959011?enter_from=search',
     },
   ],
 };

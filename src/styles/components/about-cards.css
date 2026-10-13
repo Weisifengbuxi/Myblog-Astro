@@ -258,29 +258,43 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：无限横向轮播（悬停放大图片）──────────────────────
-   轨道内容复制一份，平移到 -50% 时正好回到起点，因此循环无缝。
-   这里**不做**旧博客那种偶数块 translateY 交错：它会把行间距压到 16px，
-   又让相邻块的水平间距被错位吃掉，看起来"上下太挤、左右不对"。
-   方块用固定宽度 + 等间距排列，悬停时暂停轮播并放大该块图片。 */
+/* ── 技能：双行无限轮播 + 悬停切换"全部技能"─────────────────
+   默认两行横向滚动，第二行整体右移半个方块，形成错行（因此两行合计高度
+   与右侧生涯卡相当）。悬停时整块换成铺满卡片的全部技能面板。
+   轨道内容复制一份，平移到 -50% 即无缝循环。 */
 .ab-skills {
   min-height: 0;
+  overflow: hidden;
 }
 
 .ab-skill-marquee {
-  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  transition: opacity 0.25s ease;
+}
+
+.ab-skill-row-wrap {
   overflow: hidden;
+}
+
+/* 第二行错开半个方块 */
+.ab-skill-row-wrap--offset {
+  margin-inline-start: -2.5rem;
 }
 
 .ab-skill-track {
   display: flex;
-  gap: 1.25rem;
+  gap: 0.75rem;
   width: max-content;
-  animation: ab-skill-row 22s linear infinite;
+  animation: ab-skill-row 26s linear infinite;
 }
 
-.ab-skill-marquee:hover .ab-skill-track {
-  animation-play-state: paused;
+/* 第二行反向、错速，避免两行完全同步显得呆板 */
+.ab-skill-track--alt {
+  animation-direction: reverse;
+  animation-duration: 30s;
 }
 
 @keyframes ab-skill-row {
@@ -292,15 +306,40 @@
   }
 }
 
+/* 悬停：轮播淡出，全部技能面板淡入 */
+.ab-skill-all {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-content: start;
+  padding: 3.25rem 2rem 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.ab-skills:hover .ab-skill-marquee {
+  opacity: 0;
+}
+
+.ab-skills:hover .ab-skill-all {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .ab-tile {
   display: flex;
-  width: 5rem;
-  height: 5rem;
+  width: 4.5rem;
+  height: 4.5rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 1.1rem;
+  border-radius: 1rem;
   transition: box-shadow 0.25s ease;
 }
 
@@ -320,7 +359,7 @@
 
 /* 悬停这一块时图片放大到几乎铺满，看到的是图片本身而不是小图标 */
 .ab-tile:hover img {
-  transform: scale(1.55);
+  transform: scale(1.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -633,26 +672,26 @@
   opacity: 0.85;
 }
 
+/* 封面条：铺满卡片宽度、每块等分，块与块之间不重叠。
+   原版把盒子做成 120% 宽并居中，是想让两侧斜切不留三角空隙，但结果相邻块
+   在视觉上互相压住；这里改为铺满，两侧三角由卡片自身的 overflow:hidden 裁掉。 */
 .ab-comic-box {
   position: absolute;
-  inset-block: 0;
-  left: 50%;
+  inset: 0;
   display: flex;
-  width: 120%;
-  transform: translateX(-50%);
 }
 
 .ab-comic-item {
   position: relative;
-  width: 20%;
+  flex: 1 1 0;
+  min-width: 0;
   height: 100%;
   overflow: hidden;
   transform: skew(-10deg);
-  transition: width 0.8s ease;
 }
 
 .ab-comic-item:hover {
-  width: 46%;
+  flex-grow: 2.3;
 }
 
 .ab-comic-cover {
@@ -678,11 +717,66 @@
   object-fit: cover;
 }
 
+/* ── 爱好的游戏：单张图片铺满卡片 ─────────────────────────── */
+.ab-game {
+  min-height: 300px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ab-game .ab-comic-head {
+  position: relative;
+  z-index: 2;
+  padding: 1rem 2rem 0;
+  pointer-events: none;
+}
+
+.ab-game-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ab-game-img--empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  background-image: radial-gradient(color-mix(in oklab, currentColor 12%, transparent) 1px, transparent 1px);
+  background-size: 12px 12px;
+  font-size: 0.75rem;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-game-img--empty :global(svg) {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ab-game .ab-comic-head,
+.ab-game .ab-comic-head .ab-tips,
+.ab-game .ab-comic-head .ab-title {
+  color: #fff;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 55%);
+}
+
+/* 图片上方压一层很轻的渐变，保证标题可读 */
+.ab-game::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 45%) 0%, transparent 45%);
+}
 /* 没填封面时的占位块：四种色调轮换 + 一道书脊线，填入 cover 后即被图片取代 */
 .ab-comic-empty {
   position: relative;
   display: flex;
-  width: 10rem;
+
   height: 100%;
   align-items: center;
   justify-content: center;

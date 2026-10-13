@@ -123,17 +123,43 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
   <section class="ab-card ab-span-12 ab-skills">
     <p class="ab-tips">{skills.tips}</p>
     <h2 class="ab-title">{skills.title}</h2>
-    <!-- 默认无限横向轮播；轨道内容复制一份，平移到 -50% 即无缝循环 -->
+    <!--
+      默认：双行无限轮播（上下两行错开半个方块）。
+      悬停：整块切换成"全部技能"面板，铺满卡片、可滚动，看到的就是技能本身。
+    -->
     <div class="ab-skill-marquee">
-      <div class="ab-skill-track">
-        {
-          skillLoop.map((skill) => (
-            <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
-              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
-            </span>
-          ))
-        }
+      <div class="ab-skill-row-wrap">
+        <div class="ab-skill-track">
+          {
+            skillLoop.map((skill) => (
+              <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+                <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+              </span>
+            ))
+          }
+        </div>
       </div>
+      <div class="ab-skill-row-wrap ab-skill-row-wrap--offset">
+        <div class="ab-skill-track ab-skill-track--alt">
+          {
+            skillLoop.map((skill) => (
+              <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+                <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+    <!-- 悬停时显示：全部技能平铺 -->
+    <div class="ab-skill-all">
+      {
+        skills.list.map((skill) => (
+          <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+            <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+          </span>
+        ))
+      }
     </div>
   </section>
 
@@ -243,31 +269,22 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <Icon name="ri:gamepad-fill" class="ab-buff-icon" />
   </section>
 
-  <!-- 爱好的游戏 39% + 在追小说 59%：同一套斜切封面条，悬停展开 ---------- -->
-  <section class="ab-card ab-span-10 ab-comic">
+  <!-- 爱好的游戏 39%（单张图片）+ 在追小说 59% ------------------------- -->
+  <section class="ab-card ab-span-10 ab-game">
     <div class="ab-comic-head">
       <p class="ab-tips">{game.tips}</p>
       <h2 class="ab-title ab-title-lg">{game.title}</h2>
-      {game.date && <p class="ab-comic-date">{game.date}</p>}
     </div>
-    <div class="ab-comic-box">
-      {
-        game.list.map((item, index) => (
-          <a class="ab-comic-item" href={item.href || '#'} target="_blank" rel="noopener noreferrer" title={item.name}>
-            <span class="ab-comic-cover" data-tone={index % 4}>
-              {item.cover ? (
-                <img src={item.cover} alt={item.name} loading="lazy" />
-              ) : (
-                <span class="ab-comic-empty">
-                  <span class="ab-comic-spine" />
-                  <span class="ab-comic-name">{item.name}</span>
-                </span>
-              )}
-            </span>
-          </a>
-        ))
-      }
-    </div>
+    {
+      game.image ? (
+        <img class="ab-game-img" src={game.image} alt={game.title} loading="lazy" />
+      ) : (
+        <div class="ab-game-img ab-game-img--empty" aria-hidden="true">
+          <Icon name="ri:image-add-line" />
+          <span>在 about-config.ts 的 game.image 填入你的图片</span>
+        </div>
+      )
+    }
   </section>
 
   <!-- 在追的小说：斜切封面条，悬停展开（旧博客 .comic-content 卡片）------ -->
