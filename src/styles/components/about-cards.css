@@ -275,6 +275,9 @@
 .ab-skill-marquee {
   position: absolute;
   inset-inline: 0;
+  /* 左右内边距收窄可视区：循环距离（一份宽 + gap）必须大于可视宽度，
+     否则滚动时能同时看到队首和队尾，接缝就暴露了。 */
+  padding-inline: 2rem;
   top: 50%;
   /* 往下挪一点：横带本身居中，再整体下移 0.5rem，让两行与标题拉开一些，
      同时上下留白接近 */
@@ -286,8 +289,9 @@
 }
 
 .ab-skill-track {
-  /* gap 提成变量：关键帧里要用它做无缝补偿（见 ab-skill-row） */
+  /* 这两个变量供关键帧做无缝补偿：份数与间距（改一处即可，见 ab-skill-row） */
   --ab-skill-gap: 0.6rem;
+  --ab-skill-copies: 2;
   display: flex;
   gap: var(--ab-skill-gap);
   width: max-content;
@@ -311,11 +315,15 @@
     transform: translateX(0);
   }
   to {
-    /* 无缝循环的关键：轨道内容是「两份技能 + 中间 1 个 gap」，总宽 = 2W + gap。
-       要对齐第二份的起点需要移动 W + gap，而 -50% 只等于 W + gap/2，
-       少移动 gap/2，于是每轮结束会跳一下（表现为"闪回重播"）。
-       这里把这 gap/2 补回去，轮播就变成真正连续的队列。 */
-    transform: translateX(calc(-50% - var(--ab-skill-gap) / 2));
+    /* 无缝循环：轨道是 N 份内容 + (N-1) 个 gap，总宽 = N*W + (N-1)*gap。
+       要对齐第二份的起点需移动 W + gap，即总宽的 1/N 再加 gap/N。
+       用 calc(-100% / N - gap * (N-1) / N ...) 表达不如直接算：
+       移动量 = (总宽 + gap) / N，而 100% = 总宽，所以
+       = calc(-100% / var(--ab-skill-copies) - var(--ab-skill-gap) * (var(--ab-skill-copies) - 1) / var(--ab-skill-copies))
+       --ab-skill-copies 要与组件里的 COPY_COUNT 保持一致。 */
+    transform: translateX(
+      calc(-100% / var(--ab-skill-copies) - var(--ab-skill-gap) * (var(--ab-skill-copies) - 1) / var(--ab-skill-copies))
+    );
   }
 }
 
