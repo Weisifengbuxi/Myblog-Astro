@@ -101,35 +101,36 @@ const summary = [
     <h2 class="charts-title">网站资讯</h2>
 
     <!--
-      访问数据：数值来自 busuanzi（vercount，真实值），
-      今日/昨日/本月/全站的口径由本地累计得到 —— busuanzi 只给"累计 UV/PV"两个数，
-      没有日/月维度，而 51LA 的公开数据挂件只输出占位符（其脚本内不含取数逻辑，
-      实测渲染出的是写死的 0/3/9/2…），拿不到真实数据，因此不再使用它。
-      副作用：日/月数据从本功能上线起开始累计，不是历史回填。
+      访问数据来自 51LA 的「数据挂件」脚本。
+      注意：真实数据是**内嵌在 quote.js 的脚本文本里**的（形如
+      `<p><span>2</span><span>12</span></p>`，第一个 span 是序号、第二个才是数值），
+      而挂件渲染到 DOM 里的那份永远是写死的占位符 —— 所以不能读 DOM，只能在
+      fetch 到脚本文本后用正则解析。字段顺序取自脚本内的
+      b=[["ol"],["t","u"],["t","p"],["y","u"],["y","p"],["m","p"],["tl","p"]]。
     -->
     <div class="charts-summary">
       <div class="charts-stat">
-        <span class="charts-stat-value" data-site-stat="todayUv">—</span>
+        <span class="charts-stat-value" data-stat="todayUv">—</span>
         <span class="charts-stat-label">今日人数</span>
       </div>
       <div class="charts-stat">
-        <span class="charts-stat-value" data-site-stat="todayPv">—</span>
+        <span class="charts-stat-value" data-stat="todayPv">—</span>
         <span class="charts-stat-label">今日访问</span>
       </div>
       <div class="charts-stat">
-        <span class="charts-stat-value" data-site-stat="yesterdayUv">—</span>
+        <span class="charts-stat-value" data-stat="yesterdayUv">—</span>
         <span class="charts-stat-label">昨日人数</span>
       </div>
       <div class="charts-stat">
-        <span class="charts-stat-value" data-site-stat="yesterdayPv">—</span>
+        <span class="charts-stat-value" data-stat="yesterdayPv">—</span>
         <span class="charts-stat-label">昨日访问</span>
       </div>
       <div class="charts-stat">
-        <span class="charts-stat-value" data-site-stat="monthPv">—</span>
+        <span class="charts-stat-value" data-stat="monthPv">—</span>
         <span class="charts-stat-label">本月访问</span>
       </div>
       <div class="charts-stat">
-        <span class="charts-stat-value" data-site-stat="totalPv">—</span>
+        <span class="charts-stat-value" data-stat="totalPv">—</span>
         <span class="charts-stat-label">总访问量</span>
       </div>
     </div>
@@ -145,7 +146,7 @@ const summary = [
       }
     </div>
     <p class="charts-source">
-      访问数据来自 51LA 数据挂件，兜底为 busuanzi；其余为构建时统计 · 最后更新 {lastUpdated}
+      访问数据来自 51LA 数据挂件；其余为构建时统计 · 最后更新 {lastUpdated}
     </p>
   </section>
 
@@ -203,131 +204,60 @@ const summary = [
 
 <script>
   /**
-   * 访问数据：今日/昨日/本月/总访问量。
+   * 访问数据 —— 解析 51LA 数据挂件脚本。
    *
-   * busuanzi（vercount）只提供「累计 UV / 累计 PV」两个数，没有日/月维度，
-   * 所以这里把累计值按天快照到 localStorage，用差值算出今日/昨日/本月：
-   *   - 每天第一次打开：把上一次记录的累计值存为「昨日快照」
-   *   - 今日 = 当前累计 − 昨日快照
-   *   - 本月 = 当前累计 − 本月 1 号的快照
-   * 因此这些数字从本功能上线起累计，不是历史回填（页脚小字已注明）。
+   * 真实数据**内嵌在 quote.js 的脚本文本里**，形如：
+   *   <p><span>2</span><span>12</span></p>
+   * 第一个 span 是序号（0..6），第二个才是数值。挂件渲染进 DOM 的那份永远是
+   * 写死的占位符，所以只能 fetch 文本后用正则取，不能读 DOM。
+   *
+   * 字段顺序来自脚本内的 b 数组：
+   *   [["ol"],["t","u"],["t","p"],["y","u"],["y","p"],["m","p"],["tl","p"]]
+   *   → 最近活跃访客 / 今日人数 / 今日访问 / 昨日人数 / 昨日访问 / 本月访问 / 总访问量
    */
-  const ENDPOINT = 'https://events.vercount.one/api/v2/log';
-  const STORE = 'dsh:charts-visits:v1';
+  const WIDGET = 'https://v6-widget.51.la/v6/3REPy7id8yIlqsbo/quote.js';
 
-  interface Snapshot {
-    lastDay: string;
-    lastUv: number;
-    lastPv: number;
-    yesterdayUv: number;
-    yesterdayPv: number;
-    monthKey: string;
-    monthStartPv: number;
-  }
+  /** 解析出的下标 → 页面上的键（跳过下标 0「最近活跃访客」）。 */
+  const FIELDS: Record<number, string> = {
+    1: 'todayUv',
+    2: 'todayPv',
+    3: 'yesterdayUv',
+    4: 'yesterdayPv',
+    5: 'monthPv',
+    6: 'totalPv',
+  };
 
-  interface VisitorData {
-    site_uv?: number;
-    site_pv?: number;
-  }
-
-  function todayKey(): string {
-    const d = new Date();
-    return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-  }
-
-  function monthKey(): string {
-    const d = new Date();
-    return d.getFullYear() + '-' + (d.getMonth() + 1);
-  }
-
-  function load(): Snapshot | null {
-    try {
-      const raw = localStorage.getItem(STORE);
-      return raw ? (JSON.parse(raw) as Snapshot) : null;
-    } catch {
-      return null;
+  function parseWidget(text: string): Record<string, number> {
+    const result: Record<string, number> = {};
+    // 每项形如 <p><span>序号</span><span>数值</span></p>，直接按序号取值，
+    // 不要靠出现顺序递推 —— 序号才是权威（它同时是脚本内部的数据下标）。
+    const pattern = /<span>(\d+)<\/span><span>(\d+)<\/span>/g;
+    let match: RegExpExecArray | null = pattern.exec(text);
+    while (match) {
+      const key = FIELDS[Number.parseInt(match[1], 10)];
+      const value = Number.parseInt(match[2], 10);
+      if (key && Number.isFinite(value)) result[key] = value;
+      match = pattern.exec(text);
     }
-  }
-
-  function save(snapshot: Snapshot): void {
-    try {
-      localStorage.setItem(STORE, JSON.stringify(snapshot));
-    } catch {
-      /* 隐私模式下可能不可写，忽略 */
-    }
+    return result;
   }
 
   function paint(values: Record<string, number>): void {
     for (const [key, value] of Object.entries(values)) {
-      const el = document.querySelector<HTMLElement>(`[data-site-stat="${key}"]`);
+      const el = document.querySelector<HTMLElement>('[data-stat="' + key + '"]');
       if (el) el.textContent = value.toLocaleString('zh-CN');
     }
   }
 
   function boot(): void {
-    const siteUrl = (
-      document.querySelector<HTMLElement>('[data-site-url]')?.dataset.siteUrl ||
-      'https://www.weisifengbuxi.top'
-    ).replace(/\/+$/, '');
+    if (!document.querySelector('[data-stat="todayUv"]')) return;
 
-    const query = new URLSearchParams({
-      url: (siteUrl + location.pathname).split(/[?#]/)[0],
-      referrer: document.referrer || '',
-      title: document.title,
-    });
-
-    fetch(ENDPOINT + "?" + query.toString())
-      .then((r) => (r.ok ? r.json() : null))
-      .then((payload: { data?: VisitorData } | null) => {
-        const data = payload?.data;
-        const uv = data?.site_uv;
-        const pv = data?.site_pv;
-        if (typeof uv !== 'number' || typeof pv !== 'number') return;
-
-        const day = todayKey();
-        const month = monthKey();
-        const prev = load();
-
-        let snapshot: Snapshot;
-        if (!prev) {
-          // 首次记录：今日/本月从 0 起算
-          snapshot = {
-            lastDay: day,
-            lastUv: uv,
-            lastPv: pv,
-            yesterdayUv: 0,
-            yesterdayPv: 0,
-            monthKey: month,
-            monthStartPv: pv,
-          };
-        } else {
-          snapshot = { ...prev };
-          if (prev.lastDay !== day) {
-            // 跨天了：昨天 = 上次记录时的累计 − 更早的快照
-            snapshot.yesterdayUv = Math.max(0, prev.lastUv - prev.yesterdayUv);
-            snapshot.yesterdayPv = Math.max(0, prev.lastPv - prev.yesterdayPv);
-            snapshot.lastDay = day;
-          }
-          if (prev.monthKey !== month) {
-            snapshot.monthKey = month;
-            snapshot.monthStartPv = prev.lastPv;
-          }
-          snapshot.lastUv = uv;
-          snapshot.lastPv = pv;
-        }
-        save(snapshot);
-
-        const baseUv = prev ? (snapshot.lastDay === day ? prev.yesterdayUv : snapshot.yesterdayUv) : 0;
-        const basePv = prev ? (snapshot.lastDay === day ? prev.yesterdayPv : snapshot.yesterdayPv) : 0;
-
-        paint({
-          todayUv: Math.max(0, uv - baseUv),
-          todayPv: Math.max(0, pv - basePv),
-          yesterdayUv: snapshot.yesterdayUv,
-          yesterdayPv: snapshot.yesterdayPv,
-          monthPv: Math.max(0, pv - snapshot.monthStartPv),
-          totalPv: pv,
-        });
+    fetch(WIDGET)
+      .then((res) => (res.ok ? res.text() : ''))
+      .then((text) => {
+        if (!text) return;
+        const values = parseWidget(text);
+        if (Object.keys(values).length > 0) paint(values);
       })
       .catch(() => {
         /* 取数失败时保留占位符 */
@@ -341,6 +271,7 @@ const summary = [
   }
   document.addEventListener('astro:page-load', boot);
 </script>
+
 <style>
     实时数据与「最后更新」排成同宽一排：VisitStats 自带 auto-fit 网格，
     这里用 :global 覆盖成 3 列，让最后一个格子与前面两张宽度一致。
