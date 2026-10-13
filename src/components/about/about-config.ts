@@ -90,6 +90,27 @@ export const maxim = { tips: '座右铭', line1: '谁无狂风劲雨时', line2:
 export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', line2: '意识流编写代码' };
 
 /**
+ * 在追的小说（或番剧）。
+ *
+ * 版式与交互来自旧博客 anzhiyu 主题的 `.comic-content` 卡片：
+ * 封面斜切（skew -10deg）横向排成一条，悬停时该张横向展开并把封面放大。
+ * cover 用竖版封面图效果最好（卡片高度固定，图片会被裁成竖条）。
+ */
+export const comic = {
+  tips: '在追小说',
+  title: '最近在看',
+  /** 卡片左下角的小字，可留空。 */
+  date: '',
+  list: [
+    { name: '示例书籍一', cover: '', href: '#' },
+    { name: '示例书籍二', cover: '', href: '#' },
+    { name: '示例书籍三', cover: '', href: '#' },
+    { name: '示例书籍四', cover: '', href: '#' },
+    { name: '示例书籍五', cover: '', href: '#' },
+  ],
+};
+
+/**
  * 十年之约进度条。
  *
  * 移植自 https://blog.gbfun.cc/posts/5498433.html（原版是 Solitude 主题的效果）。

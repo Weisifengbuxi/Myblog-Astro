@@ -621,6 +621,140 @@
   pointer-events: none;
 }
 
+/* ── 在追的小说：斜切封面条，悬停展开 ───────────────────────
+   机制照搬旧博客 .comic-content：每张封面 skew(-10deg) 横向排布，
+   悬停那张宽度从 20% 涨到 46%，同时封面反向 skew 并放大，形成"抽出来"的效果。
+   封面条宽 120% 并居中、外层 overflow:hidden，两侧斜切就不会露出空隙。 */
+.ab-comic {
+  min-height: 300px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ab-comic-head {
+  position: relative;
+  z-index: 2;
+  padding: 1rem 2rem 0;
+  pointer-events: none;
+}
+
+.ab-comic-head .ab-tips {
+  margin-bottom: 0.35rem;
+}
+
+.ab-comic-date {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.ab-comic-box {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  display: flex;
+  width: 120%;
+  transform: translateX(-50%);
+}
+
+.ab-comic-item {
+  position: relative;
+  width: 20%;
+  height: 100%;
+  overflow: hidden;
+  transform: skew(-10deg);
+  transition: width 0.8s ease;
+}
+
+.ab-comic-item:hover {
+  width: 46%;
+}
+
+.ab-comic-cover {
+  position: absolute;
+  top: 0;
+  left: -50%;
+  display: block;
+  height: 100%;
+  transform: skew(10deg);
+  transition:
+    left 0.8s ease,
+    transform 0.8s ease;
+}
+
+.ab-comic-item:hover .ab-comic-cover {
+  left: 16%;
+  transform: skew(10deg) scale(1.6);
+}
+
+.ab-comic-cover img {
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+/* 没填封面时的占位块：四种色调轮换 + 一道书脊线，填入 cover 后即被图片取代 */
+.ab-comic-empty {
+  position: relative;
+  display: flex;
+  width: 10rem;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  background: var(--ab-comic-tone, hsl(var(--primary) / 0.35));
+  color: #fff;
+}
+
+.ab-comic-cover[data-tone="0"] {
+  --ab-comic-tone: linear-gradient(155deg, hsl(340 70% 44%), hsl(340 70% 28%));
+}
+.ab-comic-cover[data-tone="1"] {
+  --ab-comic-tone: linear-gradient(155deg, hsl(212 70% 46%), hsl(212 70% 28%));
+}
+.ab-comic-cover[data-tone="2"] {
+  --ab-comic-tone: linear-gradient(155deg, hsl(158 60% 40%), hsl(158 60% 24%));
+}
+.ab-comic-cover[data-tone="3"] {
+  --ab-comic-tone: linear-gradient(155deg, hsl(28 75% 48%), hsl(28 75% 30%));
+}
+
+/* 书脊：靠左一条竖直亮线，让占位块有个"书"的样子 */
+.ab-comic-spine {
+  position: absolute;
+  inset-block: 0;
+  left: 0.55rem;
+  width: 2px;
+  background: rgb(255 255 255 / 30%);
+}
+
+.ab-comic-name {
+  padding: 0 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 35%);
+}
+
+/* 文字区域压一层渐变，保证标题在封面图上可读。
+   旧站用的是一大块 #fbe9b8 inset 阴影，但那样会把封面颜色盖掉；这里改成
+   「左上角局部压暗 + 整体很轻的底部渐变」，只护住文字、尽量保留封面本色。 */
+.ab-comic::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(120% 150% at 0% 0%, rgb(0 0 0 / 62%) 0%, rgb(0 0 0 / 26%) 38%, transparent 62%),
+    linear-gradient(to bottom, rgb(0 0 0 / 22%) 0%, transparent 42%);
+}
+
+.ab-comic-head,
+.ab-comic-head .ab-tips,
+.ab-comic-head .ab-title,
+.ab-comic-head .ab-comic-date {
+  color: #fff;
+}
+
 /* ── 十年之约：进度条 ───────────────────────────────────────
    移植自 https://blog.gbfun.cc/posts/5498433.html（原版是 Solitude 主题的效果）。
    进度由 JS 写入 CSS 变量后，用关键帧做入场动画。 */

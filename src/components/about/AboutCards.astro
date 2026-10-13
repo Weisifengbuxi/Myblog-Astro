@@ -17,6 +17,7 @@ import { Icon } from 'astro-icon/components';
 import {
   buff,
   careers,
+  comic,
   hello,
   location,
   maxim,
@@ -250,6 +251,33 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <h2 class="ab-quote-line">{buff.line1}</h2>
     <h2 class="ab-quote-line">{buff.line2}</h2>
     <Icon name="ri:gamepad-fill" class="ab-buff-icon" />
+  </section>
+
+  <!-- 在追的小说：斜切封面条，悬停展开（旧博客 .comic-content 卡片）------ -->
+  <section class="ab-card ab-span-24 ab-comic">
+    <div class="ab-comic-head">
+      <p class="ab-tips">{comic.tips}</p>
+      <h2 class="ab-title ab-title-lg">{comic.title}</h2>
+      {comic.date && <p class="ab-comic-date">{comic.date}</p>}
+    </div>
+    <div class="ab-comic-box">
+      {
+        comic.list.map((item, index) => (
+          <a class="ab-comic-item" href={item.href} target="_blank" rel="noopener noreferrer" title={item.name}>
+            <span class="ab-comic-cover" data-tone={index % 4}>
+              {item.cover ? (
+                <img src={item.cover} alt={item.name} loading="lazy" />
+              ) : (
+                <span class="ab-comic-empty">
+                  <span class="ab-comic-spine" />
+                  <span class="ab-comic-name">{item.name}</span>
+                </span>
+              )}
+            </span>
+          </a>
+        ))
+      }
+    </div>
   </section>
 
   <!-- 十年之约：进度条（移植自 blog.gbfun.cc/posts/5498433.html）-------- -->
