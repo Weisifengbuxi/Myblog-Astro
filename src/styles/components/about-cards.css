@@ -260,18 +260,13 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：列内上下两块、无限轮播（对齐安知鱼原版）─────────
-   原版的 .tags-group-wrapper 是**横向 flex**，每「列」是一个
-   .tags-group-icon-pair（display: flex 的默认 row 会把两块并排，
-   所以原版靠 .tags-group-icon-pair .tags-group-icon:nth-child(even)
-   的 margin-top:1rem + translate(-60px) 把第二块压下来并左移，
-   形成"上下两组"的观感）。
-
-   这里按本站卡宽等比缩放：每列 = 上下堆叠的两个方块（列内间距很小），
-   列与列之间留出距离，列内第二块不下沉（不再做那个负位移 —— 它在本尺寸下
-   会把方块挤到一起）。
-
-   轮播：轨道内容复制一份，平移到 -50% 无缝循环；悬停时暂停。 */
+/* ── 技能：两行独立轮播 + 横向错开半块（对齐安知鱼）──────────
+   两行各自是一条无限滚动的轨道：
+     - 行内方块紧密排列（gap 0.6rem）→ 每行内部"紧紧挨在一起"
+     - 第二行整体右移半块 → 上下两行的方块互相错开（砖块错缝）
+     - 两行之间留一定间距 → 上下分成两组
+   这样既不会像"一列两块的配对结构"那样在错位时把相邻列压到一起，
+   也能得到横向错开的观感。 */
 .ab-skills {
   min-height: var(--ab-pair-h);
   overflow: hidden;
@@ -282,34 +277,29 @@
   inset-inline: 0;
   top: 50%;
   translate: 0 -50%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   overflow: hidden;
 }
 
 .ab-skill-track {
   display: flex;
-  gap: 1.1rem;
+  gap: 0.6rem;
   width: max-content;
   animation: ab-skill-row 30s linear infinite;
+}
+
+/* 第二行：右移半块形成错缝；反向、错速，避免两行完全同步 */
+.ab-skill-track--offset {
+  margin-inline-start: calc(5.5rem / 2);
+  animation-direction: reverse;
+  animation-duration: 36s;
 }
 
 .ab-skill-track:hover {
   animation-play-state: paused;
 }
-
-/* 一列：上下两个方块，列内间距小 → 上下各自紧密成组 */
-.ab-skill-pair {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-/* 隔列下沉半块（一列总高的一半）：上排方块的下缘正好落在下排方块的中心线上，
-   形成安知鱼那种上下两行都错开的排布。 */
-.ab-skill-pair--offset {
-  transform: translateY(calc((4.5rem + 0.4rem) / 2));
-}
-
 @keyframes ab-skill-row {
   from {
     transform: translateX(0);
@@ -321,8 +311,8 @@
 
 .ab-tile {
   display: flex;
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 5.5rem;
+  height: 5.5rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
@@ -370,22 +360,22 @@
   transition: opacity 0.25s ease;
 }
 
+/* 胶囊里只放缩放后的图标（不要名字文字），所以做成正圆、图标放大 */
 .ab-skill-chip {
   display: inline-flex;
-  gap: 0.45rem;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
   align-items: center;
-  padding: 0.3rem 0.85rem;
+  justify-content: center;
   border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
   border-radius: 9999px;
   background: hsl(var(--card, var(--background)));
-  font-size: 0.82rem;
-  white-space: nowrap;
 }
 
 .ab-skill-chip img {
-  width: 1.05rem;
-  height: 1.05rem;
-  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
   object-fit: contain;
 }
 

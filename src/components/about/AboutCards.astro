@@ -133,33 +133,38 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <p class="ab-tips">{skills.tips}</p>
     <h2 class="ab-title">{skills.title}</h2>
     <!--
-      默认：无限轮播。结构对齐安知鱼原版 —— 每「列」是一个 .ab-skill-pair，
-      里面上下两个方块（第二列整体下移，形成上下两组错开的效果）；
-      轮播轨道横向滚动，内容复制一份平移到 -50% 即无缝循环。
-      悬停整卡时切换成"全部技能"面板，显示的是技能图片本身。
+      默认：两行无限轮播。行内方块紧密排列，第二行整体右移半块形成横向错缝；
+      每行轨道的内容复制一份，平移到 -50% 即无缝循环。
+      悬停整卡时切换成「全部技能」面板（只放缩放后的图标）。
+      注意：注释里不能出现连续两个短横线，否则 HTML 注释会提前结束、
+      注释文字会泄漏到页面上（踩过一次）。
     -->
     <div class="ab-skill-marquee">
       <div class="ab-skill-track">
         {
-          Array.from({ length: Math.ceil(skillLoop.length / 2) }, (_, col) => (
-            <div class={`ab-skill-pair${col % 2 === 1 ? " ab-skill-pair--offset" : ""}`}>
-              {skillLoop.slice(col * 2, col * 2 + 2).map((skill) => (
-                <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
-                  <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
-                </span>
-              ))}
-            </div>
+          skillLoop.map((skill) => (
+            <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+            </span>
+          ))
+        }
+      </div>
+      <div class="ab-skill-track ab-skill-track--offset">
+        {
+          skillLoop.map((skill) => (
+            <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+            </span>
           ))
         }
       </div>
     </div>
-    <!-- 悬停时显示：全部技能（胶囊 + 彩色图标 + 名字，对齐安知鱼的 hover 效果） -->
+    <!-- 悬停时显示：全部技能（只有缩放后的图标，不要名字文字） -->
     <div class="ab-skill-all">
       {
         skills.list.map((skill) => (
           <span class="ab-skill-chip" title={skill.name}>
-            <img src={skillIconUrl(skill, true)} alt="" loading="lazy" />
-            <span>{skill.name}</span>
+            <img src={skillIconUrl(skill, true)} alt={skill.name} loading="lazy" />
           </span>
         ))
       }
