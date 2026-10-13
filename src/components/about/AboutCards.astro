@@ -55,7 +55,11 @@ const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
  */
 const COPY_COUNT = 2;
 const rowOf = (offset: number) => skills.list.filter((_, i) => i % 2 === offset);
-const repeat = <T>(items: T[]) => Array.from({ length: COPY_COUNT }, () => items).flat();
+/** 把一份列表重复 COPY_COUNT 次（用函数声明而非泛型箭头 —— 泛型箭头在 .astro 里
+    会被当成 JSX 标签，解析直接失败）。 */
+function repeat(items: typeof skills.list): typeof skills.list {
+  return Array.from({ length: COPY_COUNT }, () => items).flat();
+}
 const skillRowA = repeat(rowOf(0));
 const skillRowB = repeat(rowOf(1));
 
