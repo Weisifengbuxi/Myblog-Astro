@@ -450,7 +450,8 @@
   width: 100%;
   height: auto;
   max-height: 11rem;
-  margin-top: 1rem;
+  /* 往下移一些：原 1rem 偏上 */
+  margin-top: 3rem;
   border-radius: 0.75rem;
   object-fit: contain;
   object-position: right center;
