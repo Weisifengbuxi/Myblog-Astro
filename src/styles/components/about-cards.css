@@ -290,10 +290,10 @@
   animation: ab-skill-row 30s linear infinite;
 }
 
-/* 第二行：右移半块形成错缝；反向、错速，避免两行完全同步 */
+/* 第二行：右移半块形成错缝；与第一行错速，避免完全同步显得呆板。
+   两行都保持默认方向 —— translateX 从 0 到 -50%，即内容自右向左移动。 */
 .ab-skill-track--offset {
   margin-inline-start: calc(5.5rem / 2);
-  animation-direction: reverse;
   animation-duration: 36s;
 }
 
@@ -360,23 +360,35 @@
   transition: opacity 0.25s ease;
 }
 
-/* 胶囊里只放缩放后的图标（不要名字文字），所以做成正圆、图标放大 */
+/* 胶囊：缩放图标 + 技能名。
+   图标上色不能用 ?color= —— unpkg 会忽略查询参数，返回的 SVG 里没有 fill，
+   因此一直是黑的。改用 CSS mask：把 SVG 当镂空模板，背景色即图标颜色。 */
 .ab-skill-chip {
   display: inline-flex;
-  width: 3rem;
-  height: 3rem;
-  flex-shrink: 0;
+  gap: 0.45rem;
   align-items: center;
-  justify-content: center;
+  padding: 0.3rem 0.8rem;
   border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
   border-radius: 9999px;
   background: hsl(var(--card, var(--background)));
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
-.ab-skill-chip img {
-  width: 1.6rem;
-  height: 1.6rem;
-  object-fit: contain;
+.ab-skill-chip-icon {
+  display: block;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  background: var(--tone, currentColor);
+  -webkit-mask-image: var(--icon);
+  mask-image: var(--icon);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .ab-skills:hover .ab-skill-marquee {

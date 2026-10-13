@@ -41,15 +41,6 @@ const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
 const skillLoop = [...skills.list, ...skills.list];
 
 /**
- * simple-icons 支持用 `?color=` 覆盖图标颜色。悬停面板里的图标是放在卡片底色
- * （不是深色方块）上的，白色图标会看不见，所以那里取技能自身的主题色。
- */
-function skillIconUrl(skill: { icon: string; color: string }, colored = false): string {
-  const base = `${SKILL_ICON_BASE}/${skill.icon}.svg`;
-  return colored ? `${base}?color=${skill.color.replace('#', '')}` : base;
-}
-
-/**
  * 十年之约的日期格式化。
  *
  * 渲染阶段就把日期定成 `Y/M/D` 并写进 `data-date`，脚本读这个属性而不是显示文本
@@ -143,7 +134,7 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
       <div class="ab-skill-track">
         {
           skillLoop.map((skill) => (
-            <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+            <span class="ab-tile" style={`background:${skill.color}`}>
               <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
             </span>
           ))
@@ -152,7 +143,7 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
       <div class="ab-skill-track ab-skill-track--offset">
         {
           skillLoop.map((skill) => (
-            <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+            <span class="ab-tile" style={`background:${skill.color}`}>
               <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
             </span>
           ))
@@ -163,8 +154,9 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <div class="ab-skill-all">
       {
         skills.list.map((skill) => (
-          <span class="ab-skill-chip" title={skill.name}>
-            <img src={skillIconUrl(skill, true)} alt={skill.name} loading="lazy" />
+          <span class="ab-skill-chip" style={`--icon:url(${SKILL_ICON_BASE}/${skill.icon}.svg);--tone:${skill.color}`}>
+            <span class="ab-skill-chip-icon" aria-hidden="true" />
+            <span>{skill.name}</span>
           </span>
         ))
       }
