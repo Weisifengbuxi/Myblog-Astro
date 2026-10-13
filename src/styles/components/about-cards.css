@@ -461,14 +461,19 @@
    中间的空档由 flex 吸收，所以不会在图片下方再留一大块空白。 */
 .ab-career-img {
   display: block;
-  width: 100%;
+  /* 通到卡片左右边缘：用负外边距抵消卡片的左右内边距（16px 32px 里的 32px）。
+     卡片自身有 overflow:hidden，所以图片在边缘处被裁掉，
+     图片里的进度条看起来就是"从无限远来到无限远去"。 */
+  width: calc(100% + 4rem);
+  max-width: none;
+  margin-inline: -2rem;
   height: auto;
   max-height: 11rem;
   /* 往下移一些：原 1rem 偏上 */
   margin-top: 3rem;
-  border-radius: 0.75rem;
-  object-fit: contain;
-  object-position: right center;
+  /* 贴到卡片边缘后不能用圆角，否则四角会露出缺口 */
+  border-radius: 0;
+  object-fit: cover;
 }
 
 .ab-career-img--empty {
