@@ -260,43 +260,48 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：单行无限轮播 + 斜向交错（对齐安知鱼原版）─────────
-   原版（themes/anzhiyu/.../_extra/skills/skills.css）的做法：
-     - 轨道内容复制一份，平移到 -50% 构成无缝循环
-     - 每对里的第二个方块 translate(-60px, ...) + margin-top:1rem，
-       形成斜向下沉的交错排布
-     - 方块 120px、圆角 30px、左阴影；图标占 50%
-   这里把尺寸按卡片宽度（49%）等比缩小，并保留 hover 切换成完整列表的交互。
+/* ── 技能：列内上下两块、无限轮播（对齐安知鱼原版）─────────
+   原版的 .tags-group-wrapper 是**横向 flex**，每「列」是一个
+   .tags-group-icon-pair（display: flex 的默认 row 会把两块并排，
+   所以原版靠 .tags-group-icon-pair .tags-group-icon:nth-child(even)
+   的 margin-top:1rem + translate(-60px) 把第二块压下来并左移，
+   形成"上下两组"的观感）。
 
-   注意：上一版之所以"还有问题"，是我自创了"双行 + 半格错位"，并非原版样式；
-   现在改回原版的单行 + 配对交错。 */
+   这里按本站卡宽等比缩放：每列 = 上下堆叠的两个方块（列内间距很小），
+   列与列之间留出距离，列内第二块不下沉（不再做那个负位移 —— 它在本尺寸下
+   会把方块挤到一起）。
+
+   轮播：轨道内容复制一份，平移到 -50% 无缝循环；悬停时暂停。 */
 .ab-skills {
-  /* 与右侧生涯卡统一高度（变量定义见 .ab） */
   min-height: var(--ab-pair-h);
   overflow: hidden;
 }
 
 .ab-skill-marquee {
-  /* 绝对定位成一条横带并垂直居中：这样标题固定在上方，方块组上下留白相等，
-     不会出现"上排离标题很远、下排贴在卡片下缘"的不均。
-     （用 flex 居中不行 —— 标题与轮播同属 flex 子项，justify-content 分配不到。） */
   position: absolute;
   inset-inline: 0;
   top: 50%;
-  /* 再上移半块（方块高 6.5rem 的一半）：错缝那排下沉了半块，
-     不抵消的话视觉重心会偏下，出现"上留白多、下留白少"。 */
-  translate: 0 calc(-50% - 3.25rem / 2);
+  translate: 0 -50%;
   overflow: hidden;
 }
 
 .ab-skill-track {
   display: flex;
+  gap: 1.1rem;
   width: max-content;
   animation: ab-skill-row 30s linear infinite;
 }
 
 .ab-skill-track:hover {
   animation-play-state: paused;
+}
+
+/* 一列：上下两个方块，列内间距小 → 上下各自紧密成组 */
+.ab-skill-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 @keyframes ab-skill-row {
@@ -310,32 +315,24 @@
 
 .ab-tile {
   display: flex;
-  width: 6.5rem;
-  height: 6.5rem;
-  margin-inline-start: 1rem;
+  width: 4.75rem;
+  height: 4.75rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 1.5rem;
-  box-shadow: 0 0.5rem 1rem -0.25rem rgb(0 0 0 / 28%);
+  border-radius: 1.25rem;
+  box-shadow: 0 0.4rem 0.85rem -0.25rem rgb(0 0 0 / 26%);
   transition: box-shadow 0.25s ease;
 }
 
-/* 每隔一个下移半块 = 砖块错缝，方块之间不重叠。
-   之前照搬原版的 translateX(-60px)（横向负位移）会把相邻块拉到只差 65px，
-   再叠加垂直错位就叠在一起，看着并不像"错开"，所以这里去掉横向压缩。 */
-.ab-tile--odd {
-  transform: translateY(50%);
-}
-
 .ab-tile:hover {
-  box-shadow: 0 0.75rem 1.5rem -0.25rem rgb(0 0 0 / 38%);
+  box-shadow: 0 0.7rem 1.4rem -0.25rem rgb(0 0 0 / 38%);
 }
 
 .ab-tile img {
-  width: 50%;
-  height: 50%;
+  width: 52%;
+  height: 52%;
   object-fit: contain;
   /* simple-icons 的 svg 自带 fill，这里统一压成白色 */
   filter: brightness(0) invert(1);
@@ -345,7 +342,7 @@
 
 /* 悬停这一块时图片放大，看到的是图片本身而不是小图标 */
 .ab-tile:hover img {
-  transform: scale(1.35);
+  transform: scale(1.32);
 }
 
 /* 悬停：轮播淡出，全部技能面板淡入（absolute 铺满卡片、可滚动） */
@@ -353,11 +350,11 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.85rem;
   align-content: start;
-  /* 顶部留出卡片标题（技能 / 开启创造力）的高度，避免面板盖住文字 */
-  padding: 4.25rem 2rem 1.25rem;
+  /* 顶部留出卡片标题（技能 / 开启创造力）的高度 */
+  padding: 4.25rem 1.5rem 1.25rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   opacity: 0;
@@ -366,11 +363,9 @@
 }
 
 .ab-skill-all .ab-tile {
-  width: 4.25rem;
-  height: 4.25rem;
-  margin-inline-start: 0;
-  margin-top: 0;
-  transform: none;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
 }
 
 .ab-skills:hover .ab-skill-marquee {
