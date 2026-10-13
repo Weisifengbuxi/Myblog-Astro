@@ -286,8 +286,10 @@
 }
 
 .ab-skill-track {
+  /* gap 提成变量：关键帧里要用它做无缝补偿（见 ab-skill-row） */
+  --ab-skill-gap: 0.6rem;
   display: flex;
-  gap: 0.6rem;
+  gap: var(--ab-skill-gap);
   width: max-content;
   animation: ab-skill-row 30s linear infinite;
 }
@@ -309,7 +311,11 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    /* 无缝循环的关键：轨道内容是「两份技能 + 中间 1 个 gap」，总宽 = 2W + gap。
+       要对齐第二份的起点需要移动 W + gap，而 -50% 只等于 W + gap/2，
+       少移动 gap/2，于是每轮结束会跳一下（表现为"闪回重播"）。
+       这里把这 gap/2 补回去，轮播就变成真正连续的队列。 */
+    transform: translateX(calc(-50% - var(--ab-skill-gap) / 2));
   }
 }
 
@@ -355,8 +361,8 @@
   flex-wrap: wrap;
   gap: 0.6rem;
   align-content: flex-start;
-  /* 顶部留出卡片标题（技能 / 开启创造力）的高度 */
-  padding: 4.25rem 1.5rem 1.25rem;
+  /* 顶部留出卡片标题的高度，并整体下移一些（与图标区的位置对齐） */
+  padding: 6.5rem 1.5rem 1.25rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   opacity: 0;
