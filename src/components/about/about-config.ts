@@ -38,16 +38,16 @@ export const skills = {
   title: '开启创造力',
   /** icon 取 simple-icons 的图标名（https://simpleicons.org）。 */
   list: [
-    { name: 'HTML5', icon: 'html5', color: '#e34f26' },
-    { name: 'CSS3', icon: 'css3', color: '#1572b6' },
-    { name: 'JavaScript', icon: 'javascript', color: '#f7df1e' },
-    { name: 'TypeScript', icon: 'typescript', color: '#3178c6' },
-    { name: 'Vue', icon: 'vuedotjs', color: '#4fc08d' },
-    { name: 'React', icon: 'react', color: '#20232a' },
-    { name: 'Node.js', icon: 'nodedotjs', color: '#339933' },
-    { name: 'Python', icon: 'python', color: '#3776ab' },
-    { name: 'Java', icon: 'openjdk', color: '#e76f00' },
-    { name: 'Git', icon: 'git', color: '#f05032' },
+    { name: 'HTML5', icon: 'html5', color: '#e34f26', href: 'https://developer.mozilla.org/docs/Web/HTML' },
+    { name: 'CSS3', icon: 'css3', color: '#1572b6', href: 'https://developer.mozilla.org/docs/Web/CSS' },
+    { name: 'JavaScript', icon: 'javascript', color: '#f7df1e', href: 'https://developer.mozilla.org/docs/Web/JavaScript' },
+    { name: 'TypeScript', icon: 'typescript', color: '#3178c6', href: 'https://www.typescriptlang.org/' },
+    { name: 'Vue', icon: 'vuedotjs', color: '#4fc08d', href: 'https://vuejs.org/' },
+    { name: 'React', icon: 'react', color: '#20232a', href: 'https://react.dev/' },
+    { name: 'Node.js', icon: 'nodedotjs', color: '#339933', href: 'https://nodejs.org/' },
+    { name: 'Python', icon: 'python', color: '#3776ab', href: 'https://www.python.org/' },
+    { name: 'Java', icon: 'openjdk', color: '#e76f00', href: 'https://openjdk.org/' },
+    { name: 'Git', icon: 'git', color: '#f05032', href: 'https://git-scm.com/' },
   ],
 };
 
@@ -59,14 +59,14 @@ export const careers = {
   title: '无限进步',
   desc: '北师香港浸会大学，计算机科学与技术',
   /** 换成你自己的图片地址即可；留空则不显示图片。 */
-  image: '',
+  image: 'https://s21.ax1x.com/2025/09/02/pVgMzY4.png',
 };
 
 /** 所在地。图片换成你自己的即可；留空则显示占位块。 */
 export const location = {
   tips: '我现在住在',
   label: '中国，广东省，珠海市',
-  image: '',
+  image: 'https://images.weserv.nl/?url=https://raw.githubusercontent.com/Weisifengbuxi/tuchuang/main/img/ditu.png',
 };
 
 export const selfInfo = [
@@ -102,11 +102,31 @@ export const comic = {
   /** 卡片左下角的小字，可留空。 */
   date: '',
   list: [
-    { name: '示例书籍一', cover: '', href: '#' },
-    { name: '示例书籍二', cover: '', href: '#' },
-    { name: '示例书籍三', cover: '', href: '#' },
-    { name: '示例书籍四', cover: '', href: '#' },
-    { name: '示例书籍五', cover: '', href: '#' },
+    {
+      name: '蛊真人',
+      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/guzhenren.webp',
+      href: '#',
+    },
+    {
+      name: '仙宫开物',
+      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/xiangongkaiwu.webp',
+      href: '#',
+    },
+    {
+      name: '异兽迷城',
+      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/yishoumicheng.jpg',
+      href: '#',
+    },
+    {
+      name: '怪谈游戏设计师',
+      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/wanjiejiezhu.jpg',
+      href: 'https://www.qidian.com/book/1036804203/',
+    },
+    {
+      name: '十日终焉',
+      cover: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/shirizhongyan.webp',
+      href: '#',
+    },
   ],
 };
 

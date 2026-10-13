@@ -12,6 +12,8 @@
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
   gap: 1rem;
+  /* 卡片按自身内容取高，不被同排更高的卡片拉伸（否则宽幅图片下方会多出空档） */
+  align-items: start;
   max-width: 1352px;
   margin: 1.5rem auto;
 }
@@ -19,9 +21,6 @@
 /* 跨列工具类 */
 .ab-span-24 {
   grid-column: span 24;
-}
-.ab-span-18 {
-  grid-column: span 18;
 }
 .ab-span-14 {
   grid-column: span 14;
@@ -31,9 +30,6 @@
 }
 .ab-span-10 {
   grid-column: span 10;
-}
-.ab-span-6 {
-  grid-column: span 6;
 }
 
 .ab-stack {
@@ -262,115 +258,81 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：默认横向无限轮播，hover 切换为完整列表 ──────────────
-   与旧博客 #skills-tags-group-all 的做法一致：轨道内容复制一份，
-   平移到 -50% 时正好回到起点，因此循环无缝。 */
+/* ── 技能：规则网格 ──────────────────────────────────────────
+   替代原先的横向 marquee：marquee 里偶数块靠 translateY 交错，行间距只有 16px、
+   相邻块的水平间距又被错位吃掉，所以看起来"上下太挤、左右不对"。
+   网格的 row-gap / column-gap 独立可控，也不会再把块裁掉。 */
 .ab-skills {
-  min-height: 450px;
+  min-height: 0;
 }
 
-.ab-skill-marquee {
-  position: relative;
+.ab-tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1.25rem;
   margin-top: 1.5rem;
-  /* 上下各留 20px，给下移的偶数块留空间，避免被裁掉 */
-  padding-block: 20px;
-  overflow: hidden;
-  transition: opacity 0.3s ease;
-}
-
-.ab-skill-track {
-  display: flex;
-  gap: 1rem;
-  width: max-content;
-  animation: ab-skill-row 22s linear infinite;
-}
-
-.ab-skill-track .ab-tile {
-  flex-shrink: 0;
-}
-
-/* 偶数块下移，形成交错排布（旧博客用「配对 + 位移」实现，这里用整齐的错行，
-   避免相邻块互相压住） */
-.ab-skill-track .ab-tile:nth-child(even) {
-  transform: translateY(16px);
-}
-
-@keyframes ab-skill-row {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.ab-skill-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1.5rem 0 0;
-  padding: 0;
-  list-style: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-/* hover：轮播淡出、完整列表淡入（同旧博客 .skills:hover 行为） */
-.ab-skills:hover .ab-skill-marquee {
-  opacity: 0;
-}
-
-.ab-skills:hover .ab-skill-list {
-  opacity: 1;
-}
-
-.ab-skill-chip {
-  display: inline-flex;
-  gap: 0.4rem;
-  align-items: center;
-  padding: 0.35rem 0.8rem;
-  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
-  border-radius: 9999px;
-  font-size: 0.8rem;
-}
-
-.ab-skill-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  flex-shrink: 0;
-  border-radius: 50%;
 }
 
 .ab-tile {
   display: flex;
+  aspect-ratio: 1;
   align-items: center;
   justify-content: center;
-  width: 5.25rem;
-  height: 5.25rem;
+  overflow: hidden;
   border-radius: 1.1rem;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+/* 悬停时整块轻微抬起、图片放大到几乎铺满 —— 看到的是图片本身 */
+.ab-tile:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.6rem 1.2rem -0.5rem rgb(0 0 0 / 35%);
 }
 
 .ab-tile img {
-  width: 42%;
-  height: 42%;
+  width: 58%;
+  height: 58%;
   object-fit: contain;
   /* simple-icons 的 svg 自带 fill，这里统一压成白色 */
   filter: brightness(0) invert(1);
-  opacity: 0.92;
+  opacity: 0.95;
+  transition: transform 0.25s ease;
+}
+
+.ab-tile:hover img {
+  transform: scale(1.55);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ab-skill-track {
-    animation: none;
-  }
-
   .ab-tag {
     animation: none;
   }
+
+  .ab-tile,
+  .ab-tile img {
+    transition: none;
+  }
+
+  .ab-tile:hover {
+    transform: none;
+  }
+
+  .ab-tile:hover img {
+    transform: none;
+  }
+}
+
+/* ── 生涯 ─────────────────────────────────────────────────────
+   不设固定高度，由内容撑开：careers.image 是 815×148 的宽幅横图，缩到卡片宽度后
+   自然高度只有约 109px，之前 min-height 450px 会在图片下方留出上百像素空白。 */
+.ab-careers {
+  min-height: 0;
 }
 
 .ab-career-edu {
-  margin: 1.75rem 0 0;
+  margin: 1.25rem 0 0;
   font-size: 1rem;
   font-weight: 700;
   color: hsl(var(--primary));
@@ -382,10 +344,14 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* 生涯图片位（careers.image 留空时显示占位提示） */
+/* 生涯图片位（careers.image 留空时显示占位提示）。
+   高度交给内容：图片给 max-height + 自适应，时间轴用 margin-top:auto 贴底，
+   中间的空档由 flex 吸收，所以不会在图片下方再留一大块空白。 */
 .ab-career-img {
+  display: block;
   width: 100%;
-  height: 8rem;
+  height: auto;
+  max-height: 11rem;
   margin-top: 1rem;
   border-radius: 0.75rem;
   object-fit: contain;
@@ -394,6 +360,7 @@
 
 .ab-career-img--empty {
   display: flex;
+  height: 7rem;
   align-items: center;
   justify-content: center;
   border: 1px dashed color-mix(in oklab, currentColor 18%, transparent);

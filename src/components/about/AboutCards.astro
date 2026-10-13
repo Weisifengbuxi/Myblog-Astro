@@ -35,9 +35,7 @@ import {
 // 全局累计值（实测 4900 万量级，严重失真）。
 const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
 
-// 技能轮播：把列表复制一遍，marquee 平移到 -50% 时正好回到起点，形成无缝循环
-// （与旧博客 #skills-tags-group-all 的做法一致）。hover 时切换为完整列表。
-const skillLoop = [...skills.list, ...skills.list];
+// 技能轮播已改为规则网格（见 .ab-tiles），不再需要复制一份列表做无缝循环。
 
 /**
  * 十年之约的日期格式化。
@@ -122,29 +120,22 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
   <section class="ab-card ab-span-12 ab-skills">
     <p class="ab-tips">{skills.tips}</p>
     <h2 class="ab-title">{skills.title}</h2>
-    <!-- 默认：横向无限轮播；hover 时淡出，切换为下面那份完整列表 -->
-    <div class="ab-skill-marquee" aria-hidden="true">
-      <div class="ab-skill-track">
-        {
-          skillLoop.map((skill) => (
-            <span class="ab-tile" style={`background:${skill.color}`}>
-              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt="" loading="lazy" />
-            </span>
-          ))
-        }
-      </div>
-    </div>
-    <!-- 完整列表（hover 时显示，可点击/可读） -->
-    <ul class="ab-skill-list">
+    <!-- 规则网格：行列间距一致，悬停时图片放大 -->
+    <div class="ab-tiles">
       {
         skills.list.map((skill) => (
-          <li class="ab-skill-chip" title={skill.name}>
-            <span class="ab-skill-dot" style={`background:${skill.color}`} />
-            <span>{skill.name}</span>
-          </li>
+          <a
+            class="ab-tile"
+            style={`background:${skill.color}`}
+            title={skill.name}
+            href={skill.href ?? '#'}
+            target="_blank"
+            rel="noopener noreferrer">
+            <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+          </a>
         ))
       }
-    </ul>
+    </div>
   </section>
 
   <section class="ab-card ab-span-12 ab-careers">
