@@ -204,64 +204,13 @@ const summary = [
 
 <script>
   /**
-   * 访问数据 —— 解析 51LA 数据挂件脚本。
-   *
-   * 真实数据**内嵌在 quote.js 的脚本文本里**，形如：
-   *   <p><span>2</span><span>12</span></p>
-   * 第一个 span 是序号（0..6），第二个才是数值。挂件渲染进 DOM 的那份永远是
-   * 写死的占位符，所以只能 fetch 文本后用正则取，不能读 DOM。
-   *
-   * 字段顺序来自脚本内的 b 数组：
-   *   [["ol"],["t","u"],["t","p"],["y","u"],["y","p"],["m","p"],["tl","p"]]
-   *   → 最近活跃访客 / 今日人数 / 今日访问 / 昨日人数 / 昨日访问 / 本月访问 / 总访问量
+   * 访问数据（6 项）—— 解析逻辑在 @lib/la51-stats 里，与关于页的统计卡共用同一份。
+   * 真实数据内嵌在 quote.js 的脚本文本中，不能读挂件渲染出的 DOM（那份是占位符）。
    */
-  const WIDGET = 'https://v6-widget.51.la/v6/3REPy7id8yIlqsbo/quote.js';
-
-  /** 解析出的下标 → 页面上的键（跳过下标 0「最近活跃访客」）。 */
-  const FIELDS: Record<number, string> = {
-    1: 'todayUv',
-    2: 'todayPv',
-    3: 'yesterdayUv',
-    4: 'yesterdayPv',
-    5: 'monthPv',
-    6: 'totalPv',
-  };
-
-  function parseWidget(text: string): Record<string, number> {
-    const result: Record<string, number> = {};
-    // 每项形如 <p><span>序号</span><span>数值</span></p>，直接按序号取值，
-    // 不要靠出现顺序递推 —— 序号才是权威（它同时是脚本内部的数据下标）。
-    const pattern = /<span>(\d+)<\/span><span>(\d+)<\/span>/g;
-    let match: RegExpExecArray | null = pattern.exec(text);
-    while (match) {
-      const key = FIELDS[Number.parseInt(match[1], 10)];
-      const value = Number.parseInt(match[2], 10);
-      if (key && Number.isFinite(value)) result[key] = value;
-      match = pattern.exec(text);
-    }
-    return result;
-  }
-
-  function paint(values: Record<string, number>): void {
-    for (const [key, value] of Object.entries(values)) {
-      const el = document.querySelector<HTMLElement>('[data-stat="' + key + '"]');
-      if (el) el.textContent = value.toLocaleString('zh-CN');
-    }
-  }
+  import { initLa51Stats } from '@lib/la51-stats';
 
   function boot(): void {
-    if (!document.querySelector('[data-stat="todayUv"]')) return;
-
-    fetch(WIDGET)
-      .then((res) => (res.ok ? res.text() : ''))
-      .then((text) => {
-        if (!text) return;
-        const values = parseWidget(text);
-        if (Object.keys(values).length > 0) paint(values);
-      })
-      .catch(() => {
-        /* 取数失败时保留占位符 */
-      });
+    initLa51Stats();
   }
 
   if (document.readyState === 'loading') {

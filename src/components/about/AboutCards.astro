@@ -183,23 +183,41 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
   <section class="ab-card ab-span-10 ab-statistic">
     <p class="ab-tips">数据</p>
     <h2 class="ab-title">访问统计</h2>
+    <!--
+      六项来自 51LA 数据挂件脚本（真实数据内嵌在 quote.js 的脚本文本里，
+      见 PostCharts.astro 里的同源解析脚本；这里只放占位与 data-stat 标识）。
+      原先的三项（访问人数/总访问量/本页阅读）来自 busuanzi，实测虚高
+      （UV > PV，且比 51LA 高两个数量级），已换成 51LA 口径。
+    -->
     <div class="ab-stat-grid">
       <div class="ab-stat">
-        <span class="ab-stat-label">访问人数</span>
-        <span class="ab-stat-value" data-visitor-value="uv">—</span>
+        <span class="ab-stat-label">今日人数</span>
+        <span class="ab-stat-value" data-stat="todayUv">—</span>
+      </div>
+      <div class="ab-stat">
+        <span class="ab-stat-label">今日访问</span>
+        <span class="ab-stat-value" data-stat="todayPv">—</span>
+      </div>
+      <div class="ab-stat">
+        <span class="ab-stat-label">昨日人数</span>
+        <span class="ab-stat-value" data-stat="yesterdayUv">—</span>
+      </div>
+      <div class="ab-stat">
+        <span class="ab-stat-label">昨日访问</span>
+        <span class="ab-stat-value" data-stat="yesterdayPv">—</span>
+      </div>
+      <div class="ab-stat">
+        <span class="ab-stat-label">本月访问</span>
+        <span class="ab-stat-value" data-stat="monthPv">—</span>
       </div>
       <div class="ab-stat">
         <span class="ab-stat-label">总访问量</span>
-        <span class="ab-stat-value" data-visitor-value="pv">—</span>
-      </div>
-      <div class="ab-stat">
-        <span class="ab-stat-label">本页阅读</span>
-        <span class="ab-stat-value" data-visitor-value="page">—</span>
+        <span class="ab-stat-value" data-stat="totalPv">—</span>
       </div>
     </div>
     <p class="ab-stat-source">
       <Icon name="ri:shield-check-line" />
-      <span>数据来自 busuanzi</span>
+      <span>数据来自 51LA</span>
     </p>
     <a class="ab-button" href="/archives">
       <Icon name="ri:arrow-right-circle-line" />
@@ -331,6 +349,8 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
 </div>
 
 <script>
+  import { initLa51Stats } from '@lib/la51-stats';
+
   /**
    * Hello there!：色块随鼠标在字母笔画里游走。
    *
@@ -399,35 +419,6 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     }
   }
 
-  /** 访问人数（busuanzi / vercount，上报线上站点地址）。 */
-  function initVisitor() {
-    const box = document.querySelector<HTMLElement>('[data-visitor-value="uv"]');
-    if (!box) return;
-    const host = (
-      document.querySelector<HTMLElement>('[data-site-url]')?.dataset.siteUrl || location.origin
-    ).replace(/\/+$/, '');
-    const url = `${host}${location.pathname}`.split(/[?#]/)[0];
-
-    fetch(
-      `https://events.vercount.one/api/v2/log?url=${encodeURIComponent(url)}&referrer=&title=${encodeURIComponent(document.title)}`,
-    )
-      .then((r) => (r.ok ? r.json() : null))
-      .then((payload) => {
-        const data = payload && payload.data ? payload.data : null;
-        if (!data) return;
-        const map: Record<string, number | undefined> = {
-          uv: data.site_uv,
-          pv: data.site_pv,
-          page: data.page_pv,
-        };
-        for (const [key, value] of Object.entries(map)) {
-          const el = document.querySelector<HTMLElement>(`[data-visitor-value="${key}"]`);
-          if (el && typeof value === 'number') el.textContent = value.toLocaleString('zh-CN');
-        }
-      })
-      .catch(() => {});
-  }
-
   /**
    * 十年之约进度条。
    *
@@ -466,8 +457,8 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
   function initAbout() {
     initHelloBig();
     initPursuit();
-    initVisitor();
     initTenYearProgress();
+    initLa51Stats();
   }
 
   initAbout();
