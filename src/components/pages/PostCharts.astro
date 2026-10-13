@@ -101,8 +101,23 @@ const summary = [
   <section class="charts-block">
     <h2 class="charts-title">网站资讯</h2>
 
-    <!-- 实时数据（访问人数 / 总访问量）+ 构建期算出的最后更新，同一排等宽 -->
-    <div class="charts-summary">
+    <!--
+      51LA 数据挂件：脚本自身按域名（www.weisifengbuxi.top）校验，只在正式域名渲染，
+      因此本地开发时这块是空的 —— 属预期行为，不是坏了。
+      脚本用 id="LA-DATA-WIDGET" 定位自己，所以必须保留该 id 且不能参与 Astro 打包。
+      它会给写出的元素打内联 !important 样式，外观由下面的 CSS 覆盖成站点风格。
+    -->
+    <div class="charts-la51" data-la51-widget>
+      <script
+        id="LA-DATA-WIDGET"
+        is:inline
+        crossorigin="anonymous"
+        charset="UTF-8"
+        src="https://v6-widget.51.la/v6/3REPy7id8yIlqsbo/quote.js?theme=0&col=true&f=13&display=0,1,1,1,1,1,1,0"></script>
+    </div>
+
+    <!-- 挂件没出来时（本地 / 离线 / 被拦截）显示 busuanzi 的站点 UV·PV 兜底 -->
+    <div class="charts-summary charts-fallback" data-la51-fallback hidden>
       <VisitorStats />
       <div class="charts-stat">
         <span class="charts-stat-value">{lastUpdated}</span>
@@ -120,7 +135,9 @@ const summary = [
         ))
       }
     </div>
-    <p class="charts-source">访问数据来自 busuanzi（vercount），其余为构建时统计</p>
+    <p class="charts-source">
+      访问数据来自 51LA 数据挂件，兜底为 busuanzi；其余为构建时统计 · 最后更新 {lastUpdated}
+    </p>
   </section>
 
   <section class="charts-block">
@@ -175,7 +192,93 @@ const summary = [
   </section>
 </div>
 
+<script>
+  /**
+   * 51LA 数据挂件的兜底检测。
+   *
+   * 挂件脚本自己按域名校验，且数据是异步取的，所以这里轮询等它写出 DOM：
+   * 一旦出现就隐藏 busuanzi 兜底；超时仍没有（本地开发、被拦截、接口挂了）
+   * 就把兜底显示出来，统计页不会出现空白。
+   */
+  function initLa51Fallback(): void {
+    const widget = document.querySelector<HTMLElement>('[data-la51-widget]');
+    const fallback = document.querySelector<HTMLElement>('[data-la51-fallback]');
+    if (!widget || !fallback) return;
+
+    const render = (visible: boolean) => {
+      fallback.hidden = !visible;
+    };
+    render(false);
+
+    let elapsed = 0;
+    const timer = window.setInterval(() => {
+      elapsed += 400;
+      if (widget.querySelector('.la-widget, .la-data-widget__container')) {
+        window.clearInterval(timer);
+        render(false);
+        return;
+      }
+      if (elapsed >= 8000) {
+        window.clearInterval(timer);
+        render(true);
+      }
+    }, 400);
+  }
+
+  function boot(): void {
+    initLa51Fallback();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
+  document.addEventListener('astro:page-load', boot);
+</script>
+
 <style>
+  /*
+    51LA 挂件会把自己写出的每个元素都加上内联 `!important` 样式（白底、#333 文字、
+    蓝色边框等），所以只能用同样带 !important 的规则覆盖成站点风格，
+    让它跟随明暗模式、和下面的总数列表统一。
+  */
+  .charts-la51 {
+    margin-bottom: 1.5rem;
+  }
+
+  .charts-la51 :global(.la-data-widget__container) {
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    font-size: 0.8rem !important;
+  }
+
+  .charts-la51 :global(.la-data-widget__container > p) {
+    display: flex !important;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0 !important;
+    padding: 0.5rem 0.15rem !important;
+    border-bottom: 1px solid color-mix(in oklab, currentColor 8%, transparent);
+    line-height: 1.5 !important;
+  }
+
+  /* 标签（挂件里是内联块 + float:right 的数值） */
+  .charts-la51 :global(.la-data-widget__container > p > span:not([style*="float"])) {
+    color: hsl(var(--muted-foreground)) !important;
+    font-size: 0.8rem !important;
+  }
+
+  .charts-la51 :global(.la-data-widget__container > p > span[style*="float"]) {
+    float: none !important;
+    color: hsl(var(--foreground)) !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
+  }
+
   /*
     实时数据与「最后更新」排成同宽一排：VisitStats 自带 auto-fit 网格，
     这里用 :global 覆盖成 3 列，让最后一个格子与前面两张宽度一致。

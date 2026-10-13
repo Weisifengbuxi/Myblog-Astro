@@ -90,6 +90,26 @@ export const maxim = { tips: '座右铭', line1: '谁无狂风劲雨时', line2:
 export const buff = { tips: '特长', line1: 'MOBA，非射击类竞技游戏', line2: '意识流编写代码' };
 
 /**
+ * 爱好的游戏。
+ *
+ * 与 `comic` 同一套版式与交互（旧博客 anzhiyu 的 .comic-content 卡片）：
+ * 封面斜切排列，悬停那张横向展开并把封面放大。cover 留空时显示占位块。
+ */
+export const game = {
+  tips: '爱好的游戏',
+  title: '王者荣耀 英雄联盟',
+  /** 卡片左下角的小字，可留空。 */
+  date: '',
+  list: [
+    { name: '游戏一', cover: '', href: '#' },
+    { name: '游戏二', cover: '', href: '#' },
+    { name: '游戏三', cover: '', href: '#' },
+    { name: '游戏四', cover: '', href: '#' },
+    { name: '游戏五', cover: '', href: '#' },
+  ],
+};
+
+/**
  * 在追的小说（或番剧）。
  *
  * 版式与交互来自旧博客 anzhiyu 主题的 `.comic-content` 卡片：

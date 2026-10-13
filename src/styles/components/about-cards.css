@@ -258,36 +258,53 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：规则网格 ──────────────────────────────────────────
-   替代原先的横向 marquee：marquee 里偶数块靠 translateY 交错，行间距只有 16px、
-   相邻块的水平间距又被错位吃掉，所以看起来"上下太挤、左右不对"。
-   网格的 row-gap / column-gap 独立可控，也不会再把块裁掉。 */
+/* ── 技能：无限横向轮播（悬停放大图片）──────────────────────
+   轨道内容复制一份，平移到 -50% 时正好回到起点，因此循环无缝。
+   这里**不做**旧博客那种偶数块 translateY 交错：它会把行间距压到 16px，
+   又让相邻块的水平间距被错位吃掉，看起来"上下太挤、左右不对"。
+   方块用固定宽度 + 等间距排列，悬停时暂停轮播并放大该块图片。 */
 .ab-skills {
   min-height: 0;
 }
 
-.ab-tiles {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1.25rem;
+.ab-skill-marquee {
   margin-top: 1.5rem;
+  overflow: hidden;
+}
+
+.ab-skill-track {
+  display: flex;
+  gap: 1.25rem;
+  width: max-content;
+  animation: ab-skill-row 22s linear infinite;
+}
+
+.ab-skill-marquee:hover .ab-skill-track {
+  animation-play-state: paused;
+}
+
+@keyframes ab-skill-row {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .ab-tile {
   display: flex;
-  aspect-ratio: 1;
+  width: 5rem;
+  height: 5rem;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border-radius: 1.1rem;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: box-shadow 0.25s ease;
 }
 
-/* 悬停时整块轻微抬起、图片放大到几乎铺满 —— 看到的是图片本身 */
 .ab-tile:hover {
-  transform: translateY(-3px);
   box-shadow: 0 0.6rem 1.2rem -0.5rem rgb(0 0 0 / 35%);
 }
 
@@ -301,6 +318,7 @@
   transition: transform 0.25s ease;
 }
 
+/* 悬停这一块时图片放大到几乎铺满，看到的是图片本身而不是小图标 */
 .ab-tile:hover img {
   transform: scale(1.55);
 }
@@ -310,13 +328,13 @@
     animation: none;
   }
 
+  .ab-skill-track {
+    animation: none;
+  }
+
   .ab-tile,
   .ab-tile img {
     transition: none;
-  }
-
-  .ab-tile:hover {
-    transform: none;
   }
 
   .ab-tile:hover img {

@@ -18,6 +18,7 @@ import {
   buff,
   careers,
   comic,
+  game,
   hello,
   location,
   maxim,
@@ -35,7 +36,9 @@ import {
 // 全局累计值（实测 4900 万量级，严重失真）。
 const siteUrl = (siteConfig.site || '').replace(/\/+$/, '');
 
-// 技能轮播已改为规则网格（见 .ab-tiles），不再需要复制一份列表做无缝循环。
+// 技能轮播：列表复制一份，轨道平移到 -50% 时正好回到起点，形成无缝循环
+// （与旧博客 #skills-tags-group-all 同一手法）。
+const skillLoop = [...skills.list, ...skills.list];
 
 /**
  * 十年之约的日期格式化。
@@ -120,21 +123,17 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
   <section class="ab-card ab-span-12 ab-skills">
     <p class="ab-tips">{skills.tips}</p>
     <h2 class="ab-title">{skills.title}</h2>
-    <!-- 规则网格：行列间距一致，悬停时图片放大 -->
-    <div class="ab-tiles">
-      {
-        skills.list.map((skill) => (
-          <a
-            class="ab-tile"
-            style={`background:${skill.color}`}
-            title={skill.name}
-            href={skill.href ?? '#'}
-            target="_blank"
-            rel="noopener noreferrer">
-            <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
-          </a>
-        ))
-      }
+    <!-- 默认无限横向轮播；轨道内容复制一份，平移到 -50% 即无缝循环 -->
+    <div class="ab-skill-marquee">
+      <div class="ab-skill-track">
+        {
+          skillLoop.map((skill) => (
+            <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
+              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+            </span>
+          ))
+        }
+      </div>
     </div>
   </section>
 
@@ -244,8 +243,35 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <Icon name="ri:gamepad-fill" class="ab-buff-icon" />
   </section>
 
+  <!-- 爱好的游戏 39% + 在追小说 59%：同一套斜切封面条，悬停展开 ---------- -->
+  <section class="ab-card ab-span-10 ab-comic">
+    <div class="ab-comic-head">
+      <p class="ab-tips">{game.tips}</p>
+      <h2 class="ab-title ab-title-lg">{game.title}</h2>
+      {game.date && <p class="ab-comic-date">{game.date}</p>}
+    </div>
+    <div class="ab-comic-box">
+      {
+        game.list.map((item, index) => (
+          <a class="ab-comic-item" href={item.href || '#'} target="_blank" rel="noopener noreferrer" title={item.name}>
+            <span class="ab-comic-cover" data-tone={index % 4}>
+              {item.cover ? (
+                <img src={item.cover} alt={item.name} loading="lazy" />
+              ) : (
+                <span class="ab-comic-empty">
+                  <span class="ab-comic-spine" />
+                  <span class="ab-comic-name">{item.name}</span>
+                </span>
+              )}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
   <!-- 在追的小说：斜切封面条，悬停展开（旧博客 .comic-content 卡片）------ -->
-  <section class="ab-card ab-span-24 ab-comic">
+  <section class="ab-card ab-span-14 ab-comic">
     <div class="ab-comic-head">
       <p class="ab-tips">{comic.tips}</p>
       <h2 class="ab-title ab-title-lg">{comic.title}</h2>
@@ -254,7 +280,7 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <div class="ab-comic-box">
       {
         comic.list.map((item, index) => (
-          <a class="ab-comic-item" href={item.href} target="_blank" rel="noopener noreferrer" title={item.name}>
+          <a class="ab-comic-item" href={item.href || '#'} target="_blank" rel="noopener noreferrer" title={item.name}>
             <span class="ab-comic-cover" data-tone={index % 4}>
               {item.cover ? (
                 <img src={item.cover} alt={item.name} loading="lazy" />
