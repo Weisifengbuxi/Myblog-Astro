@@ -124,31 +124,19 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <p class="ab-tips">{skills.tips}</p>
     <h2 class="ab-title">{skills.title}</h2>
     <!--
-      默认：双行无限轮播（上下两行错开半个方块）。
-      悬停：整块切换成"全部技能"面板，铺满卡片、可滚动，看到的就是技能本身。
+      默认：单行无限轮播（轨道内容复制一份，平移到 -50% 即无缝循环）。
+      每对里的第二个方块下移 + 左移，形成安知鱼那种斜向交错；
+      悬停时整块切换成"全部技能"面板，显示的是技能图片本身。
     -->
     <div class="ab-skill-marquee">
-      <div class="ab-skill-row-wrap">
-        <div class="ab-skill-track">
-          {
-            skillLoop.map((skill) => (
-              <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
-                <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
-              </span>
-            ))
-          }
-        </div>
-      </div>
-      <div class="ab-skill-row-wrap ab-skill-row-wrap--offset">
-        <div class="ab-skill-track ab-skill-track--alt">
-          {
-            skillLoop.map((skill) => (
-              <span class="ab-tile" style={`background:${skill.color}`} title={skill.name}>
-                <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
-              </span>
-            ))
-          }
-        </div>
+      <div class="ab-skill-track">
+        {
+          skillLoop.map((skill, index) => (
+            <span class={`ab-tile${index % 2 === 1 ? ' ab-tile--odd' : ''}`} style={`background:${skill.color}`} title={skill.name}>
+              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+            </span>
+          ))
+        }
       </div>
     </div>
     <!-- 悬停时显示：全部技能平铺 -->

@@ -258,43 +258,34 @@
   fill: hsl(var(--primary));
 }
 
-/* ── 技能：双行无限轮播 + 悬停切换"全部技能"─────────────────
-   默认两行横向滚动，第二行整体右移半个方块，形成错行（因此两行合计高度
-   与右侧生涯卡相当）。悬停时整块换成铺满卡片的全部技能面板。
-   轨道内容复制一份，平移到 -50% 即无缝循环。 */
+/* ── 技能：单行无限轮播 + 斜向交错（对齐安知鱼原版）─────────
+   原版（themes/anzhiyu/.../_extra/skills/skills.css）的做法：
+     - 轨道内容复制一份，平移到 -50% 构成无缝循环
+     - 每对里的第二个方块 translate(-60px, ...) + margin-top:1rem，
+       形成斜向下沉的交错排布
+     - 方块 120px、圆角 30px、左阴影；图标占 50%
+   这里把尺寸按卡片宽度（49%）等比缩小，并保留 hover 切换成完整列表的交互。
+
+   注意：上一版之所以"还有问题"，是我自创了"双行 + 半格错位"，并非原版样式；
+   现在改回原版的单行 + 配对交错。 */
 .ab-skills {
   min-height: 0;
   overflow: hidden;
 }
 
 .ab-skill-marquee {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-  transition: opacity 0.25s ease;
-}
-
-.ab-skill-row-wrap {
+  margin-top: 2rem;
   overflow: hidden;
-}
-
-/* 第二行错开半个方块 */
-.ab-skill-row-wrap--offset {
-  margin-inline-start: -2.5rem;
 }
 
 .ab-skill-track {
   display: flex;
-  gap: 0.75rem;
   width: max-content;
-  animation: ab-skill-row 26s linear infinite;
+  animation: ab-skill-row 30s linear infinite;
 }
 
-/* 第二行反向、错速，避免两行完全同步显得呆板 */
-.ab-skill-track--alt {
-  animation-direction: reverse;
-  animation-duration: 30s;
+.ab-skill-track:hover {
+  animation-play-state: paused;
 }
 
 @keyframes ab-skill-row {
@@ -306,20 +297,68 @@
   }
 }
 
-/* 悬停：轮播淡出，全部技能面板淡入 */
+.ab-tile {
+  display: flex;
+  width: 5.5rem;
+  height: 5.5rem;
+  margin-inline-start: 1rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  box-shadow: 0 0.5rem 1rem -0.25rem rgb(0 0 0 / 28%);
+  transition: box-shadow 0.25s ease;
+}
+
+/* 每对里的第二个：下移 + 左移，形成原版那种斜向交错 */
+.ab-tile--odd {
+  margin-top: 1rem;
+  transform: translateX(-2.4rem);
+}
+
+.ab-tile:hover {
+  box-shadow: 0 0.75rem 1.5rem -0.25rem rgb(0 0 0 / 38%);
+}
+
+.ab-tile img {
+  width: 50%;
+  height: 50%;
+  object-fit: contain;
+  /* simple-icons 的 svg 自带 fill，这里统一压成白色 */
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
+  transition: transform 0.25s ease;
+}
+
+/* 悬停这一块时图片放大，看到的是图片本身而不是小图标 */
+.ab-tile:hover img {
+  transform: scale(1.35);
+}
+
+/* 悬停：轮播淡出，全部技能面板淡入（absolute 铺满卡片、可滚动） */
 .ab-skill-all {
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.85rem;
   align-content: start;
-  padding: 3.25rem 2rem 1.5rem;
+  /* 顶部留出卡片标题（技能 / 开启创造力）的高度，避免面板盖住文字 */
+  padding: 4.25rem 2rem 1.25rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
+}
+
+.ab-skill-all .ab-tile {
+  width: 4.25rem;
+  height: 4.25rem;
+  margin-inline-start: 0;
+  margin-top: 0;
+  transform: none;
 }
 
 .ab-skills:hover .ab-skill-marquee {
@@ -329,37 +368,6 @@
 .ab-skills:hover .ab-skill-all {
   opacity: 1;
   pointer-events: auto;
-}
-
-.ab-tile {
-  display: flex;
-  width: 4.5rem;
-  height: 4.5rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 1rem;
-  transition: box-shadow 0.25s ease;
-}
-
-.ab-tile:hover {
-  box-shadow: 0 0.6rem 1.2rem -0.5rem rgb(0 0 0 / 35%);
-}
-
-.ab-tile img {
-  width: 58%;
-  height: 58%;
-  object-fit: contain;
-  /* simple-icons 的 svg 自带 fill，这里统一压成白色 */
-  filter: brightness(0) invert(1);
-  opacity: 0.95;
-  transition: transform 0.25s ease;
-}
-
-/* 悬停这一块时图片放大到几乎铺满，看到的是图片本身而不是小图标 */
-.ab-tile:hover img {
-  transform: scale(1.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -380,7 +388,6 @@
     transform: none;
   }
 }
-
 /* ── 生涯 ─────────────────────────────────────────────────────
    不设固定高度，由内容撑开：careers.image 是 815×148 的宽幅横图，缩到卡片宽度后
    自然高度只有约 109px，之前 min-height 450px 会在图片下方留出上百像素空白。 */
