@@ -2,36 +2,36 @@
  * 侧边栏日历卡片样式。
  *
  * 版式来自旧博客的 schedule.css（原为安知鱼主题侧边栏组件）：
- * 左侧一列显示周次/日期/公历/农历，右侧是当月网格。
- * 配色改用本站主题变量，因此自动跟随明暗模式。
+ * 左侧「第 N 周 + 星期」/ 大号日期 / 公历，右侧当月网格，农历单独一行居中。
+ *
+ * 卡片外观与 WelcomeCard 的 .welcome-shell 对齐：**无边框、无背景**，
+ * 靠 .shadow-box 的投影与栏底拉开层次，因此这里不写 border / background。
  */
 
 .sidebar-calendar {
-  padding: 0.85rem 1rem 1rem;
-  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
-  border-radius: 12px;
-  background: hsl(var(--card, var(--background)));
+  /* 与欢迎卡片同款的表面处理（无边框无底色） */
+  border-radius: 0.75rem;
 }
 
 .cal-inner {
   display: flex;
   gap: 0.5rem;
-  align-items: stretch;
+  align-items: center;
 }
 
-/* ── 左侧：周次 / 大号日期 / 公历 / 农历 ─────────────────────── */
+/* ── 左侧：周次 / 大号日期 / 公历 ─────────────────────────── */
 .cal-left {
   display: flex;
-  width: 42%;
+  flex: 1 1 auto;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem;
   text-align: center;
 }
 
 .cal-week {
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -49,23 +49,25 @@
 }
 
 .cal-solar {
-  margin-top: 0.45rem;
+  margin-top: 0.4rem;
   font-size: 0.68rem;
   color: hsl(var(--muted-foreground));
   white-space: nowrap;
 }
 
+/* ── 农历：整行居中，窄栏里也不折行 ───────────────────────── */
 .cal-lunar {
-  margin-top: 0.15rem;
-  font-size: 0.68rem;
+  margin-top: 0.6rem;
+  font-size: 0.7rem;
   color: hsl(var(--muted-foreground));
+  text-align: center;
   white-space: nowrap;
 }
 
 /* ── 右侧：当月网格 ───────────────────────────────────────── */
 .cal-right {
   display: flex;
-  width: 55%;
+  flex: 0 0 auto;
   flex-direction: column;
   justify-content: center;
   padding: 0.25rem;

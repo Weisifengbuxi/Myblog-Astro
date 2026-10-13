@@ -2,14 +2,16 @@
  * 侧边栏倒计时卡片。
  *
  * 移植自 https://blog.bsgun.cn/posts/68c5cdb9（原版是安知鱼主题的侧边栏组件）。
- * 这里按侧边栏 18rem 的宽度重排：上方是事件与剩余天数，下方是四条紧凑进度。
+ * 这里按侧边栏宽度重排：上方是事件与剩余天数，下方是四条紧凑进度。
+ *
+ * 卡片外观与 WelcomeCard 的 .welcome-shell 对齐：**无边框、无背景**，
+ * 靠 .shadow-box 的投影与栏底拉开层次，因此这里不写 border / background。
  */
 
 .sc-countdown {
-  padding: 0.85rem 1rem 1rem;
-  border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
-  border-radius: 12px;
-  background: hsl(var(--card, var(--background)));
+  /* 与日历卡同宽同缩进：两者都不写左右内边距，交给侧栏的 --sider-bleed 统一控制 */
+  padding: 0.6rem 0 0.4rem;
+  border-radius: 0.75rem;
 }
 
 .sc-head {

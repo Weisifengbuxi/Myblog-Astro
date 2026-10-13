@@ -85,6 +85,7 @@ const lastUpdated = posts.length
     })
   : '—';
 
+// ---- site totals + last update --------------------------------------------
 const summary = [
   { label: '文章总数', value: posts.length },
   { label: '标签总数', value: tagCounts.size },
@@ -93,26 +94,34 @@ const summary = [
   { label: '总字数', value: siteStats.formattedWords },
   { label: '总阅读时长', value: siteStats.formattedTime },
   { label: '运行天数', value: runningDays },
-  { label: '最后更新', value: lastUpdated },
 ];
 ---
 
 <div class="charts">
   <section class="charts-block">
-    <h2 class="charts-title">访问人数<span class="charts-sub">数据来源 busuanzi</span></h2>
-    <VisitorStats />
-  </section>
+    <h2 class="charts-title">网站资讯</h2>
 
-  <div class="charts-summary">
-    {
-      summary.map((item) => (
-        <div class="charts-stat">
-          <span class="charts-stat-value">{item.value}</span>
-          <span class="charts-stat-label">{item.label}</span>
-        </div>
-      ))
-    }
-  </div>
+    <!-- 实时数据（访问人数 / 总访问量）+ 构建期算出的最后更新，同一排等宽 -->
+    <div class="charts-summary">
+      <VisitorStats />
+      <div class="charts-stat">
+        <span class="charts-stat-value">{lastUpdated}</span>
+        <span class="charts-stat-label">最后更新</span>
+      </div>
+    </div>
+
+    <div class="charts-totals">
+      {
+        summary.map((item) => (
+          <div class="charts-total">
+            <span class="charts-total-label">{item.label}</span>
+            <span class="charts-total-value">{item.value}</span>
+          </div>
+        ))
+      }
+    </div>
+    <p class="charts-source">访问数据来自 busuanzi（vercount），其余为构建时统计</p>
+  </section>
 
   <section class="charts-block">
     <h2 class="charts-title">文章发布统计<span class="charts-sub">按月份 · 共 {monthTotal} 篇</span></h2>
@@ -167,32 +176,75 @@ const summary = [
 </div>
 
 <style>
+  /*
+    实时数据与「最后更新」排成同宽一排：VisitStats 自带 auto-fit 网格，
+    这里用 :global 覆盖成 3 列，让最后一个格子与前面两张宽度一致。
+  */
   .charts-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
+  .charts-summary :global(.visitor-stats) {
+    display: contents;
+  }
+
+  .charts-summary :global(.visitor-stat),
   .charts-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.15rem;
-    padding: 0.9rem 0.5rem;
+    gap: 0.2rem;
+    padding: 1rem 0.5rem;
     border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
-    border-radius: 0.7rem;
+    border-radius: 0.5rem;
   }
 
   .charts-stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1.1;
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
   }
 
   .charts-stat-label {
-    font-size: 0.75rem;
-    opacity: 0.6;
+    font-size: 0.78rem;
+    opacity: 0.7;
+  }
+
+  /* 总数：读起来比实时数字轻，标签在左、值在右，省纵向空间 */
+  .charts-totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.4rem 1.5rem;
+  }
+
+  .charts-total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0.15rem;
+    border-bottom: 1px solid color-mix(in oklab, currentColor 8%, transparent);
+  }
+
+  .charts-total-label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .charts-total-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .charts-source {
+    margin: 1rem 0 0;
+    font-size: 0.72rem;
+    opacity: 0.5;
   }
 
   .charts-block + .charts-block {

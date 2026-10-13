@@ -32,10 +32,11 @@
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
-/* The avatar halo and focus rings reach past the column edge; give the clipped scroller room for them. */
+/* The avatar halo and focus rings reach past the column edge; give the clipped scroller room for them.
+   The extra bleed also widens every sidebar card, which keeps the calendar meta on one line. */
 .drawer-sider sider-content,
 .sider-column sider-content {
-  --sider-bleed: 0.5rem;
+  --sider-bleed: 1rem;
   margin-inline: calc(var(--sider-bleed) * -1);
   padding-inline: var(--sider-bleed);
 }
