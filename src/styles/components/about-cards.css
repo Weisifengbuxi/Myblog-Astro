@@ -9,6 +9,8 @@
  */
 
 .ab {
+  /* 技能卡与生涯卡所在那一行的统一高度 */
+  --ab-pair-h: 17.5rem;
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
   gap: 1rem;
@@ -269,7 +271,8 @@
    注意：上一版之所以"还有问题"，是我自创了"双行 + 半格错位"，并非原版样式；
    现在改回原版的单行 + 配对交错。 */
 .ab-skills {
-  min-height: 0;
+  /* 与右侧生涯卡统一高度（变量定义见下方 .ab-careers），避免两者不等高 */
+  min-height: var(--ab-pair-h);
   overflow: hidden;
 }
 
@@ -301,8 +304,8 @@
 
 .ab-tile {
   display: flex;
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 6.5rem;
+  height: 6.5rem;
   margin-inline-start: 1rem;
   flex-shrink: 0;
   align-items: center;
@@ -395,7 +398,7 @@
    不设固定高度，由内容撑开：careers.image 是 815×148 的宽幅横图，缩到卡片宽度后
    自然高度只有约 109px，之前 min-height 450px 会在图片下方留出上百像素空白。 */
 .ab-careers {
-  min-height: 0;
+  min-height: var(--ab-pair-h);
 }
 
 .ab-career-edu {
