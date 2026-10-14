@@ -91,7 +91,8 @@
 /* 百分比放在进度条**外侧**的固定列里。
    之前放在条内右端，而四行的填充宽度差异很大（4%~78%），同一列文字底下
    时而浅灰、时而粉红、时而半粉半灰，观感上就"有的清楚有的糊"。
-   移到条外后四种情况底色一致，颜色也就统一了。 */
+   移到条外后四种情况底色一致，颜色也就统一了。
+   悬停时它保持不变 —— 与「还剩 X」是两条信息，不该互相顶掉。 */
 .sc-percentage {
   width: 2.9rem;
   flex-shrink: 0;
@@ -100,7 +101,6 @@
   color: hsl(var(--muted-foreground));
   text-align: right;
   font-variant-numeric: tabular-nums;
-  transition: opacity 0.2s ease;
 }
 
 .sc-percentage.sc-many {
@@ -129,11 +129,8 @@
   font-size: 0.6rem;
 }
 
-/* 悬停：该行数字隐去、「还剩 X」淡入 */
-.sc-item:hover .sc-percentage {
-  opacity: 0;
-}
-
+/* 悬停：进度条上浮出「还剩 X」，右侧百分比**保持可见**。
+   原版是两者互换，但百分比消失会让这一列在鼠标扫过时忽隐忽现，读起来很跳。 */
 .sc-item:hover .sc-remaining {
   opacity: 1;
 }

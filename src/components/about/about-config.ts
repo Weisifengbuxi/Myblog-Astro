@@ -162,7 +162,7 @@ export const tenyear = {
  *
  * 移植自 https://blog.bsgun.cn/posts/68c5cdb9（原版是安知鱼主题的侧边栏组件）。
  * 左侧显示目标事件与剩余天数，右侧是今日/本周/本月/本年的进度条，
- * hover 时百分比与「还剩 X」互换。
+ * hover 时进度条上浮出「还剩 X」，右侧百分比常驻显示。
  *
  * targetDate 请用 `Y/M/D` 或 `YYYY-MM-DD` 书写；脚本会统一转成 `Y/M/D` 再交给
  * Date 解析——带连字符的 `YYYY-MM-DD` 会被当成 UTC，东八区会差一天。
