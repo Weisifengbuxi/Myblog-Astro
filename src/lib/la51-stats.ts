@@ -10,10 +10,13 @@
  *   [["ol"],["t","u"],["t","p"],["y","u"],["y","p"],["m","p"],["tl","p"]]
  *   → 最近活跃访客 / 今日人数 / 今日访问 / 昨日人数 / 昨日访问 / 本月访问 / 总访问量
  *
- * `ck` 与 config/site.yaml 的 analytics.la51.ck 一致（挂件 URL 用同一个 ID）。
+ * 这里用的是**旧博客的 51LA 应用 ID**（3NaU22Pij8KxRC6w），因为它累积了历史数据
+ * （总访问量 1573），而 Astro 站新建的那个应用只有几十次访问，看起来像"新站"。
+ * 注意：站点自身的埋点（LA.init）用的是 config/site.yaml 里的 analytics.la51.ck，
+ * 两者不是同一个应用 —— 上报与展示可以分开。
  */
 
-export const LA51_WIDGET_URL = 'https://v6-widget.51.la/v6/3REPy7id8yIlqsbo/quote.js';
+export const LA51_WIDGET_URL = 'https://v6-widget.51.la/v6/3NaU22Pij8KxRC6w/quote.js';
 
 /** 脚本内的数据下标 → 页面上的 data-stat 键（跳过下标 0「最近活跃访客」）。 */
 export const LA51_FIELDS: Record<number, string> = {
