@@ -275,13 +275,12 @@
 .ab-skill-marquee {
   position: absolute;
   inset-inline: 0;
-  /* 左右内边距收窄可视区：循环距离（一份宽 + gap）必须大于可视宽度，
-     否则滚动时能同时看到队首和队尾，接缝就暴露了。 */
+  /* 左右内边距收窄可视区：一份内容的宽度必须大于可视宽度，
+     否则一屏里能同时看到两份，循环就露馅了。 */
   padding-inline: 2rem;
-  top: 50%;
-  /* 往下挪一点：横带本身居中，再整体下移 0.5rem，让两行与标题拉开一些，
-     同时上下留白接近 */
-  translate: 0 calc(-50% + 1.25rem);
+  /* 贴着卡片底部排（原先垂直居中，底下会空出 66px）。用 bottom 而不是
+     top + translate：卡片在窄屏会按内容取高，钉底才不会把两排图标顶出卡片。 */
+  bottom: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -289,13 +288,13 @@
 }
 
 .ab-skill-track {
-  /* 这两个变量供关键帧做无缝补偿：份数与间距（改一处即可，见 ab-skill-row） */
+  /* 间距改成「每块瓦片的右外边距」（见 .ab-tile）：这样轨道总宽 = 份数 × 一份宽，
+     translateX(-50%) 恰好是一份，循环点不会差半个间距。 */
   --ab-skill-gap: 0.6rem;
-  --ab-skill-copies: 2;
   display: flex;
-  gap: var(--ab-skill-gap);
   width: max-content;
   animation: ab-skill-row 30s linear infinite;
+  will-change: transform;
 }
 
 /* 第二行：右移半块形成错缝。
@@ -310,20 +309,17 @@
 .ab-skill-track:hover {
   animation-play-state: paused;
 }
+/* 无缝循环靠两件事：
+   ① 轨道里放 2 份内容（组件里的 COPY_COUNT 必须为 2）；
+   ② 每块瓦片带一个右外边距当间距，于是轨道总宽 = 2 × 一份宽，-50% 正好一份。
+   关键帧里不写 var() / calc()：个别浏览器在关键帧里解析自定义属性会出错，
+   那样循环处就会看到一下跳动（之前用 calc + var 补偿半个间隙就是这个隐患）。 */
 @keyframes ab-skill-row {
   from {
     transform: translateX(0);
   }
   to {
-    /* 无缝循环：轨道是 N 份内容 + (N-1) 个 gap，总宽 = N*W + (N-1)*gap。
-       要对齐第二份的起点需移动 W + gap，即总宽的 1/N 再加 gap/N。
-       用 calc(-100% / N - gap * (N-1) / N ...) 表达不如直接算：
-       移动量 = (总宽 + gap) / N，而 100% = 总宽，所以
-       = calc(-100% / var(--ab-skill-copies) - var(--ab-skill-gap) * (var(--ab-skill-copies) - 1) / var(--ab-skill-copies))
-       --ab-skill-copies 要与组件里的 COPY_COUNT 保持一致。 */
-    transform: translateX(
-      calc(-100% / var(--ab-skill-copies) - var(--ab-skill-gap) * (var(--ab-skill-copies) - 1) / var(--ab-skill-copies))
-    );
+    transform: translateX(-50%);
   }
 }
 
@@ -332,6 +328,9 @@
   width: 6.25rem;
   height: 6.25rem;
   flex-shrink: 0;
+  /* 右外边距就是两块之间的间距（见 .ab-skill-track：不留 flex gap，
+     轨道总宽才正好是「份数 × 一份宽」，-50% 才等于一份）。 */
+  margin-inline-end: var(--ab-skill-gap, 0.6rem);
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -1043,6 +1042,11 @@
 
   .ab-card {
     min-height: 0;
+  }
+
+  /* 技能卡的轮播是绝对定位的，卡片压到内容高度会把两排图标裁掉 —— 单独给它留高度 */
+  .ab-skills {
+    min-height: 19rem;
   }
 
   .ab-hero-row {
