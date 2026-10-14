@@ -92,19 +92,17 @@
    之前放在条内右端，而四行的填充宽度差异很大（4%~78%），同一列文字底下
    时而浅灰、时而粉红、时而半粉半灰，观感上就"有的清楚有的糊"。
    移到条外后四种情况底色一致，颜色也就统一了。
+   颜色一律用最亮的 --foreground：早先按数值分深浅（≥46% 才变亮），
+   低的那两行看着像"灰掉的禁用态"，读起来像两种状态，其实只是进度不同。
    悬停时它保持不变 —— 与「还剩 X」是两条信息，不该互相顶掉。 */
 .sc-percentage {
   width: 2.9rem;
   flex-shrink: 0;
   font-size: 0.65rem;
   font-weight: 600;
-  color: hsl(var(--muted-foreground));
+  color: hsl(var(--foreground));
   text-align: right;
   font-variant-numeric: tabular-nums;
-}
-
-.sc-percentage.sc-many {
-  color: hsl(var(--foreground));
 }
 
 /* 「还剩 X」只在悬停时出现，压在进度条左端。
