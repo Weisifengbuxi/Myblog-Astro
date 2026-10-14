@@ -1190,21 +1190,21 @@ badges:
     # lang: # 语言 (默认: 'zh-CN')
 comment:
   provider: twikoo # 'remark42' | 'giscus' | 'waline' | 'twikoo' | 'none'
-  # ⚠️ 待填写：原有 Twikoo 服务 twikoo.weisifengbuxi.top 已无法解析（DNS NXDOMAIN），
-  # 老站评论区同样处于不可用状态。请把下方 envId 换成你重新部署后的 Twikoo 地址。
+  # 后端：Vercel 上的 Twikoo（2026-10 重建），数据库是 MongoDB Atlas 的新集群。
+  #   - 连通性自检：POST https://twikoo.weisifengbuxi.top/  body {"event":"GET_CONFIG"}
+  #     正常返回 {"code":0,...}；浏览器直接打开该地址应显示「Twikoo 云函数运行正常」。
+  #   - 数据库连接串存在 **Vercel 项目的环境变量 MONGODB_URI** 里（不在本仓库，
+  #     也不要提交进仓库）；换库/换密码时在那里改完必须 Redeploy 才生效。
+  #   - Atlas 的 Network Access 需要放行 0.0.0.0/0（Vercel 出口 IP 不固定）。
   #
-  # 可选方案：
-  #   1. Vercel 重新部署 twikoo 后，填 https://<your-project>.vercel.app
-  #   2. 自有服务器 / 腾讯云环境，填对应地址
-  #   3. 暂时不想用评论：把 provider 改为 none
-  #
-  # 关于旧评论数据：文章的规范地址已由 /posts/<abbrlink>.html 变为 /post/<abbrlink>，
-  # Twikoo 默认以 location.pathname 作为评论归属键，因此旧评论不会自动出现在新地址下。
+  # 关于旧评论数据：旧集群（...pvbnhes.mongodb.net）已不存在，老评论需从备份导入。
+  # 另外文章的规范地址已由 /posts/<abbrlink>.html 变为 /post/<abbrlink>，
+  # Twikoo 默认以 location.pathname 作为评论归属键，因此旧评论不会自动出现在新地址下；
   # 若希望延续旧评论，需要在 Twikoo 数据库里把 url 字段整体改写，例如：
   #   /posts/e4925c7a.html  ->  /post/e4925c7a
   # 可在 Twikoo 管理面板导出评论后批量替换，再导入。
   twikoo:
-    envId: https://your-twikoo.example.com # TODO: 替换为你的 Twikoo 地址
+    envId: https://twikoo.weisifengbuxi.top
     lang: zh-CN
 
 # =============================================================================
