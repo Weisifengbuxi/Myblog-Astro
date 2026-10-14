@@ -52,13 +52,9 @@ console.log(`[postbuild] flattened ${moved}/${htmlRedirects.length} .html redire
 // Redirects are 301s/noindex stubs and must not be indexed. Derive the origin
 // from config/site.yaml so this keeps working if the domain changes.
 const yaml = (await import('yaml')).default;
-const siteUrl = new URL(
-  yaml.parse(fs.readFileSync(path.resolve('config/site.yaml'), 'utf8')).site.url
-).origin;
+const siteUrl = new URL(yaml.parse(fs.readFileSync(path.resolve('config/site.yaml'), 'utf8')).site.url).origin;
 
-const stubPaths = new Set(
-  posts.flatMap((p) => (p.oldUrls ?? []).map((u) => `${siteUrl}${u}`))
-);
+const stubPaths = new Set(posts.flatMap((p) => (p.oldUrls ?? []).map((u) => `${siteUrl}${u}`)));
 const sitemaps = fs.readdirSync(DIST).filter((f) => /^sitemap.*\.xml$/.test(f));
 let stripped = 0;
 for (const name of sitemaps) {

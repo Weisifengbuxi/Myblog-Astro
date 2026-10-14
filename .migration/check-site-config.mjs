@@ -18,7 +18,12 @@ const config = yaml.parse(fs.readFileSync(`${ROOT}\\config\\site.yaml`, 'utf8'))
 const site = config.site ?? {};
 
 const checks = [
-  ['MournConfig 接口字段完整', /interface MournConfig \{[\s\S]*?enabled: boolean;[\s\S]*?days: string\[\];[\s\S]*?affect: 'cover' \| 'page';[\s\S]*?\}/.test(src)],
+  [
+    'MournConfig 接口字段完整',
+    /interface MournConfig \{[\s\S]*?enabled: boolean;[\s\S]*?days: string\[\];[\s\S]*?affect: 'cover' \| 'page';[\s\S]*?\}/.test(
+      src,
+    ),
+  ],
   ['universeConfig 已导出', src.includes('export const universeConfig')],
   ['mournConfig 已导出', src.includes('export const mournConfig')],
   ['UniverseConfig 接口存在', /interface UniverseConfig \{[\s\S]*?density: number;[\s\S]*?\}/.test(src)],
@@ -38,10 +43,7 @@ if (fs.existsSync(rssPath)) {
   const rss = fs.readFileSync(rssPath, 'utf8');
   const channelTitle = /<channel><title>(.*?)<\/title>/.exec(rss)?.[1] ?? '';
   const expected = String(site.title ?? '');
-  checks.push([
-    `RSS 频道标题为 site.title（实际 "${channelTitle}"）`,
-    channelTitle === expected,
-  ]);
+  checks.push([`RSS 频道标题为 site.title（实际 "${channelTitle}"）`, channelTitle === expected]);
 } else {
   console.log('  ℹ 未找到 dist/rss.xml（跳过 RSS 标题检查，先跑 pnpm build）');
 }

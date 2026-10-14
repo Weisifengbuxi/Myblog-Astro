@@ -128,7 +128,7 @@ for (const file of files) {
           .replace(/```[\s\S]*?```/g, ' ')
           .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
           .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-          .replace(/[#>*`_~\-]|{%[^%]*%}|:::[^\n]*/g, ' ')
+          .replace(/[#>*`_~-]|{%[^%]*%}|:::[^\n]*/g, ' ')
           .replace(/\s+/g, ' ')
           .trim()
           .slice(0, 150);
@@ -176,7 +176,7 @@ for (const file of files) {
 fs.writeFileSync(
   MANIFEST,
   JSON.stringify({ generatedAt: new Date().toISOString(), userPostsOnly: true, posts: manifest }, null, 2),
-  'utf8'
+  'utf8',
 );
 console.log(`\n${files.length} posts migrated.`);
 if (warnings.length) console.log('\nWARNINGS:\n' + warnings.map((w) => '  ! ' + w).join('\n'));

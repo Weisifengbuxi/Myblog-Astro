@@ -130,7 +130,10 @@ async function getText(url) {
     const res = await fetch(url, {
       signal: controller.signal,
       redirect: 'follow',
-      headers: { 'User-Agent': USER_AGENT, Accept: 'application/atom+xml, application/rss+xml, application/xml, text/xml, */*' },
+      headers: {
+        'User-Agent': USER_AGENT,
+        Accept: 'application/atom+xml, application/rss+xml, application/xml, text/xml, */*',
+      },
     });
     if (!res.ok) return null;
     return await res.text();
@@ -181,7 +184,12 @@ function readFriends() {
       const [name, site, avatar] = Array.isArray(entry) ? entry : [];
       if (!name || !site) return null;
       try {
-        return { name: String(name), site: String(site), avatar: avatar ? String(avatar) : undefined, origin: new URL(String(site)).origin };
+        return {
+          name: String(name),
+          site: String(site),
+          avatar: avatar ? String(avatar) : undefined,
+          origin: new URL(String(site)).origin,
+        };
       } catch {
         console.warn(`  跳过（URL 非法）: ${name} ${site}`);
         return null;
@@ -262,9 +270,7 @@ const payload = {
   })),
 };
 
-console.log(
-  `\n成功 ${okCount}/${friends.length} 个友链，失败 ${errorCount}，共 ${payload.article_data.length} 篇文章`,
-);
+console.log(`\n成功 ${okCount}/${friends.length} 个友链，失败 ${errorCount}，共 ${payload.article_data.length} 篇文章`);
 
 if (DRY) {
   console.log('(--dry 模式，未写入文件)');

@@ -100,7 +100,7 @@ const checks = [
 
 // Draft posts are excluded from production builds, so they have no live route.
 const manifest = JSON.parse(
-  await (await import('node:fs/promises')).readFile(new URL('./manifest.json', import.meta.url), 'utf8')
+  await (await import('node:fs/promises')).readFile(new URL('./manifest.json', import.meta.url), 'utf8'),
 );
 const posts = manifest.posts ?? [];
 const livePosts = posts.filter((p) => p.draft !== true);

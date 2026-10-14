@@ -44,9 +44,7 @@ console.log('脚本里是否含配置注入:', /mournEnabled|mournDays|mournAffe
 // 且 lightningcss 会把两条规则合并成一条逗号选择器：
 //   html[data-mourn=cover] .cover-hero,html[data-mourn=page]{filter:grayscale()}
 // 所以这里按「选择器片段 + 整表存在 grayscale」两项分别断言。
-const cssFiles = fs
-  .readdirSync('D:\\myBlog-astro\\dist\\_astro')
-  .filter((f) => f.endsWith('.css'));
+const cssFiles = fs.readdirSync('D:\\myBlog-astro\\dist\\_astro').filter((f) => f.endsWith('.css'));
 const css = cssFiles.map((f) => fs.readFileSync(`D:\\myBlog-astro\\dist\\_astro\\${f}`, 'utf8')).join('\n');
 
 // 生效范围是「仅首页」，范围由 BootScripts 的路径判断控制，CSS 只负责去色。
@@ -66,11 +64,6 @@ const coverAttr = /<div class="cover-hero[^"]*"/.exec(html)?.[0];
 console.log('封面元素      :', coverAttr ? '存在 cover-hero' : '✗ 未找到');
 
 const ok =
-  grayscaleForCover &&
-  grayscaleForPage &&
-  grayscaleRule &&
-  hasHomeGate &&
-  Boolean(coverAttr) &&
-  /mournDays/.test(source);
+  grayscaleForCover && grayscaleForPage && grayscaleRule && hasHomeGate && Boolean(coverAttr) && /mournDays/.test(source);
 console.log(ok ? '\n✓ 脚本、配置、CSS 三者链路完整，且带首页范围判断' : '\n✗ 链路不完整');
 process.exit(ok ? 0 : 1);

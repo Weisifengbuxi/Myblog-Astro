@@ -51,7 +51,10 @@ const checks = [
   { path: '/about', contains: ['tools-menu-btn'] },
 
   // Friend-link gate
-  { path: '/link', contains: ['friendlink-gate', 'checkbox1', 'checkbox5', '免责声明', '本站添加的友链要求', 'friendlink-gate-open'] },
+  {
+    path: '/link',
+    contains: ['friendlink-gate', 'checkbox1', 'checkbox5', '免责声明', '本站添加的友链要求', 'friendlink-gate-open'],
+  },
 
   // 友链朋友圈：数据在构建时读 public/fcircle/all.json 并渲染成静态列表，
   // 所以页面 HTML 里必须已经有真实条目（而不是运行时再请求后端）。
@@ -87,8 +90,21 @@ for (const check of checks) {
 
 // Every footer link must resolve (no 404 in the strip).
 const pages = [
-  '/about', '/link', '/messages', '/album', '/dailyPhoto', '/wordScenery', '/gamePhotos',
-  '/equipment', '/essay', '/charts', '/air-conditioner', '/cookies', '/privacy', '/copyright', '/wechat',
+  '/about',
+  '/link',
+  '/messages',
+  '/album',
+  '/dailyPhoto',
+  '/wordScenery',
+  '/gamePhotos',
+  '/equipment',
+  '/essay',
+  '/charts',
+  '/air-conditioner',
+  '/cookies',
+  '/privacy',
+  '/copyright',
+  '/wechat',
 ];
 let footerOk = 0;
 for (const p of pages) {

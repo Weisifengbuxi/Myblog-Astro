@@ -26,7 +26,9 @@ async function probe(fakeDate, url, label) {
     dataMourn: document.documentElement.dataset.mourn ?? null,
     filter: getComputedStyle(document.documentElement).filter,
   }));
-  console.log(`${label.padEnd(34)} ${state.path.padEnd(24)} data-mourn=${String(state.dataMourn).padEnd(6)} filter=${state.filter}`);
+  console.log(
+    `${label.padEnd(34)} ${state.path.padEnd(24)} data-mourn=${String(state.dataMourn).padEnd(6)} filter=${state.filter}`,
+  );
   await page.close();
   return state;
 }

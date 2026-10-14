@@ -68,7 +68,7 @@ if (unmapped.length) {
 }
 
 const unused = Object.keys(categoryMap).filter(
-  (n) => !usedNames.has(n) && !Object.values(categoryMap).some((s) => s.includes('/') && s.split('/').includes(categoryMap[n]))
+  (n) => !usedNames.has(n) && !Object.values(categoryMap).some((s) => s.includes('/') && s.split('/').includes(categoryMap[n])),
 );
 if (unused.length) {
   console.log(`  ℹ 未被子分类引用的顶层配置项（不影响，仅提示）: ${unused.join(', ')}`);

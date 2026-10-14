@@ -38,7 +38,9 @@ for (const [date, expected, label] of cases) {
   const actual = isMournDay(date, DAYS);
   const ok = actual === expected;
   if (!ok) failed++;
-  console.log(`${ok ? '✓' : '✗'} ${label.padEnd(28)} ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}  →  ${actual}`);
+  console.log(
+    `${ok ? '✓' : '✗'} ${label.padEnd(28)} ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}  →  ${actual}`,
+  );
 }
 
 assert.equal(failed, 0, `${failed} 个用例未通过`);

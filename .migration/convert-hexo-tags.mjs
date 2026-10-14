@@ -73,16 +73,13 @@ function convertTags(src, stats) {
   });
 
   // --- {% note TYPE no-icon %} ... {% endnote %} -----------------------------
-  src = src.replace(
-    /\{%-?\s*note\s+([^%]+?)\s*-?%\}([\s\S]*?)\{%-?\s*endnote\s*-?%\}/g,
-    (_, args, body) => {
-      hit('note');
-      const a = args.trim().split(/\s+/);
-      const style = a[0] || 'default';
-      const noIcon = a.includes('no-icon') ? ' no-icon' : '';
-      return `:::${style}${noIcon}\n${body.trim()}\n:::`;
-    }
-  );
+  src = src.replace(/\{%-?\s*note\s+([^%]+?)\s*-?%\}([\s\S]*?)\{%-?\s*endnote\s*-?%\}/g, (_, args, body) => {
+    hit('note');
+    const a = args.trim().split(/\s+/);
+    const style = a[0] || 'default';
+    const noIcon = a.includes('no-icon') ? ' no-icon' : '';
+    return `:::${style}${noIcon}\n${body.trim()}\n:::`;
+  });
 
   // --- {% label TEXT COLOR %} -------------------------------------------------
   src = src.replace(/\{%-?\s*label\s+([^%]+?)\s*-?%\}/g, (_, body) => {

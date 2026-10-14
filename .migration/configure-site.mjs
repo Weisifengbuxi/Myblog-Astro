@@ -59,7 +59,7 @@ s = replaceBlock(
   #   link: "https://beian.miit.gov.cn/"
   # Enable slug transliteration (converts CJK characters to pinyin/romaji)
   # Note: enabling this will break existing CJK URLs. Run \`pnpm save-slugs\` first to save old slugs into frontmatter.link
-  # enableSlugTransliteration: true`
+  # enableSlugTransliteration: true`,
 );
 
 // ---------------------------------------------------------------- i18n
@@ -80,7 +80,7 @@ s = replaceBlock(
       enabled: false
     - code: ko
       label: 한국어
-      enabled: false`
+      enabled: false`,
 );
 
 // ---------------------------------------------------------------- categoryMap
@@ -104,7 +104,7 @@ s = replaceBlock(
   福利: tools
   # 可按需继续添加：
   # 书摘: reading
-  # 项目: project`
+  # 项目: project`,
 );
 
 // ---------------------------------------------------------------- featuredCategories
@@ -127,7 +127,7 @@ s = replaceBlock(
   - link: life
     label: 生活日常
     image: /img/cover/2.webp
-    description: 生活记录、随想与见闻`
+    description: 生活记录、随想与见闻`,
 );
 
 // ---------------------------------------------------------------- featuredSeries
@@ -145,7 +145,7 @@ s = replaceBlock(
       这是周刊/系列文章功能的示例配置。
     cover: /img/weekly_header.webp
     enabled: false
-    icon: ri:newspaper-line`
+    icon: ri:newspaper-line`,
 );
 
 // ---------------------------------------------------------------- social
@@ -168,7 +168,7 @@ s = replaceBlock(
   # bilibili:
   #   url: https://space.bilibili.com/451525062
   #   icon: ri:bilibili-fill
-  #   color: '#da708a'`
+  #   color: '#da708a'`,
 );
 
 // ---------------------------------------------------------------- friends
@@ -293,7 +293,7 @@ s = replaceBlock(
       owner: KangQi
       desc: 惟有忍耐到底的，必然得救
       image: https://www.kangqiovo.com/wp-content/uploads/2025/10/KangQi-.png
-      color: '#fcf6bd'`
+      color: '#fcf6bd'`,
 );
 
 // ---------------------------------------------------------------- navigation
@@ -332,7 +332,7 @@ s = replaceBlock(
   - name: 歌单
     nameKey: nav.music
     path: /music
-    icon: ri:music-2-fill`
+    icon: ri:music-2-fill`,
 );
 
 // ---------------------------------------------------------------- comment
@@ -346,7 +346,7 @@ s = replaceBlock(
   # 如需让旧评论也显示，请在 Twikoo 后台按新路径迁移评论数据。
   twikoo:
     envId: https://twikoo.weisifengbuxi.top
-    lang: zh-CN`
+    lang: zh-CN`,
 );
 
 // ---------------------------------------------------------------- analytics
@@ -361,7 +361,7 @@ s = replaceBlock(
     # statistics_display:
     #   token: your-umami-share-token
     #   article_page_views: true
-    #   footer_site_stats: true`
+    #   footer_site_stats: true`,
 );
 
 // ---------------------------------------------------------------- bangumi
@@ -371,7 +371,7 @@ s = replaceBlock(
   `# bangumi:
 #   userId: cosine
 #   # label: 追番
-#   # icon: ri:bilibili-fill`
+#   # icon: ri:bilibili-fill`,
 );
 
 // ---------------------------------------------------------------- bgm
@@ -384,7 +384,7 @@ s = replaceBlock(
   # audio:
   #   - title: 最爱山山
   #     list:
-  #       - https://music.163.com/playlist?id=8676645748`
+  #       - https://music.163.com/playlist?id=8676645748`,
 );
 
 // ---------------------------------------------------------------- dev
@@ -406,7 +406,7 @@ s = replaceBlock(
     - id: zed
       name: Zed
       icon: simple-icons:zedindustries
-      urlTemplate: 'zed://file/{path}'`
+      urlTemplate: 'zed://file/{path}'`,
 );
 
 fs.writeFileSync(FILE, s, 'utf8');
