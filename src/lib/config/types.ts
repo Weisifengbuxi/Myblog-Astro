@@ -791,6 +791,10 @@ export interface SiteYamlConfig {
   /** Markdown copy / download / open-in-writing-room actions on post pages. */
   postActions?: unknown;
   navigation?: RouterItem[];
+  /** Flat footer link row ("小页面" strip at the bottom of every page). */
+  footerLinks?: { name: string; path: string }[];
+  /** Grouped footer columns; wins over {@link footerLinks} when non-empty. */
+  footerLinkGroups?: { title: string; links: { name: string; path: string }[] }[];
   comment?: CommentConfig;
   analytics?: AnalyticsConfig;
   /** SEO configuration for robots.txt and meta tags */

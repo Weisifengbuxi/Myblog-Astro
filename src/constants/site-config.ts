@@ -82,7 +82,7 @@ export interface FooterLinkGroup {
  * Falls back to a single "导航" column built from `footerLinks` when the grouped
  * form is not configured, so existing configs keep working.
  */
-const rawFooterLinkGroups = (yamlConfig as { footerLinkGroups?: unknown }).footerLinkGroups;
+const rawFooterLinkGroups = yamlConfig.footerLinkGroups;
 
 export const footerLinkGroups: FooterLinkGroup[] = Array.isArray(rawFooterLinkGroups)
   ? rawFooterLinkGroups

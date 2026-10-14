@@ -273,7 +273,7 @@ export function setupClickText(options: ResolvedClickShowTextConfig): void {
     floatWordAt(x, y);
   };
 
-  const onBeforeSwap = (event: Event) => holdClickText((event as { viewTransition: ViewTransition }).viewTransition);
+  const onBeforeSwap = (event: Event) => holdClickText((event as unknown as { viewTransition: ViewTransition }).viewTransition);
 
   boundClick = onClick;
   boundStop = stopWhenDisabled;

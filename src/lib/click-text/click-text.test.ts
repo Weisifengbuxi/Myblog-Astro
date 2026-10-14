@@ -102,7 +102,8 @@ interface Harness {
   flights: FakeFlight[];
   root: FakeElement;
   documentEvents: EventTarget & { documentElement: FakeElement; hidden: boolean; createElement: () => FakeElement };
-  press: (x?: number, y?: number) => void;
+  /** Blank-area clicks pass `interactive: null` so `closest` returns null. */
+  press: (x?: number, y?: number, button?: number, interactive?: boolean | null) => void;
   restore: () => void;
 }
 
@@ -348,11 +349,15 @@ test('the duplicate window lives on the document so a second module copy shares 
     // another copy of this module listening; document state does.
     type Host = { __clickTextTrigger?: { at: number; x: number; y: number } };
     const host = dom.documentEvents as unknown as Host;
-    assert.equal(host.__clickTextTrigger, undefined);
+    // Read into a local first: `assert.equal(host.__clickTextTrigger, undefined)`
+    // narrows the property itself to `undefined`, which then makes the post-press
+    // read `never` (node's `equal` is an assertion function).
+    const before = host.__clickTextTrigger;
+    assert.equal(before, undefined);
 
     dom.press(30, 40);
     const state = host.__clickTextTrigger;
-    assert.ok(state, 'expected the trigger window to be recorded on the document');
+    if (!state) throw new Error('expected the trigger window to be recorded on the document');
     assert.equal(state.x, 30);
     assert.equal(state.y, 40);
     assert.equal(typeof state.at, 'number');
