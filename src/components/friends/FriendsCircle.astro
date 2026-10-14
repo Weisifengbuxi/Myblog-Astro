@@ -8,6 +8,9 @@
  * 原博客用的是 Friend-Circle-Lite 的 Vue 前端 + 独立后端；这里改为
  * 服务端渲染静态列表 —— 无运行时请求，因此不受 CORS、证书、后端可用性影响，
  * 首屏也更快（内容已在 HTML 里）。
+ *
+ * 列表默认只渲染前 `fcircle.pageSize` 条，其余条目**同样在 HTML 里**（利于抓取，
+ * 且无脚本环境能直接看到全部），只是先由 CSS 收起，点「显示更多」每次再放出一批。
  */
 import { fcircleConfig } from '@constants/site-config';
 import { getFcircleData } from '@lib/fcircle/data';
@@ -15,13 +18,35 @@ import { type FcirclePost, formatRelative } from '@lib/fcircle/types';
 import { Icon } from 'astro-icon/components';
 
 const { posts: allPosts, stat } = getFcircleData();
-const posts = allPosts.slice(0, fcircleConfig.pageSize) as FcirclePost[];
+
+/** 首屏显示多少条；同时也是「显示更多」每次追加的条数。 */
+const batchSize = Math.max(1, fcircleConfig.pageSize);
+const initialCount = Math.min(batchSize, allPosts.length);
+const remainingCount = allPosts.length - initialCount;
+
+/**
+ * 文案由脚本更新，放在 data 属性里传过去，避免组件和脚本各维护一份。
+ * `{shown}` / `{total}` / `{remaining}` 由脚本替换。
+ */
+const shownLabel = '已显示 {shown} / {total} 篇';
+const doneLabel = '已显示全部 {total} 篇';
+const remainingLabel = '还有 {remaining} 篇';
+
+const listId = 'fcircle-list';
 
 /** 取站点名首字作为头像缺失时的占位，避免出现空白方块。 */
 const initial = (name: string) => name.trim().slice(0, 1) || '友';
 ---
 
-<div class="fcircle">
+<div
+  class="fcircle"
+  data-fcircle-more
+  data-batch={batchSize}
+  data-total={allPosts.length}
+  data-shown-label={shownLabel}
+  data-done-label={doneLabel}
+  data-remaining-label={remainingLabel}
+>
   {
     stat && (
       <p class="fcircle-stat">
@@ -37,7 +62,7 @@ const initial = (name: string) => name.trim().slice(0, 1) || '友';
   }
 
   {
-    posts.length === 0 ? (
+    allPosts.length === 0 ? (
       <div class="fcircle-empty">
         <Icon name="ri:inbox-archive-line" class="size-8 opacity-40" />
         <p>还没有抓取到朋友圈内容。</p>
@@ -47,9 +72,9 @@ const initial = (name: string) => name.trim().slice(0, 1) || '友';
         </p>
       </div>
     ) : (
-      <ul class="fcircle-list">
-        {posts.map((post) => (
-          <li class="fcircle-item">
+      <ul class="fcircle-list" id={listId}>
+        {allPosts.map((post: FcirclePost, index) => (
+          <li class="fcircle-item" data-deferred={index >= initialCount ? 'true' : undefined}>
             <a class="fcircle-link" href={post.link} target="_blank" rel="noopener noreferrer" title={post.title}>
               <span class="fcircle-avatar">
                 {post.avatar ? (
@@ -81,13 +106,97 @@ const initial = (name: string) => name.trim().slice(0, 1) || '友';
   }
 
   {
-    allPosts.length > posts.length && (
-      <p class="fcircle-more">
-        仅显示最近 {posts.length} 篇，共 {allPosts.length} 篇。
-      </p>
+    remainingCount > 0 ? (
+      <div class="fcircle-more">
+        {/*
+          状态文案用 aria-live 播出，键盘焦点在按钮消失后也落到这里，
+          因此它需要一个可编程聚焦的 tabindex。
+        */}
+        <p class="fcircle-more-status" data-fcircle-status aria-live="polite" tabindex="-1">
+          已显示 {initialCount} / {allPosts.length} 篇
+        </p>
+        {/* 无障碍名直接取按钮文案，跟着剩余篇数一起更新，不再单独写 aria-label */}
+        <button type="button" class="fcircle-more-button" data-fcircle-more-button aria-controls={listId}>
+          <Icon name="ri:arrow-down-s-line" class="size-4" aria-hidden="true" />
+          <span>显示更多</span>
+          <span class="fcircle-more-count" data-fcircle-remaining>
+            还有 {remainingCount} 篇
+          </span>
+        </button>
+      </div>
+    ) : (
+      allPosts.length > 0 && <p class="fcircle-more-status">已显示全部 {allPosts.length} 篇</p>
     )
   }
 </div>
+
+<script>
+  /**
+   * 「显示更多」：首屏之外的条目已经在 HTML 里，只是一直被 CSS 收起
+   * （见样式里的 `html[data-motion] .fcircle-item[data-deferred]`），
+   * 这里每点一次就放出一批。
+   *
+   * 没有脚本时 `<html>` 上没有 `data-motion`（BootScripts 在首屏前才打上），
+   * 那些规则不生效，所有条目本来就是可见的。
+   */
+  function formatFcircleLabel(template: string, values: Record<string, number>): string {
+    return template.replace(/\{(\w+)\}/g, (match, key: string) => (key in values ? String(values[key]) : match));
+  }
+
+  function initFcircleMore() {
+    document.querySelectorAll<HTMLElement>('[data-fcircle-more]').forEach((root) => {
+      // astro:page-load 与首次初始化可能都会走到这里，用标记保证只绑一次。
+      if (root.dataset.fcircleReady === 'true') return;
+
+      const button = root.querySelector<HTMLButtonElement>('[data-fcircle-more-button]');
+      const status = root.querySelector<HTMLElement>('[data-fcircle-status]');
+      const remaining = root.querySelector<HTMLElement>('[data-fcircle-remaining]');
+      const deferred = Array.from(root.querySelectorAll<HTMLElement>('.fcircle-item[data-deferred]'));
+      if (!button || deferred.length === 0) return;
+
+      root.dataset.fcircleReady = 'true';
+
+      const total = Number(root.dataset.total) || deferred.length;
+      const batch = Math.max(1, Number(root.dataset.batch) || deferred.length);
+      const shownLabel = root.dataset.shownLabel ?? '';
+      const doneLabel = root.dataset.doneLabel ?? '';
+      const remainingLabel = root.dataset.remainingLabel ?? '';
+      let revealed = 0;
+
+      const sync = () => {
+        const left = deferred.length - revealed;
+        if (status) {
+          status.textContent = formatFcircleLabel(left > 0 ? shownLabel : doneLabel, {
+            shown: total - left,
+            total,
+          });
+        }
+        if (remaining) {
+          remaining.textContent = left > 0 ? formatFcircleLabel(remainingLabel, { remaining: left }) : '';
+        }
+        button.hidden = left === 0;
+      };
+
+      button.addEventListener('click', () => {
+        for (const item of deferred.slice(revealed, revealed + batch)) {
+          delete item.dataset.deferred;
+          // 让新出现的条目走一次淡入，动画本身由 CSS 按动效档位决定。
+          item.dataset.fcircleAppended = 'true';
+        }
+        revealed = Math.min(revealed + batch, deferred.length);
+        const finished = revealed >= deferred.length;
+        sync();
+        // 按钮收起后焦点不能凭空消失，交给状态文案（tabindex="-1"）。
+        if (finished) status?.focus({ preventScroll: true });
+      });
+
+      sync();
+    });
+  }
+
+  initFcircleMore();
+  document.addEventListener('astro:page-load', initFcircleMore);
+</script>
 
 <style>
   .fcircle {
@@ -126,6 +235,15 @@ const initial = (name: string) => name.trim().slice(0, 1) || '友';
 
   .fcircle-item {
     min-width: 0;
+  }
+
+  /*
+    收起首屏之外的条目。`<html data-motion>` 由 BootScripts 在首屏前写入，因此这里
+    不会闪一下再收起；脚本被禁用时该属性不存在，全部条目直接可见（也是上面脚本
+    注释里说的降级路径）。
+  */
+  :global(html[data-motion]) .fcircle-item[data-deferred] {
+    display: none;
   }
 
   .fcircle-link {
@@ -248,19 +366,92 @@ const initial = (name: string) => name.trim().slice(0, 1) || '友';
   }
 
   .fcircle-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  /* 无脚本时所有条目都已经展开，「显示更多」没有意义 */
+  :global(html:not([data-motion])) .fcircle-more {
+    display: none;
+  }
+
+  .fcircle-more-status {
     margin: 0;
-    text-align: center;
     font-size: 0.75rem;
+    text-align: center;
     opacity: 0.6;
   }
 
+  .fcircle-more-status:focus-visible {
+    border-radius: 0.35rem;
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 4px;
+  }
+
+  .fcircle-more-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.5rem;
+    padding: 0.375rem 0.875rem;
+    border: 1px solid hsl(var(--border) / 0.8);
+    border-radius: 9999px;
+    background: hsl(var(--card));
+    color: inherit;
+    font-size: 0.8125rem;
+    /* 移动端点击不必等 300ms 双击缩放 */
+    touch-action: manipulation;
+    transition:
+      border-color 0.18s ease,
+      color 0.18s ease,
+      scale 0.18s ease;
+  }
+
+  .fcircle-more-button:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    color: hsl(var(--primary));
+  }
+
+  /* 全部放完后脚本把它 hidden 掉；显式写一条，免得被上面的 display 盖过 */
+  .fcircle-more-button[hidden] {
+    display: none;
+  }
+
+  .fcircle-more-button:active {
+    scale: 0.96;
+  }
+
+  .fcircle-more-button:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  .fcircle-more-count {
+    opacity: 0.6;
+  }
+
+  @media screen and (prefers-reduced-motion: no-preference) {
+    :global(html:is([data-motion='lively'], [data-motion='subtle'])) .fcircle-item[data-fcircle-appended] {
+      animation: motion-fade var(--dur-fast) var(--ease-out-quart) both;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .fcircle-link {
+    .fcircle-link,
+    .fcircle-arrow,
+    .fcircle-more-button {
       transition: none;
     }
 
     .fcircle-link:hover {
       translate: none;
+    }
+
+    .fcircle-more-button:active {
+      scale: none;
     }
   }
 </style>

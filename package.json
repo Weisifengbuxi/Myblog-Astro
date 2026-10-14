@@ -68,7 +68,7 @@
     "acceptance": "pnpm build && node acceptance/scripts/run.mjs",
     "acceptance:report": "node acceptance/scripts/report.mjs",
     "acceptance:open": "node acceptance/scripts/report.mjs && node acceptance/scripts/open.mjs",
-    "test:fcircle": "node --import tsx --test src/lib/fcircle/types.test.ts src/lib/config/fcircle.test.ts"
+    "test:fcircle": "node --import tsx --test src/lib/fcircle/types.test.ts src/lib/config/fcircle.test.ts tests/fcircle/*.test.ts"
   },
   "dependencies": {
     "@antv/infographic": "^0.2.4",

@@ -248,7 +248,7 @@ rightClickMenu:
 #   enabled:     总开关；关掉则不渲染页面，导航里也不会出现
 #   title:       页面标题
 #   description: 页面副标题
-#   pageSize:    首屏显示多少条
+#   pageSize:    首屏显示多少条；也是「显示更多」按钮每次追加的条数
 #   topTips:     顶部横幅上的提示语
 #   topBackground: 引言条的背景图；**留空则用主题主色的浅色底**（推荐，更干净）。
 #                 原博客在这里放了一张大图，但那是给宽横幅用的；
