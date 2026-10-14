@@ -98,8 +98,6 @@ categoryMap:
   # 前端分类：暂未被任何文章使用。若要启用，必须**同时**把它作为
   # 二级分类写进文章的 categories（如 [[学习笔记, 前端]]）才会出现在树里。
   前端: front-end
-  CSS: css
-  番剧: anime
   # 可按需继续添加（不要在值里写斜杠，也不要与已有 slug 重复）：
   # 书摘: reading
   # 项目: project

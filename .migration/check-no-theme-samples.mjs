@@ -37,6 +37,19 @@ const walk = (dir) =>
     return e.isDirectory() ? walk(p) : [p];
   });
 
+/**
+ * 纯 ASCII 的示例值按「整词」匹配。
+ *
+ * Shiki 的语言语法包里有 Wolfram 的 `VertexCosineSimilarity` 这类标识符，
+ * 按子串匹配会把 `Cosine` 误判成主题 logo 泄漏；中日韩示例值仍按子串匹配。
+ */
+const ASCII_ONLY = /^[\x20-\x7e]+$/;
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const matchers = THEME_SAMPLES.map((sample) => ({
+  sample,
+  pattern: ASCII_ONLY.test(sample) ? new RegExp(`\\b${escapeRegExp(sample)}\\b`) : null,
+}));
+
 const files = walk(DIST).filter((f) => /\.(html|js|json|xml|css)$/.test(f));
 const hits = [];
 for (const file of files) {
@@ -46,8 +59,8 @@ for (const file of files) {
   } catch {
     continue;
   }
-  for (const sample of THEME_SAMPLES) {
-    if (text.includes(sample)) {
+  for (const { sample, pattern } of matchers) {
+    if (pattern ? pattern.test(text) : text.includes(sample)) {
       hits.push({ file: path.relative(DIST, file), sample });
     }
   }

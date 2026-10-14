@@ -65,7 +65,9 @@ const checks = [
   // 只有文章页（走 data 分支）刻意**不加** —— 文章标题不该自己消失。
   { path: '/', contains: ['cover-intro-fade'] },
   { path: '/archives', contains: ['cover-intro-fade'] },
-  { path: '/about', contains: ['cover-intro-fade'] },
+  // 关于页是单列卡片墙，用自己的 ab-hero 头图（AboutLayout 走 Layout，
+  // 没有渲染 `slot="cover"`），因此这里断言它自己的头图而不是主题封面。
+  { path: '/about', contains: ['ab-hero-title'] },
   { path: '/fcircle', contains: ['cover-intro-fade'] },
   { path: '/post/3be0a65', notContains: ['cover-intro-fade'] },
 

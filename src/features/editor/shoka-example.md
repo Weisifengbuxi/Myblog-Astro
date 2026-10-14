@@ -336,12 +336,12 @@ $$
 
 ```markdown
 {% links %}
-- site: 余弦の博客
-  url: https://blog.cosine.ren
-  owner: cos
-  desc: FE / ACG / 手工
-  image: https://blog.cosine.ren/img/avatar.webp
-  color: '#ed788b'
+- site: 示例博客 B
+  url: https://example-b.com
+  owner: Bob
+  desc: 分享生活与技术的博客
+  image: https://api.dicebear.com/7.x/avataaars/svg?seed=Bob
+  color: '#FBC1CC'
 - site: 示例博客
   url: https://example.com
   owner: Alice
@@ -352,12 +352,12 @@ $$
 ```
 
 {% links %}
-- site: 余弦の博客
-  url: https://blog.cosine.ren
-  owner: cos
-  desc: FE / ACG / 手工
-  image: https://blog.cosine.ren/img/avatar.webp
-  color: '#ed788b'
+- site: 示例博客 B
+  url: https://example-b.com
+  owner: Bob
+  desc: 分享生活与技术的博客
+  image: https://api.dicebear.com/7.x/avataaars/svg?seed=Bob
+  color: '#FBC1CC'
 - site: 示例博客
   url: https://example.com
   owner: Alice
