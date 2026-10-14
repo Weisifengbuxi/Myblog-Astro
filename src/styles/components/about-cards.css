@@ -348,8 +348,8 @@
   width: 52%;
   height: 52%;
   object-fit: contain;
-  /* simple-icons 的 svg 自带 fill，这里统一压成白色 */
-  filter: brightness(0) invert(1);
+  /* 图标现在是原 Hexo 博客那套彩色图片（含白底 jpg），照原样显示，
+     不再像 simple-icons 单色 svg 那样压成白色 —— 压白会在白底方块上彻底看不见。 */
   opacity: 0.95;
   transition: transform 0.25s ease;
 }
@@ -360,8 +360,7 @@
 }
 
 /* 悬停：轮播淡出，全部技能面板淡入。
-   面板里不用方块，改成"胶囊 + 彩色图标 + 名字"（对齐安知鱼的 hover 效果）——
-   图标是深色方块外的形态，所以取技能主题色，白底胶囊上才看得见。 */
+   面板里不用方块，改成"胶囊 + 图标 + 名字"（对齐安知鱼的 hover 效果）。 */
 .ab-skill-all {
   position: absolute;
   inset: 0;
@@ -378,9 +377,7 @@
   transition: opacity 0.25s ease;
 }
 
-/* 胶囊：缩放图标 + 技能名。
-   图标上色不能用 ?color= —— unpkg 会忽略查询参数，返回的 SVG 里没有 fill，
-   因此一直是黑的。改用 CSS mask：把 SVG 当镂空模板，背景色即图标颜色。 */
+/* 胶囊：缩放图标 + 技能名。图标直接用图片（这批来自原 Hexo 博客，是彩色图片）。 */
 .ab-skill-chip {
   display: inline-flex;
   gap: 0.45rem;
@@ -395,18 +392,18 @@
 
 .ab-skill-chip-icon {
   display: block;
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.35rem;
+  height: 1.35rem;
   flex-shrink: 0;
-  background: var(--tone, currentColor);
-  -webkit-mask-image: var(--icon);
-  mask-image: var(--icon);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
+  /* 小方块：底色取配置里的主题色，图标原样叠在上面（和轮播里的方块一致）。
+     直接用图片是因为这批图标来自原 Hexo 博客、是彩色/白色图片 ——
+     用 mask 涂成主题色剪影的话，白色图标（CSS3、JS、HTML、Git）在白胶囊上会消失。 */
+  border-radius: 0.35rem;
+  background-color: var(--tone, transparent);
+  background-image: var(--icon);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 76%;
 }
 
 .ab-skills:hover .ab-skill-marquee {

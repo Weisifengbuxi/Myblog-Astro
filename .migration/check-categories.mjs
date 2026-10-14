@@ -101,7 +101,7 @@ if (fs.existsSync(distCat)) {
 
 if (failures.length) {
   console.log(`\nFAILURES (${failures.length}):`);
-  for (const f of failures) console.log('  ✗ ' + f);
+  for (const f of failures) console.log(`  ✗ ${f}`);
   process.exit(1);
 }
 console.log('\n分类配置检查通过。');

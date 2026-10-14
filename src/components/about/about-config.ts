@@ -36,23 +36,56 @@ export const pursuit = {
 export const skills = {
   tips: '技能',
   title: '开启创造力',
-  /** icon 取 simple-icons 的图标名（https://simpleicons.org）。 */
+  /**
+   * icon 可以是**完整图片地址**（http/https/data:），也可以是 simple-icons 的图标名
+   * （如 `html5`、`vuedotjs`，见 https://simpleicons.org）；后者会拼上 {@link SKILL_ICON_BASE}。
+   * 这批图标沿用原 Hexo 博客的图片（最多 16 个），因此这里全部写完整地址。
+   */
   list: [
-    { name: 'HTML5', icon: 'html5', color: '#e34f26', href: 'https://developer.mozilla.org/docs/Web/HTML' },
-    { name: 'CSS3', icon: 'css3', color: '#1572b6', href: 'https://developer.mozilla.org/docs/Web/CSS' },
-    { name: 'JavaScript', icon: 'javascript', color: '#f7df1e', href: 'https://developer.mozilla.org/docs/Web/JavaScript' },
-    { name: 'TypeScript', icon: 'typescript', color: '#3178c6', href: 'https://www.typescriptlang.org/' },
-    { name: 'Vue', icon: 'vuedotjs', color: '#4fc08d', href: 'https://vuejs.org/' },
-    { name: 'React', icon: 'react', color: '#20232a', href: 'https://react.dev/' },
-    { name: 'Node.js', icon: 'nodedotjs', color: '#339933', href: 'https://nodejs.org/' },
-    { name: 'Python', icon: 'python', color: '#3776ab', href: 'https://www.python.org/' },
-    { name: 'Java', icon: 'openjdk', color: '#e76f00', href: 'https://openjdk.org/' },
-    { name: 'Git', icon: 'git', color: '#f05032', href: 'https://git-scm.com/' },
+    { name: 'Java', color: '#fff', icon: 'https://bu.dusays.com/2023/04/09/643293b1184e9.jpg' },
+    { name: 'Docker', color: '#57b6e6', icon: 'https://bu.dusays.com/2023/04/09/643293b0f0abe.png' },
+    { name: 'Photoshop', color: '#4082c3', icon: 'https://bu.dusays.com/2022/12/15/639aa3a5c240e.png' },
+    { name: 'Node', color: '#333', icon: 'https://npm.elemecdn.com/anzhiyu-blog@2.1.1/img/svg/node-logo.svg' },
+    { name: 'Webpack', color: '#2e3a41', icon: 'https://bu.dusays.com/2023/04/09/643293b68026c.png' },
+    {
+      name: 'Premiere Pro',
+      color: '#9A99FF',
+      icon: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/PR1.png',
+    },
+    { name: 'Python', color: '#fff', icon: 'https://bu.dusays.com/2023/04/09/643293b1230f7.png' },
+    { name: 'Vite', color: '#937df7', icon: 'https://npm.elemecdn.com/anzhiyu-blog@2.0.8/img/svg/vite-logo.svg' },
+    {
+      name: 'After Effects',
+      color: '#9A99FF',
+      icon: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/AE.png',
+    },
+    { name: 'Vue', color: '#b8f0ae', icon: 'https://bu.dusays.com/2023/04/09/643293b6788bd.png' },
+    // { name: 'React', color: '#222', icon: 'https://unpkg.com/simple-icons@13/icons/react.svg' },
+    { name: 'CSS3', color: '#2c51db', icon: 'https://bu.dusays.com/2022/12/15/639aa3a5c251e.png' },
+    { name: 'JS', color: '#f7cb4f', icon: 'https://bu.dusays.com/2023/04/09/643293b121f02.png' },
+    { name: 'HTML', color: '#e9572b', icon: 'https://bu.dusays.com/2022/12/15/639aa3a5c241c.png' },
+    { name: 'Git', color: '#df5b40', icon: 'https://bu.dusays.com/2023/04/09/643293b10ccdd.webp' },
+    // { name: 'Apifox', color: '#e65164', icon: 'https://bu.dusays.com/2022/11/19/6378d6458c6b6.png' },
+    {
+      name: 'C',
+      color: '#ffffff',
+      icon: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/Cyuyan.png',
+    },
+    {
+      name: 'MYSQL',
+      color: '#000000',
+      icon: 'https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/com037-scaled.jpg',
+    },
   ],
 };
 
 /** simple-icons 的 CDN 前缀；换源只需改这一处。 */
 export const SKILL_ICON_BASE = 'https://unpkg.com/simple-icons@13/icons';
+
+/** 技能图标的最终地址：完整地址原样返回，simple-icons 名拼上 CDN 前缀。 */
+export function skillIconSrc(icon: string): string {
+  return /^(https?:)?\/\/|^data:/.test(icon) ? icon : `${SKILL_ICON_BASE}/${icon}.svg`;
+}
 
 export const careers = {
   tips: '生涯',

@@ -26,8 +26,8 @@ import {
   photo,
   profile,
   pursuit,
-  SKILL_ICON_BASE,
   selfInfo,
+  skillIconSrc,
   skills,
   tenyear,
 } from './about-config';
@@ -159,7 +159,7 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
         {
           skillRowA.map((skill) => (
             <span class="ab-tile" style={`background:${skill.color}`}>
-              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+              <img src={skillIconSrc(skill.icon)} alt={skill.name} loading="lazy" />
             </span>
           ))
         }
@@ -169,7 +169,7 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
         {
           skillRowB.map((skill) => (
             <span class="ab-tile" style={`background:${skill.color}`}>
-              <img src={`${SKILL_ICON_BASE}/${skill.icon}.svg`} alt={skill.name} loading="lazy" />
+              <img src={skillIconSrc(skill.icon)} alt={skill.name} loading="lazy" />
             </span>
           ))
         }
@@ -179,7 +179,7 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
     <div class="ab-skill-all">
       {
         skills.list.map((skill) => (
-          <span class="ab-skill-chip" style={`--icon:url(${SKILL_ICON_BASE}/${skill.icon}.svg);--tone:${skill.color}`}>
+          <span class="ab-skill-chip" style={`--icon:url("${skillIconSrc(skill.icon)}");--tone:${skill.color}`}>
             <span class="ab-skill-chip-icon" aria-hidden="true" />
             <span>{skill.name}</span>
           </span>
