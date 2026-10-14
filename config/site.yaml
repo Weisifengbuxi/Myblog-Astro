@@ -269,6 +269,19 @@ fcircle:
 
 # -----------------------------------------------------------------------------
 friends:
+  # 友链分组：按这里的顺序展示，页签在本页即时筛选。
+  # 这里三组沿用 data 里原有的注释分区（框架 / 推荐博客 / 小伙伴）；
+  # 不写 group 或写了不存在的 id 的友链会归入最后的「未分组」。
+  groups:
+    - id: framework
+      title: 框架
+      description: 站点框架与主题本身。
+    - id: recommend
+      title: 推荐博客
+      description: 喜欢阅读、推荐给大家的博客。
+    - id: friends
+      title: 小伙伴
+      description: 常有交流、互相串门的小站。
   intro:
     title: 友情链接
     subtitle: 欢迎交换友链！
@@ -289,12 +302,14 @@ friends:
       desc: 快速、简单且强大的网站框架
       image: https://d33wubrfki0l68.cloudfront.net/6657ba50e702d84afb32fe846bed54fba1a77add/827ae/logo.svg
       color: '#0e83cd'
+      group: framework
     - site: anzhiyu主题
       url: https://blog.anheyu.com/
       owner: 安知鱼
       desc: 生活明朗，万物可爱
       image: https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg
       color: '#425aef'
+      group: framework
     # —— 推荐博客 ——
     - site: 小嗷犬的技术小站
       url: https://blog.marquis.eu.org/
@@ -302,54 +317,63 @@ friends:
       desc: 为天地立心，为生民立命，为往圣继绝学，为万世开太平
       image: https://blog.marquis.eu.org/img/avatar/2.png
       color: '#BEDCFF'
+      group: recommend
     - site: Akilarの糖果屋
       url: https://akilar.top/
       owner: Akilar
       desc: 欢迎光临糖果屋
       image: https://npm.elemecdn.com/akilar-friends@latest/avatar/akilar.top.jpg
       color: '#FBC1CC'
+      group: recommend
     - site: 青桔气球
       url: https://blog.qjqq.cn/
       owner: 青桔气球
       desc: 分享网络安全与科技生活
       image: https://q2.qlogo.cn/headimg_dl?dst_uin=1645253&spec=640
       color: '#ABDCFF'
+      group: recommend
     - site: 张洪Heo
       url: https://blog.zhheo.com/
       owner: 张洪Heo
       desc: 分享设计与科技生活
       image: https://img.zhheo.com/i/67d8fa75943e4.webp
       color: '#6ec6ff'
+      group: recommend
     - site: 山岳库博
       url: https://kmar.top/
       owner: 山岳库博
       desc: 开发学习启发性二刺螈
       image: https://s21.ax1x.com/2025/09/01/pVcHzGt.png
       color: '#ffb3c1'
+      group: recommend
     - site: 梦爱吃鱼
       url: https://blog.bsgun.cn/
       owner: 梦爱吃鱼
       desc: 不负心灵，不负今生
       image: https://oss-cdn.bsgun.cn/logo/avatar.256.png
       color: '#a0e7e5'
+      group: recommend
     - site: 周润发
       url: https://blog.zrf.me/
       owner: 周润发
       desc: 收录开源，好用的互联网项目
       image: https://blog.zrf.me/img/logo.webp
       color: '#ffd6a5'
+      group: recommend
     - site: 清羽飞扬
       url: https://blog.liushen.fun/
       owner: 清羽飞扬
       desc: 柳影曳曳，清酒孤灯，扬笔撒墨，心境如霜
       image: https://blog.liushen.fun/info/avatar.ico
       color: '#cdb4db'
+      group: recommend
     - site: 杜老师说
       url: https://dusays.com
       owner: 杜老师
       desc: 师者，传道，受业，解惑！
       image: https://cdn.dusays.com/favicon.ico
       color: '#bde0fe'
+      group: recommend
     # —— 小伙伴 ——
     - site: 谢大大
       url: https://xiedada.net/
@@ -357,36 +381,42 @@ friends:
       desc: 现实中的技术大佬
       image: https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/youlian1.jpg
       color: '#ffc8dd'
+      group: friends
     - site: 洛元の小屋
       url: https://blog.dimeta.top/
       owner: 洛元
       desc: 科技，游戏，生活
       image: https://blog.dimeta.top/upload/avatar.jpg
       color: '#b8e0d2'
+      group: friends
     - site: 碧水荡漾
       url: https://blog.yvyang.top
       owner: 碧水荡漾
       desc: 澄空碧山 绿水余漾
       image: https://blog.yvyang.top/favicon.webp
       color: '#c7f9cc'
+      group: friends
     - site: Lifeline
       url: https://lifelinest.github.io/
       owner: Lifeline
       desc: 经世致用 自强不息
       image: http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130
       color: '#d0f4de'
+      group: friends
     - site: 辰渊尘の个人博客
       url: https://blog.mcxiaochen.top/
       owner: 辰渊尘
       desc: 偏技术
       image: https://blog.mcxiaochen.top/favicon.ico
       color: '#e4c1f9'
+      group: friends
     - site: KangQi の Blog
       url: https://www.kangqiovo.com
       owner: KangQi
       desc: 惟有忍耐到底的，必然得救
       image: https://www.kangqiovo.com/wp-content/uploads/2025/10/KangQi-.png
       color: '#fcf6bd'
+      group: friends
 # =============================================================================
 # Announcements
 # 公告系统 - 在页面顶部显示重要通知
