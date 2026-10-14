@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import twikooStyles from 'twikoo/dist/twikoo.css?inline';
 import { commentConfig } from '@/constants/site-config';
 import { useTranslation } from '@/hooks/useTranslation';
 import { getHtmlLang, getLocaleFromUrl } from '@/i18n/utils';
@@ -50,9 +49,10 @@ export default function Twikoo() {
       containerRef.current.innerHTML = '';
       const locale = getLocaleFromUrl(window.location.pathname);
       try {
-        // Dynamic import: twikoo is a UMD bundle (~500KB) with no type definitions,
-        // and accesses `document` at module load time — lazy loading is the cleanest approach
-        const { init } = await import('twikoo/dist/twikoo.nocss.js');
+        // 2.0 的包 `exports` 只放开 "."（→ dist/twikoo.min.js，加载时把自带样式注入 <head>），
+        // 深路径的 nocss.js / twikoo.css 已经不可导入，所以这里直接引裸包名。
+        // 动态 import：UMD 产物约 350KB 且加载时就访问 document，懒加载最省事。
+        const { init } = await import('twikoo');
         if (!containerRef.current) return;
         await init({
           envId: config.envId,
@@ -78,7 +78,11 @@ export default function Twikoo() {
 
   return (
     <>
-      <style>{`${twikooStyles}\n${themeStyles}`}</style>
+      {/*
+        只放主题自己的覆盖样式：Twikoo 2.0 的基础样式由包在加载时注入 <head>，
+        本组件渲染的 <style> 在 body 里、文档顺序更靠后，同优先级下覆盖照样生效。
+      */}
+      <style>{themeStyles}</style>
       <div className="px-4">
         {status === 'loading' && <TwikooSkeleton />}
         {status === 'error' && (

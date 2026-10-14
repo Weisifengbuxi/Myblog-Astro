@@ -31,13 +31,13 @@ html.dark .tk-comments-container {
   color: #c8c8c8;
 }
 
-html.dark .tk-comments-container .tk-meta-input .el-input .el-input__inner,
+html.dark .tk-comments-container .tk-meta-input .tk-input__inner,
 html.dark .tk-comments-container .tk-content,
 html.dark .tk-comments-container .tk-main .tk-nick {
   color: #c8c8c8;
 }
 
-html.dark .tk-comments-container .tk-meta-input .el-input .el-input__inner {
+html.dark .tk-comments-container .tk-meta-input .tk-input__inner {
   background-color: transparent;
   border-color: #444;
 }
