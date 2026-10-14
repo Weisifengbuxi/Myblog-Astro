@@ -8,7 +8,7 @@
 export const profile = {
   avatar: 'https://images.weserv.nl/?url=https://raw.githubusercontent.com/Weisifengbuxi/tuchuang/main/img/Wechat.jpg',
   /** 头像左右两侧的标签（左 4 右 4）。 */
-  tagsLeft: ['🤖️ 科技软件爱好者', '🔍 分享与热心帮助', '🏠 智能家居小能手', '📘 平日里爱看小说'],
+  tagsLeft: ['🤖️ 科技软件爱好者', '🔍 分享与热心帮助', '🏠 智能家居小能手', '📘 平时娱乐看小说'],
   tagsRight: ['专修计算机科学 💻', '脚踏实地行动派 🏃', '团队小组发动机 🔯', '热爱于竞技游戏 🎮'],
   /** 头像下方的页面大标题。 */
   heading: '关于本站',

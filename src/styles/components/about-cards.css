@@ -275,12 +275,14 @@
 .ab-skill-marquee {
   position: absolute;
   inset-inline: 0;
-  /* 左右内边距收窄可视区：一份内容的宽度必须大于可视宽度，
-     否则一屏里能同时看到两份，循环就露馅了。 */
-  padding-inline: 2rem;
-  /* 贴着卡片底部排（原先垂直居中，底下会空出 66px）。用 bottom 而不是
-     top + translate：卡片在窄屏会按内容取高，钉底才不会把两排图标顶出卡片。 */
-  bottom: 1.5rem;
+  /* 可视区尽量宽：原 2rem 两边各截掉 32px，方块离卡片边还老远就被切了；
+     只留 0.5rem 给左右的投影一点余量。 */
+  padding-inline: 0.5rem;
+  /* 方块投影是向下偏移的（0 0.4rem），容器不留底部内边距就会把第二排的投影切掉 */
+  padding-bottom: 0.75rem;
+  /* 贴着卡片底部排；用 bottom 而不是 top + translate，
+     窄屏卡片按内容取高时也不会把两排图标顶出卡片。 */
+  bottom: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -465,8 +467,9 @@
   margin-inline: -2rem;
   height: auto;
   max-height: 11rem;
-  /* 往下移一些：原 1rem 偏上 */
-  margin-top: 3rem;
+  /* 贴到卡片底部（原 3rem 偏上，下面空着一大块）：卡片是 flex 列，
+     auto 会把图片推到剩余空间的末尾，卡片再高也不会改变这个相对位置。 */
+  margin-top: auto;
   /* 贴到卡片边缘后不能用圆角，否则四角会露出缺口 */
   border-radius: 0;
   object-fit: cover;
