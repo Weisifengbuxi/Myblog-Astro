@@ -10,10 +10,10 @@
  *   [["ol"],["t","u"],["t","p"],["y","u"],["y","p"],["m","p"],["tl","p"]]
  *   → 最近活跃访客 / 今日人数 / 今日访问 / 昨日人数 / 昨日访问 / 本月访问 / 总访问量
  *
- * 这里用的是**旧博客的 51LA 应用 ID**（3NaU22Pij8KxRC6w），因为它累积了历史数据
- * （总访问量 1573），而 Astro 站新建的那个应用只有几十次访问，看起来像"新站"。
- * 注意：站点自身的埋点（LA.init）用的是 config/site.yaml 里的 analytics.la51.ck，
- * 两者不是同一个应用 —— 上报与展示可以分开。
+ * 用的是**旧博客那个 51LA 应用**（3NaU22Pij8KxRC6w）：它累积了历史数据
+ * （总访问量 1500+），而 Astro 站最初新建的应用只有几十次访问。
+ * 站点埋点（config/site.yaml 的 analytics.la51.id/ck）已改为**同一个 ID**，
+ * 这样新访问会继续累加到这份数据上；两者必须一致，否则统计与展示会脱节。
  */
 
 export const LA51_WIDGET_URL = 'https://v6-widget.51.la/v6/3NaU22Pij8KxRC6w/quote.js';

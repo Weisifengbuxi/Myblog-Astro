@@ -1094,10 +1094,15 @@ analytics:
   # 51LA 访问统计（https://v6.51.la/）
   # 脚本由 Layout.astro 注入到 </head> 之前，全站生效。
   # id 与 ck 都取自 51LA 后台给出的初始化代码：LA.init({ id, ck })。
+  #
+  # 用**旧博客那个应用**（3NaU22Pij8KxRC6w）：它累积了历史数据（总访问量 1500+），
+  # 而 Astro 站最初新建的应用只有几十次访问，看起来像"新站"。
+  # 上报与展示（src/lib/la51-stats.ts 的 LA51_WIDGET_URL）必须用同一个 ID，
+  # 否则新访问记在新应用、页面却显示旧应用的冻结数据。
   la51:
     enabled: true
-    id: 3REPy7id8yIlqsbo
-    ck: 3REPy7id8yIlqsbo
+    id: 3NaU22Pij8KxRC6w
+    ck: 3NaU22Pij8KxRC6w
 
 # =============================================================================
 # SEO Configuration
