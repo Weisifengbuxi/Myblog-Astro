@@ -207,8 +207,10 @@ test('a click spawns exactly one word from the configured pool', () =>
 test('each click gets a fresh random colour', () =>
   withEffect((dom) => {
     const colors = new Set<string>();
+    // Spread the spots out: clicks at the same place inside the duplicate
+    // window collapse into one word (see the duplicate-trigger tests below).
     for (let i = 0; i < 40; i++) {
-      dom.press(i, i);
+      dom.press(i * 40, 60);
       const layer = layerOf(dom.root);
       colors.add(String(layer.children[layer.children.length - 1].style.color));
     }
@@ -262,13 +264,14 @@ test('clicks cancel on motion/visibility changes and cannot resume after transit
 
     dom.root.dataset.motion = 'lively';
     dom.documentEvents.dispatchEvent(new Event('visibilitychange'));
-    dom.press();
+    // A different spot: same-spot clicks inside the duplicate window collapse.
+    dom.press(120, 140);
     assert.equal(dom.flights.length, 2);
 
     dom.documentEvents.hidden = true;
     dom.documentEvents.dispatchEvent(new Event('visibilitychange'));
     assert.ok(dom.flights.every((flight) => flight.cancelCount === 1));
-    dom.press();
+    dom.press(240, 260);
     assert.equal(dom.flights.length, 2);
   }));
 
@@ -320,4 +323,37 @@ test('re-running setup replaces the handler instead of stacking one', () =>
     setupClickText(TEST_CONFIG);
     dom.press(50, 60);
     assert.equal(dom.flights.length, 1);
+  }));
+
+test('two click events for one press at the same spot collapse into a single word', () =>
+  withEffect((dom) => {
+    // One physical press, two events (a leftover listener or a device that
+    // double-fires). Both used to spawn a word on top of the other.
+    dom.press(320, 460, 0, null);
+    dom.press(320, 460, 0, null);
+    assert.equal(dom.flights.length, 1);
+    assert.equal(layerOf(dom.root).children.length, 1);
+  }));
+
+test('clicks a little apart still each spawn a word', () =>
+  withEffect((dom) => {
+    dom.press(100, 100);
+    dom.press(200, 160);
+    assert.equal(dom.flights.length, 2);
+  }));
+
+test('the duplicate window lives on the document so a second module copy shares it', () =>
+  withEffect((dom) => {
+    // Module-scope state would not help when HMR/a second registration leaves
+    // another copy of this module listening; document state does.
+    type Host = { __clickTextTrigger?: { at: number; x: number; y: number } };
+    const host = dom.documentEvents as unknown as Host;
+    assert.equal(host.__clickTextTrigger, undefined);
+
+    dom.press(30, 40);
+    const state = host.__clickTextTrigger;
+    assert.ok(state, 'expected the trigger window to be recorded on the document');
+    assert.equal(state.x, 30);
+    assert.equal(state.y, 40);
+    assert.equal(typeof state.at, 'number');
   }));

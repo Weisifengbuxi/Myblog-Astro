@@ -19,6 +19,9 @@
  * <html> so it survives ClientRouter swaps, carries a view-transition-name while
  * words are airborne so a navigation shows it live rather than frozen, and holds
  * still while the page itself is frozen.
+ *
+ * One press must produce one word: duplicate `click` events for the same spot
+ * inside a short window are swallowed (see {@link isDuplicateTrigger}).
  */
 
 import type { ResolvedClickShowTextConfig } from '@lib/config/types';
@@ -32,6 +35,43 @@ import { readMotionLevel, subscribeMotionLevel } from '@lib/motion-level';
 const EXCLUDED = 'input, textarea, select, [contenteditable="true"], [data-no-click-text]';
 const LAYER_NAME = 'click-text';
 const LAYER_CLASS = 'click-text-layer';
+
+/**
+ * Duplicate-click window.
+ *
+ * One physical press can deliver two `click` events — a second listener left by
+ * an earlier registration or a second copy of this module after HMR, a device
+ * that double-fires, or a doubled dispatch. Both would spawn a word on top of
+ * the other, which reads as "the word appears twice".
+ *
+ * The window is stored **on the document**, not in module scope: two copies of
+ * this module each keep their own variables, so only shared state can collapse
+ * a duplicate that comes from the other copy.
+ */
+const DUPLICATE_TRIGGER_MS = 180;
+const DUPLICATE_TRIGGER_SLOP_PX = 12;
+const TRIGGER_STATE_KEY = '__clickTextTrigger';
+
+interface TriggerState {
+  at: number;
+  x: number;
+  y: number;
+}
+
+/** True when this trigger duplicates one handled moments ago at the same spot. */
+function isDuplicateTrigger(x: number, y: number): boolean {
+  const host = document as unknown as Record<string, TriggerState | undefined>;
+  const now = typeof performance?.now === 'function' ? performance.now() : Date.now();
+  const previous = host[TRIGGER_STATE_KEY];
+  const duplicate =
+    previous !== undefined &&
+    now - previous.at < DUPLICATE_TRIGGER_MS &&
+    Math.abs(x - previous.x) <= DUPLICATE_TRIGGER_SLOP_PX &&
+    Math.abs(y - previous.y) <= DUPLICATE_TRIGGER_SLOP_PX;
+
+  host[TRIGGER_STATE_KEY] = { at: now, x, y };
+  return duplicate;
+}
 
 let layer: HTMLDivElement | null = null;
 const flights = new Set<Animation>();
@@ -221,13 +261,16 @@ export function setupClickText(options: ResolvedClickShowTextConfig): void {
     // coordinates; fall back to that element's centre so the word still lands
     // somewhere sensible. Everything else — links, buttons and **blank areas** —
     // uses the pointer position, which is why no INTERACTIVE filter is applied.
-    const hasPoint = event.clientX !== 0 || event.clientY !== 0;
-    if (hasPoint || !(target instanceof Element)) {
-      floatWordAt(event.clientX, event.clientY);
-      return;
+    let { clientX: x, clientY: y } = event;
+    if (x === 0 && y === 0 && target instanceof Element) {
+      const rect = target.getBoundingClientRect();
+      x = rect.left + rect.width / 2;
+      y = rect.top + rect.height / 2;
     }
-    const rect = target.getBoundingClientRect();
-    floatWordAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+    // One word per press: a duplicate `click` for the same spot is swallowed.
+    if (isDuplicateTrigger(x, y)) return;
+    floatWordAt(x, y);
   };
 
   const onBeforeSwap = (event: Event) => holdClickText((event as { viewTransition: ViewTransition }).viewTransition);
