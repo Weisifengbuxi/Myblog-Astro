@@ -1196,6 +1196,9 @@ comment:
   #   - 数据库连接串存在 **Vercel 项目的环境变量 MONGODB_URI** 里（不在本仓库，
   #     也不要提交进仓库）；换库/换密码时在那里改完必须 Redeploy 才生效。
   #   - Atlas 的 Network Access 需要放行 0.0.0.0/0（Vercel 出口 IP 不固定）。
+  #   - 前端版本要与云函数版本一致，否则 Twikoo 后台会提示「前端版本 x / 云函数版本 y」：
+  #     云函数（Vercel）当前 1.7.9，所以 package.json 里 twikoo 精确锁到 1.7.9。
+  #     升级时两边一起升（Vercel 重新部署时记得取消勾选 Use existing Build Cache）。
   #
   # 关于旧评论数据：旧集群（...pvbnhes.mongodb.net）已不存在，老评论需从备份导入。
   # 另外文章的规范地址已由 /posts/<abbrlink>.html 变为 /post/<abbrlink>，
