@@ -1,10 +1,10 @@
 {
   "statistical_data": {
     "friends_num": 17,
-    "active_num": 14,
-    "error_num": 3,
-    "article_num": 255,
-    "last_updated_time": "2026-10-14 10:50:37"
+    "active_num": 13,
+    "error_num": 4,
+    "article_num": 254,
+    "last_updated_time": "2026-10-14 15:46:28"
   },
   "article_data": [
     {
@@ -15,6 +15,13 @@
       "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
     },
     {
+      "title": "网站链接分享没预览图？og 标签设置指南",
+      "created": "2026-10-14 02:30",
+      "link": "https://mfy-lifeline.com/posts/77ee308b/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
+    {
       "title": "说说广场 API 0.31.0 版的调用代码说明",
       "created": "2026-10-13 16:00",
       "link": "https://dusays.com/posts/893/",
@@ -22,11 +29,25 @@
       "avatar": "https://cdn.dusays.com/favicon.ico"
     },
     {
+      "title": "GEO 决策证据：让 AI 推荐后真正成交的关键",
+      "created": "2026-10-13 04:10",
+      "link": "https://mfy-lifeline.com/posts/0055d24e/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
+    {
       "title": "OpenCode 网页端新版后台如何获取 API key",
       "created": "2026-10-13 02:35",
       "link": "https://blog.zhheo.com/p/id68ti5q.html",
       "author": "张洪Heo",
       "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
+    },
+    {
+      "title": "我给外贸独立站做 AI 询盘助手时，怎么让 LLM 不胡说（RAG/提示工程/合规擦除实录）",
+      "created": "2026-10-12 04:00",
+      "link": "https://mfy-lifeline.com/posts/5242d200/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "Redis vs Valkey：性能实测对比 + 无缝迁移指南",
@@ -176,13 +197,6 @@
       "avatar": "https://blog.liushen.fun/info/avatar.ico"
     },
     {
-      "title": "欢迎使用 Typecho",
-      "created": "2026-09-05 17:47",
-      "link": "https://xiedada.net/blog/1.html",
-      "author": "谢大大",
-      "avatar": "https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/youlian1.jpg"
-    },
-    {
       "title": "Web 应用常见漏洞与防御:OWASP Top 10 实战讲解",
       "created": "2026-09-04 16:00",
       "link": "https://dusays.com/posts/886/",
@@ -330,7 +344,7 @@
       "avatar": "https://cdn.dusays.com/favicon.ico"
     },
     {
-      "title": "短信接口安全加固：常见风险与防御实践",
+      "title": "独立站短信与验证码安全：注册验证、营销短信合规与防护",
       "created": "2026-08-11 14:28",
       "link": "https://mfy-lifeline.com/posts/2aea9a81/",
       "author": "Lifeline",
@@ -391,13 +405,6 @@
       "link": "https://blog.liushen.fun/posts/b404081c/",
       "author": "LiuShen",
       "avatar": "https://blog.liushen.fun/info/avatar.ico"
-    },
-    {
-      "title": "LifelineVerve · 恒线智讯",
-      "created": "2026-08-06 12:07",
-      "link": "https://mfy-lifeline.com/posts/96fe089a/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "Arch Linux 下让 Sunshine 接管 SDDM：X11 捕获、服务交接与多显示器触控适配",
@@ -491,7 +498,7 @@
       "avatar": "https://blog.yvyang.top/favicon.webp"
     },
     {
-      "title": "知识库搭建随笔复盘",
+      "title": "外贸团队知识库：用 AI 沉淀产品、客户与话术资产",
       "created": "2026-07-15 11:33",
       "link": "https://mfy-lifeline.com/posts/c70de62d/",
       "author": "Lifeline",
@@ -580,20 +587,6 @@
       "link": "https://dusays.com/posts/874/",
       "author": "Teacher Du",
       "avatar": "https://cdn.dusays.com/favicon.ico"
-    },
-    {
-      "title": "如何排查 AI 编程助手 Skill 故障并规范安全上线",
-      "created": "2026-06-19 08:25",
-      "link": "https://mfy-lifeline.com/posts/fe9f2465/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
-    },
-    {
-      "title": "如何管理 Claude Skill 版本迭代与团队协作配置",
-      "created": "2026-06-19 08:23",
-      "link": "https://mfy-lifeline.com/posts/6cae7b2c/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "Subconverter 太臃肿？PHP 版轻量化替代来了！",
