@@ -424,10 +424,6 @@
     animation: none;
   }
 
-  .ab-skill-track {
-    animation: none;
-  }
-
   .ab-tile,
   .ab-tile img {
     transition: none;
@@ -435,6 +431,22 @@
 
   .ab-tile:hover img {
     transform: none;
+  }
+}
+
+/*
+  技能轮播是个刻意的例外：它是"内容展示"（两排图标，悬停卡片才换成全部技能面板），
+  而静态停在 translateX(0) 时左右两边正好各裁掉半个方块，看着像坏了。
+  所以 —— 设置里选「减弱」时**照常滚动**；但**系统**的「减少动态效果」仍然让它停住
+  （无障碍优先，这个原则我们之前定过）。
+  用 prefers-reduced-motion: no-preference 区分这两种情况：系统没要求减动效时才放开。
+*/
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion="reduced"] .ab-skill-track {
+    /* motion.css 用 !important 把动效压到 0.01ms / 播放 1 次，这里要压回去 */
+    animation-duration: 30s !important;
+    animation-iteration-count: infinite !important;
+    will-change: transform !important;
   }
 }
 /* ── 生涯 ─────────────────────────────────────────────────────
