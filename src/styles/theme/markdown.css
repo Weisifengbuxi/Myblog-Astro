@@ -1030,6 +1030,14 @@ html[data-font-preset="wenkai"] .prose :is(h1, h2, h3, h4, h5, h6) {
   font-family: "LXGW WenKai", "LXGW WenKai Screen", "寒蝉全圆体", serif;
 }
 
+/* 钉钉进步体自托管在 public/fonts/DingTalkJinBuTi（懒加载，见 settings-constants）。 */
+html[data-font-preset="dingtalk"] .prose,
+html[data-font-preset="dingtalk"] .prose :is(h1, h2, h3, h4, h5, h6) {
+  font-family:
+    "DingTalk JinBuTi", "寒蝉全圆体", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei",
+    sans-serif;
+}
+
 html[data-reader-font="local"]:not(:lang(ja)) .prose,
 html[data-reader-font="local"]:not(:lang(ja)) .prose :is(h1, h2, h3, h4, h5, h6) {
   font-family:

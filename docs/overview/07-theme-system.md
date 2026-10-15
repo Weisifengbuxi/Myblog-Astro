@@ -16,7 +16,7 @@ astro-koharu 实现了完整的深色/浅色主题切换功能，包括：
 
 ### 整体流程
 
-```
+```plain
 ┌─────────────────────────────────────────────────────────────┐
 │                    主题系统工作流程                          │
 └─────────────────────────────────────────────────────────────┘
@@ -67,6 +67,10 @@ astro-koharu 实现了完整的深色/浅色主题切换功能，包括：
 ### 解决方案：内联脚本
 
 在 `Layout.astro` 的 `<head>` 中使用 `is:inline` 脚本：
+
+> **本站的差异**：本站默认主题是**深色**，不再跟随系统偏好 —— `BootScripts.astro` 里的
+> `getTheme()` 只在 `localStorage.theme === 'light'` 时返回 `light`，其余情况一律 `dark`。
+> 下面这段是上游主题的写法（跟随 `prefers-color-scheme`），仅作原理参考。
 
 ```astro
 <!-- src/layouts/Layout.astro -->
@@ -305,7 +309,7 @@ document.addEventListener('astro:page-load', setupThemeToggle);
 
 ### 动画效果图
 
-```
+```plain
 浅色模式（太阳）              深色模式（月亮）
     ·  ·  ·                     ╭──────╮
    ·  ╭──╮  ·                  │      │
@@ -357,7 +361,7 @@ document.addEventListener('astro:page-load', setupThemeToggle);
 
 ### 动画原理
 
-```
+```plain
 1. 点击切换按钮
    ┌─────────────────────┐
    │                     │
@@ -539,7 +543,7 @@ toggleBtn.addEventListener('keydown', (e) => {
 1. **FOUC 防护**：使用 `is:inline` 脚本在渲染前设置主题
 2. **View Transitions API**：实现圆形扩散动画效果
 3. **localStorage**：持久化用户主题偏好
-4. **系统主题跟随**：使用 `prefers-color-scheme` 媒体查询
+4. **主题默认值**：本站默认深色，用户手动选择（`localStorage.theme`）优先
 5. **Astro 兼容**：监听 `astro:page-load` 事件
 6. **CSS box-shadow**：创建太阳/月亮图标动画
 7. **CSS 变量**：实现主题色统一管理

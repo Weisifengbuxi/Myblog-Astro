@@ -367,6 +367,8 @@ comment:
 
 使用字体[寒蝉全圆体](https://chinese-font.netlify.app/zh-cn/fonts/hcqyt/ChillRoundFRegular)
 
+「钉钉体」预设使用[钉钉进步体](https://page.dingtalk.com/wow/dingtalk/act/font)（钉钉免费商用字体），unicode-range 切片取自[中文网字计划](https://chinese-font.netlify.app/)，自托管在 `public/fonts/DingTalkJinBuTi/`。
+
 感谢以下项目对 astro-koharu 的开发提供的灵感及参考：
 
 - [mx-space](https://github.com/mx-space)

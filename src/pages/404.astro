@@ -360,10 +360,10 @@ const DEBUG_CAT_STATE = false;
     text-align: center;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .fade-text {
-      color: #aaa;
-    }
+  /* 跟随站点主题（BootScripts 写在 <html> 上的 .dark），不再看系统偏好：
+     站点默认就是深色，用 prefers-color-scheme 会和页面实际主题对不上。 */
+  :global(.dark) .fade-text {
+    color: #aaa;
   }
   
   .actions {
@@ -409,26 +409,24 @@ const DEBUG_CAT_STATE = false;
     transform: translateY(-2px) scale(1.02);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .home-btn {
-      background: linear-gradient(135deg, rgba(241, 139, 179, 0.9) 0%, rgba(240, 163, 135, 0.9) 100%);
-      box-shadow: 0 2px 8px rgba(241, 139, 179, 0.3);
-    }
+  :global(.dark) .home-btn {
+    background: linear-gradient(135deg, rgba(241, 139, 179, 0.9) 0%, rgba(240, 163, 135, 0.9) 100%);
+    box-shadow: 0 2px 8px rgba(241, 139, 179, 0.3);
+  }
 
-    .home-btn:hover {
-      box-shadow: 0 6px 20px rgba(241, 139, 179, 0.4);
-    }
+  :global(.dark) .home-btn:hover {
+    box-shadow: 0 6px 20px rgba(241, 139, 179, 0.4);
+  }
 
-    .archive-btn {
-      background: linear-gradient(135deg, rgba(241, 139, 179, 0.08) 0%, rgba(240, 163, 135, 0.08) 100%);
-      color: #f18bb3;
-      border-color: rgba(241, 139, 179, 0.3);
-    }
+  :global(.dark) .archive-btn {
+    background: linear-gradient(135deg, rgba(241, 139, 179, 0.08) 0%, rgba(240, 163, 135, 0.08) 100%);
+    color: #f18bb3;
+    border-color: rgba(241, 139, 179, 0.3);
+  }
 
-    .archive-btn:hover {
-      background: linear-gradient(135deg, rgba(241, 139, 179, 0.18) 0%, rgba(240, 163, 135, 0.18) 100%);
-      border-color: rgba(241, 139, 179, 0.5);
-    }
+  :global(.dark) .archive-btn:hover {
+    background: linear-gradient(135deg, rgba(241, 139, 179, 0.18) 0%, rgba(240, 163, 135, 0.18) 100%);
+    border-color: rgba(241, 139, 179, 0.5);
   }
 
 /* Browser support for d: path() animation is generally good in modern browsers (Chrome/Safari/Firefox). */

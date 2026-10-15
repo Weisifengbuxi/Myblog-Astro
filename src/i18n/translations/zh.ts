@@ -262,6 +262,7 @@ export const uiStrings = {
   'settings.fontPreset.system': '系统黑体',
   'settings.fontPreset.serif': '衬线',
   'settings.fontPreset.wenkai': '文楷',
+  'settings.fontPreset.dingtalk': '钉钉体',
   'settings.fontPreset.local': '本机字体',
   'settings.localFont.title': '选择本机字体',
   'settings.localFont.description': '为文章正文选择这台设备上安装的字体',

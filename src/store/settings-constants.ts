@@ -1,12 +1,12 @@
 /**
- * Settings defaults, localStorage keys, and WenKai font metadata.
+ * Settings defaults, localStorage keys, and on-demand webfont metadata.
  *
  * Single source of truth shared by the settings store and the FOUC-prevention script in
  * Layout.astro. Kept free of nanostores so Layout.astro can import it at build time without
  * pulling store side effects into the SSR bundle.
  */
 
-export const FONT_PRESETS = ['round', 'system', 'serif', 'wenkai'] as const;
+export const FONT_PRESETS = ['round', 'system', 'serif', 'wenkai', 'dingtalk'] as const;
 export type FontPreset = (typeof FONT_PRESETS)[number];
 
 export const READER_DEFAULTS = {
@@ -46,6 +46,14 @@ export const STORAGE_KEYS = {
   wave: 'site-wave',
 } as const;
 
-/** WenKai WebFont loaded on demand from jsDelivr; see docs/adr/0003. */
-export const WENKAI_STYLESHEET_ID = 'lxgw-wenkai-webfont';
-export const WENKAI_STYLESHEET_HREF = 'https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css';
+/**
+ * Webfonts injected on demand: nothing is requested until the matching preset is selected.
+ *
+ * - `wenkai`（霞鹜文楷）来自 jsDelivr 的官方 webfont 包。
+ * - `dingtalk`（钉钉进步体）自托管在 `public/fonts/DingTalkJinBuTi/`：文件的 unicode-range
+ *   切片是渐进的（只下载页面真正用到的字形块），且不受 jsDelivr 在国内不可达的影响。
+ */
+export const FONT_STYLESHEETS: Partial<Record<FontPreset, { id: string; href: string }>> = {
+  wenkai: { id: 'lxgw-wenkai-webfont', href: 'https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css' },
+  dingtalk: { id: 'dingtalk-jinbuti-webfont', href: '/fonts/DingTalkJinBuTi/result.css' },
+};

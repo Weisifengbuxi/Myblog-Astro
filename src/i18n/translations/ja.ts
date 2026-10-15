@@ -264,6 +264,7 @@ export const uiStrings: UIStrings = {
   'settings.fontPreset.system': 'システム',
   'settings.fontPreset.serif': 'セリフ',
   'settings.fontPreset.wenkai': '文楷',
+  'settings.fontPreset.dingtalk': 'DingTalk JinBuTi',
   'settings.fontPreset.local': 'ローカルフォント',
   'settings.localFont.title': 'ローカルフォントを選択',
   'settings.localFont.description': 'この端末にインストールされているフォントを本文に使用します',

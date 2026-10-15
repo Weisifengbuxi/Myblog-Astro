@@ -263,6 +263,7 @@ export const uiStrings: UIStrings = {
   'settings.fontPreset.system': 'System',
   'settings.fontPreset.serif': 'Serif',
   'settings.fontPreset.wenkai': 'WenKai',
+  'settings.fontPreset.dingtalk': 'DingTalk JinBuTi',
   'settings.fontPreset.local': 'Local font',
   'settings.localFont.title': 'Choose a local font',
   'settings.localFont.description': 'Choose an installed font for article text on this device',

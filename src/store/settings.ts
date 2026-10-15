@@ -13,14 +13,13 @@ import { atom } from 'nanostores';
 import { closeBgmPanel } from './bgm';
 import {
   FONT_PRESETS,
+  FONT_STYLESHEETS,
   type FontPreset,
   GENERAL_DEFAULTS,
   READER_DEFAULTS,
   READER_FONT_FAMILY_MAX_LENGTH,
   REDUCED_MOTION_QUERY,
   STORAGE_KEYS,
-  WENKAI_STYLESHEET_HREF,
-  WENKAI_STYLESHEET_ID,
 } from './settings-constants';
 
 export type { FontPreset };
@@ -41,15 +40,16 @@ export const motionLevel = atom<MotionLevel>('lively');
 export const waveEnabled = atom<boolean>(GENERAL_DEFAULTS.wave);
 
 /**
- * Insert the WenKai stylesheet once when that preset is first selected.
+ * Insert the selected preset's webfont stylesheet once (only WenKai and DingTalk ship one).
  */
-function loadWenkaiFont(): void {
+function loadFontStylesheet(preset: FontPreset): void {
   if (typeof document === 'undefined') return;
-  if (document.getElementById(WENKAI_STYLESHEET_ID)) return;
+  const sheet = FONT_STYLESHEETS[preset];
+  if (!sheet || document.getElementById(sheet.id)) return;
   const link = document.createElement('link');
-  link.id = WENKAI_STYLESHEET_ID;
+  link.id = sheet.id;
   link.rel = 'stylesheet';
-  link.href = WENKAI_STYLESHEET_HREF;
+  link.href = sheet.href;
   document.head.appendChild(link);
 }
 
@@ -112,7 +112,7 @@ export function setFontPreset(preset: FontPreset): void {
   readerFontFamily.set(null);
   persist(STORAGE_KEYS.fontPreset, preset);
   removePersisted(STORAGE_KEYS.fontFamily);
-  if (preset === 'wenkai') loadWenkaiFont();
+  loadFontStylesheet(preset);
   applyReaderPreferences();
 }
 
@@ -233,7 +233,8 @@ export function initSettings(): void {
   const storedPreset = localStorage.getItem(STORAGE_KEYS.fontPreset);
   if (storedPreset && FONT_PRESETS.includes(storedPreset as FontPreset)) {
     readerFontPreset.set(storedPreset as FontPreset);
-    if (storedPreset === 'wenkai' && !fontFamily) loadWenkaiFont();
+    // A custom local family overrides the preset, so its webfont is not needed.
+    if (!fontFamily) loadFontStylesheet(storedPreset as FontPreset);
   }
   readerFontSize.set(readPositiveNumber(STORAGE_KEYS.fontSize, READER_DEFAULTS.fontSize));
   readerLineHeight.set(readPositiveNumber(STORAGE_KEYS.lineHeight, READER_DEFAULTS.lineHeight));

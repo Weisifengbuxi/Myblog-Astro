@@ -262,6 +262,7 @@ export const uiStrings = {
   'settings.fontPreset.system': '시스템 고딕체',
   'settings.fontPreset.serif': '명조체',
   'settings.fontPreset.wenkai': 'Wenkai체',
+  'settings.fontPreset.dingtalk': 'DingTalk JinBuTi',
   'settings.fontPreset.local': '로컬 글꼴',
   'settings.localFont.title': '로컬 글꼴 선택',
   'settings.localFont.description': '본문용 글꼴을 이 기기에 설치된 글꼴 중에서 선택해 주세요',

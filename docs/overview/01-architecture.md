@@ -282,12 +282,9 @@ import '@styles/index.css'; // 全局样式
     <!-- 4. View Transitions -->
     <ClientRouter />
 
-    <!-- 5. 主题初始化（防止闪屏） -->
+    <!-- 5. 主题初始化（防止闪屏；本站默认深色，只有手动选过浅色才是浅色） -->
     <script is:inline>
-      if (
-        localStorage.theme === 'dark' ||
-        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
-      ) {
+      if (localStorage.theme !== 'light') {
         document.documentElement.classList.add('dark');
       }
     </script>
