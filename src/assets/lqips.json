@@ -10,10 +10,11 @@
   "background.jpg": "514b85444880805e93",
   "avatar.webp": "d8bcc1d8a8b8a08998",
   "avatar.jpg": "205671265870234d5f",
-  "cover/tools.webp": "42437d3c437a805d8f",
+  "effects/holo.webp": "0d14250f15250c1118",
+  "cover/tools.webp": "858c9b666e7f515b6d",
   "cover/theory.webp": "6c76825b5e6ea38879",
   "cover/note.webp": "287eb2257aacc1b2b0",
-  "cover/life.webp": "858c9b666e7f515b6d",
+  "cover/life.webp": "42437d3c437a805d8f",
   "cover/code.webp": "d9dfe8c0c8d6c2cfe3",
   "cover/9.webp": "6e6fa27a7aad9cb1dd",
   "cover/8.webp": "6e9dbe6383ac597da3",
@@ -35,6 +36,5 @@
   "cover/12.webp": "cedceac8d9e8bacfe5",
   "cover/11.webp": "c7d3e4c5d2e6cbcedb",
   "cover/10.webp": "bfd0fea69fe8999bc3",
-  "cover/1.webp": "87a3c4c2dfefbddae9",
-  "effects/holo.webp": "0d14250f15250c1118"
+  "cover/1.webp": "87a3c4c2dfefbddae9"
 }
