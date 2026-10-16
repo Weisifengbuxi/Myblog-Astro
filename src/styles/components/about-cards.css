@@ -534,16 +534,10 @@
   display: flex;
   gap: 0.35rem;
   align-items: center;
-  margin: auto 0 0;
+  /* 与上面六项数据拉开距离，让这一行更靠卡片底部（原先 margin-top: auto，实际紧贴数据区） */
+  margin: 1.25rem 0 0;
   font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
-}
-
-/* 兜底提示：取不到新数据、显示的是缓存值时出现 */
-.ab-stat-note {
-  margin: 0.4rem 0 0;
-  font-size: 0.75rem;
-  color: hsl(var(--primary));
 }
 
 /* 胶囊按钮 */
