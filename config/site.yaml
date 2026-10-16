@@ -118,7 +118,7 @@ featuredCategories:
     description: 计算机组成原理、数据结构与算法等课程笔记
   - link: note/code
     label: 代码学习
-    image: /img/cover/1.webp
+    image: /img/cover/code.webp
     description: Java 数据结构、链表栈队列与递归
   - link: note/theory
     label: 理论学习
@@ -130,7 +130,7 @@ featuredCategories:
     description: 博客美化、CDN 加速与效率工具
   - link: life
     label: 生活日常
-    image: /img/cover/2.webp
+    image: /img/cover/life.webp
     description: 生活记录、随想与见闻
 # =============================================================================
 # Featured Series
