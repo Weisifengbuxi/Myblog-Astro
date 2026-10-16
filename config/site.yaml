@@ -114,7 +114,7 @@ categoryMap:
 featuredCategories:
   - link: note
     label: 学习笔记
-    image: /img/cover/4.webp
+    image: /img/cover/note.webp
     description: 计算机组成原理、数据结构与算法等课程笔记
   - link: note/code
     label: 代码学习
@@ -122,11 +122,11 @@ featuredCategories:
     description: Java 数据结构、链表栈队列与递归
   - link: note/theory
     label: 理论学习
-    image: /img/cover/7.webp
+    image: /img/cover/theory.webp
     description: 逻辑门电路、计算机组成原理等理论笔记
   - link: tools
     label: 工具
-    image: /img/cover/11.webp
+    image: /img/cover/tools.webp
     description: 博客美化、CDN 加速与效率工具
   - link: life
     label: 生活日常
