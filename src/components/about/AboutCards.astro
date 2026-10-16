@@ -244,6 +244,8 @@ const tenyearEnd = formatTenYearDate(tenyear.end);
       <Icon name="ri:shield-check-line" />
       <span>数据来自 51LA</span>
     </p>
+    <!-- 取不到新数据时的兜底提示（51LA 挂件曾因证书过期整段加载不了），由脚本填充 -->
+    <p class="ab-stat-note" data-stat-note hidden></p>
     <a class="ab-button" href="/archives">
       <Icon name="ri:arrow-right-circle-line" />
       <span>文章统计</span>

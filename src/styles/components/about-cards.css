@@ -539,6 +539,13 @@
   color: hsl(var(--muted-foreground));
 }
 
+/* 兜底提示：取不到新数据、显示的是缓存值时出现 */
+.ab-stat-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: hsl(var(--primary));
+}
+
 /* 胶囊按钮 */
 .ab-button {
   display: inline-flex;

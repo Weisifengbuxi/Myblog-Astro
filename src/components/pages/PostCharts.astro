@@ -148,6 +148,8 @@ const summary = [
     <p class="charts-source">
       访问数据来自 51LA 数据挂件；其余为构建时统计 · 最后更新 {lastUpdated}
     </p>
+    <!-- 取不到新数据时的兜底提示（51LA 挂件曾因证书过期整段加载不了），由脚本填充 -->
+    <p class="charts-note" data-stat-note hidden></p>
   </section>
 
   <section class="charts-block">
@@ -284,6 +286,13 @@ const summary = [
     margin: 1rem 0 0;
     font-size: 0.72rem;
     opacity: 0.5;
+  }
+
+  .charts-note {
+    margin: 0.4rem 0 0;
+    font-size: 0.72rem;
+    color: hsl(var(--primary));
+    opacity: 0.85;
   }
 
   .charts-block + .charts-block {
