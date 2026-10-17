@@ -1,5 +1,6 @@
 ---
 import type { FriendLink } from '@constants/friends-config';
+import { toSecureUrl } from '@lib/url';
 import { normalizeHexColor } from '@lib/utils';
 import { Icon } from 'astro-icon/components';
 
@@ -8,6 +9,8 @@ interface Props {
 }
 
 const { friend } = Astro.props;
+// 友链头像来自别人的站点，写 http:// 会让整页被浏览器标成「不安全」
+const avatar = toSecureUrl(friend.image);
 ---
 
 <a
@@ -30,10 +33,10 @@ const { friend } = Astro.props;
         <circle cx="80" cy="55" r="6" />
       </g>
     </svg>
-    {friend.image && (
+    {avatar && (
       <>
-        <img data-friend-src={friend.image} alt="" width="56" height="56" loading="lazy" decoding="async" class="relative size-full object-cover" data-friend-avatar hidden />
-        <noscript><img src={friend.image} alt="" width="56" height="56" loading="lazy" decoding="async" class="relative size-full object-cover" /></noscript>
+        <img data-friend-src={avatar} alt="" width="56" height="56" loading="lazy" decoding="async" class="relative size-full object-cover" data-friend-avatar hidden />
+        <noscript><img src={avatar} alt="" width="56" height="56" loading="lazy" decoding="async" class="relative size-full object-cover" /></noscript>
       </>
     )}
   </span>

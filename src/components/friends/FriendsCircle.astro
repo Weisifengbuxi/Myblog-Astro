@@ -15,6 +15,7 @@
 import { fcircleConfig } from '@constants/site-config';
 import { getFcircleData } from '@lib/fcircle/data';
 import { type FcirclePost, formatRelative } from '@lib/fcircle/types';
+import { toSecureUrl } from '@lib/url';
 import { Icon } from 'astro-icon/components';
 
 const { posts: allPosts, stat } = getFcircleData();
@@ -78,7 +79,9 @@ const initial = (name: string) => name.trim().slice(0, 1) || '友';
             <a class="fcircle-link" href={post.link} target="_blank" rel="noopener noreferrer" title={post.title}>
               <span class="fcircle-avatar">
                 {post.avatar ? (
-                  <img src={post.avatar} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                  // 朋友圈头像来自定时抓取的 all.json，别人的 RSS 里写 http:// 时
+                  // 会让整页被浏览器标成「不安全」——渲染时统一升级成 https
+                  <img src={toSecureUrl(post.avatar)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
                 ) : (
                   <span class="fcircle-avatar-fallback" aria-hidden="true">
                     {initial(post.author)}
