@@ -51,6 +51,15 @@ const isPostPage = stripLocaleFromPath(Astro.url.pathname).startsWith('/post/');
 <!doctype html>
 <html transition:name="root" transition:animate={pageTransition} lang={getHtmlLang(locale)}>
   <head>
+    <!--
+      让浏览器把页面里的 http:// 子资源自动升级成 https://。
+      站点是纯 HTTPS，但头像这类资源来自别人家（友链 config、朋友圈定时抓取的
+      public/fcircle/all.json），一旦漏进一个 http 链接，浏览器就会把整页标成
+      「不安全」（混合内容警告）。代码侧已在渲染时用 toSecureUrl() 兜底，这里再
+      加一层浏览器级的保险 —— 只升级、不阻断，http-only 的资源会加载失败而不是
+      污染整个页面的安全状态。
+    -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     <HeadMeta meta={meta} />
 
     <ClientRouter />
