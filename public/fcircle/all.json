@@ -1,18 +1,46 @@
 {
   "statistical_data": {
     "friends_num": 17,
-    "active_num": 13,
-    "error_num": 4,
-    "article_num": 254,
-    "last_updated_time": "2026-10-17 19:50:10"
+    "active_num": 14,
+    "error_num": 3,
+    "article_num": 255,
+    "last_updated_time": "2026-10-18 02:03:59"
   },
   "article_data": [
+    {
+      "title": "谷歌SEO新手该用哪些工具",
+      "created": "2026-10-17 14:10",
+      "link": "https://mfy-lifeline.com/posts/cf9e2cfd/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
+    {
+      "title": "老站做GEO，旧SEO内容要重写吗",
+      "created": "2026-10-17 08:30",
+      "link": "https://mfy-lifeline.com/posts/6de28ddf/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
     {
       "title": "说说广场 API 0.31.0 版的调用代码说明",
       "created": "2026-10-16 16:00",
       "link": "https://dusays.com/posts/893/",
       "author": "Teacher Du",
       "avatar": "https://cdn.dusays.com/favicon.ico"
+    },
+    {
+      "title": "外链暴涨别慌，也别买发链工具",
+      "created": "2026-10-16 09:30",
+      "link": "https://mfy-lifeline.com/posts/b7e4f1a9/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
+    {
+      "title": "GEO 实操：让 AI 引擎稳定收录并推荐你的品牌",
+      "created": "2026-10-16 07:30",
+      "link": "https://mfy-lifeline.com/posts/6f2a8c3e/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "独立站被爬虫刷爆带宽？拦截实操与 GEO 避坑",
@@ -204,6 +232,13 @@
       "avatar": "https://blog.liushen.fun/info/avatar.ico"
     },
     {
+      "title": "欢迎使用 Typecho",
+      "created": "2026-09-05 17:47",
+      "link": "https://xiedada.net/blog/1.html",
+      "author": "谢大大",
+      "avatar": "https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Weisifengbuxi/tuchuang@main/img/youlian1.jpg"
+    },
+    {
       "title": "Web 应用常见漏洞与防御:OWASP Top 10 实战讲解",
       "created": "2026-09-04 16:00",
       "link": "https://dusays.com/posts/886/",
@@ -365,13 +400,6 @@
       "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
-      "title": "GitHub优质开源项目合集",
-      "created": "2026-08-11 14:00",
-      "link": "https://mfy-lifeline.com/posts/e0822f31/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
-    },
-    {
       "title": "从 iGame Center 到 Linux：Colorful CVN Z890 ARK FROZEN RGB 控制器逆向与 Qt 控制台实现",
       "created": "2026-08-11 08:41",
       "link": "https://blog.dimeta.top/archives/cong-igame-center-dao-linux-colorful-cvn-z890-ark-frozen-rgb-kong-zhi-qi-ni-xiang-yu-qt-kong-zhi-tai-shi-xian",
@@ -398,13 +426,6 @@
       "link": "https://blog.dimeta.top/archives/ji-18nian-de-ren-sheng-lu-cheng-gao-kao-luo-mu-zai-yi-han-xing-yun-yu-zhe-teng-zhong-zou-xiang-xia-yi-zhan",
       "author": "洛元",
       "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "本地搭建WordPress开发环境",
-      "created": "2026-08-07 14:50",
-      "link": "https://mfy-lifeline.com/posts/1c83d0aa/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "AxonHub - 多模型API智能路由网关",
@@ -505,13 +526,6 @@
       "avatar": "https://blog.yvyang.top/favicon.webp"
     },
     {
-      "title": "外贸团队知识库：用 AI 沉淀产品、客户与话术资产",
-      "created": "2026-07-15 11:33",
-      "link": "https://mfy-lifeline.com/posts/c70de62d/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
-    },
-    {
       "title": "713解锁节来辣！小米17全系，k90pm又能解bl了",
       "created": "2026-07-13 17:02",
       "link": "https://blog.mcxiaochen.top/posts/mi-unlock-713/",
@@ -538,13 +552,6 @@
       "link": "https://kmar.top/posts/6fea76ad/",
       "author": "山岳库博",
       "avatar": "https://s21.ax1x.com/2025/09/01/pVcHzGt.png"
-    },
-    {
-      "title": "放弃一众竞品最终留下了小米平板8",
-      "created": "2026-07-12 03:16",
-      "link": "https://mfy-lifeline.com/posts/1a7e4f01/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "居家办公 5 个减少分心的动作",
