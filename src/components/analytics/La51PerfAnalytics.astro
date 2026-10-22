@@ -1,0 +1,29 @@
+---
+/**
+ * 51LA 灵雀（LingQue）前端性能监控。
+ *
+ * 官方给的代码是「先加载 SDK、紧接着初始化」两个标签：
+ *   <script src="https://sdk.51.la/perf/js-sdk-perf.min.js" crossorigin="anonymous"></script>
+ *   <script>new LingQue.Monitor().init({ id });</script>
+ *
+ * 两个都用 `is:inline`：SDK 是渲染阻塞的普通脚本，Astro 默认会把它提升并加
+ * `type="module"` / `defer`，那样 `LingQue.Monitor().init()` 会在 SDK 还没加载
+ * 时执行而报错。写法与 La51Analytics（访客统计）保持一致。
+ *
+ * 采集内容：页面加载性能（FP/FCP/LCP、慢资源、白屏）、JS 报错、接口异常；
+ * 数据进 51LA 的「灵雀」面板，与「网站统计」是两个后台。
+ */
+import { analyticsConfig } from '@constants/site-config';
+
+const perf = analyticsConfig.la51?.perf;
+const enabled = perf?.enabled === true && Boolean(perf.id);
+---
+
+{
+  enabled && (
+    <>
+      <script is:inline src="https://sdk.51.la/perf/js-sdk-perf.min.js" crossorigin="anonymous" />
+      <script is:inline set:html={`new LingQue.Monitor().init({id:"${perf.id}"});`} />
+    </>
+  )
+}

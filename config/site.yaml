@@ -1251,6 +1251,14 @@ analytics:
     enabled: true
     id: 3NaU22Pij8KxRC6w
     ck: 3NaU22Pij8KxRC6w
+    # 灵雀（LingQue）前端性能监控 —— 51LA 的另一个产品：采集页面性能
+    # （FP/FCP/LCP、慢资源、白屏）、JS 报错与接口异常，数据进 51LA 的「灵雀」面板。
+    # 与上面的访客统计互不影响（不同 app id、不同后台），可单独开关。
+    # 脚本同样由 La51PerfAnalytics.astro 注入到 </head> 之前，全站生效。
+    # 注意：这个 SDK 是渲染阻塞的普通脚本，会略微影响首屏 —— 不需要就设 enabled: false。
+    perf:
+      enabled: true
+      id: 3NaUCeXWGlWFdg8C
 
 # =============================================================================
 # SEO Configuration

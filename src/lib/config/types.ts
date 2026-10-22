@@ -587,6 +587,16 @@ export interface La51Config {
   id: string;
   /** Channel key (`LA.init({ ck })`); falls back to `id` when omitted. */
   ck?: string;
+  /**
+   * 灵雀（LingQue）前端性能监控 —— 51LA 的另一个产品，独立的 app id、
+   * 独立的后台面板，与上面的访客统计互不影响，可单独开关。
+   * 官方初始化：`new LingQue.Monitor().init({ id })`。
+   */
+  perf?: {
+    enabled: boolean;
+    /** 灵雀应用 id（与访客统计的 id 不同）。 */
+    id: string;
+  };
 }
 
 export interface AnalyticsConfig {
