@@ -98,6 +98,10 @@ export function rehypeShokaAttrs() {
           if (child.type === 'text') {
             textNode = child;
           } else if (child.type === 'element' && child.children.length > 0) {
+            // <code> 的文本是源码（行内代码、数学公式都会渲染成 <code class="language-math …">），
+            // 其中的 {…} 属于内容本身（LaTeX 的 \frac{a}{b}、JS 的对象字面量），
+            // 当成属性块剥掉会把公式截断成 \frac{a} —— 直接跳过这类元素。
+            if (child.tagName === 'code') continue;
             const last = child.children[child.children.length - 1];
             if (last?.type === 'text') textNode = last as Text;
           }
