@@ -520,11 +520,27 @@
     display: table;
     width: 100%;
     margin: 0;
+    /* Typography 默认把表格缩到 0.875em / 0.79em（正文 16px 时 td 只有 12.6px），
+       表格本来就信息密，缩了更累眼 —— 拉到与正文同号 */
+    font-size: 1em;
   }
 
   th,
   td {
+    /* 原来的内边距几乎贴边，加大一点让行与行之间透气 */
+    padding: 0.8em 1.05em;
+    line-height: 1.7;
     text-align: center;
+  }
+
+  thead th {
+    font-size: 1em;
+  }
+
+  tbody td,
+  tfoot td {
+    /* Typography 给 td 单独设了 0.9em，再抬一次与表头对齐 */
+    font-size: 1em;
   }
 
   /* 逃生口：表格后面单独写一段 {.left}，这张表恢复左对齐
@@ -534,10 +550,15 @@
   }
 
   /* 窄屏：撑满整行会把四五列挤成「指/令」这种折行，给个舒服的最小宽度，
-     超出部分交给外层 .table-scroll 横向滑动 */
+     超出部分交给外层 .table-scroll 横向滑动；内边距收一点把宽度让给内容 */
   @media (max-width: 640px) {
     table {
-      min-width: 24rem;
+      min-width: 30rem;
+    }
+
+    th,
+    td {
+      padding: 0.6em 0.75em;
     }
   }
 }
