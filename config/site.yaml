@@ -1344,12 +1344,14 @@ christmas:
 #   label: 导航显示名称（可选，默认：追番）
 #   icon: 导航图标，Iconify 格式（可选，默认：ri:bilibili-fill）
 # -----------------------------------------------------------------------------
-# 已关闭：原博客并未使用 bangumi 功能。
-# 若要启用，取消下面三行注释并把 userId 换成你的 Bangumi 用户名或数字 ID：
-# bangumi:
-#   userId: your-bangumi-id
-#   label: 追番
-#   icon: ri:bilibili-fill
+# 已启用（vmid 451525062）。
+# 说明：本主题只需要**公开的用户 ID**，不需要 access token —— 页面在浏览器里
+# 直接读 `https://api.bgm.tv/v0/users/<userId>/collections`（公开收藏，不涉及
+# 隐私数据）。若访客所在网络把 api.bgm.tv 解析污染了，页面会显示空状态。
+bangumi:
+  userId: 451525062
+  label: 追番
+  icon: ri:bilibili-fill
 # =============================================================================
 # Development Tools (Dev Only)
 # 开发工具配置 - 仅在开发环境（pnpm dev）生效
