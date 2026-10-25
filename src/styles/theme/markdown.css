@@ -508,10 +508,37 @@
     content: none;
   }
 
-  table {
-    display: block;
+  /* 表格：外层 .table-scroll 负责横向滚动，表格本体撑满行宽、单元格居中 */
+  .table-scroll {
+    max-width: 100%;
+    margin-block: 2em;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    display: table;
+    width: 100%;
+    margin: 0;
+  }
+
+  th,
+  td {
+    text-align: center;
+  }
+
+  /* 逃生口：表格后面单独写一段 {.left}，这张表恢复左对齐
+     （属性块会落在包着表格的 .table-scroll 上，所以两种位置都照顾到） */
+  :is(.table-scroll.left, table.left) :is(th, td) {
+    text-align: left;
+  }
+
+  /* 窄屏：撑满整行会把四五列挤成「指/令」这种折行，给个舒服的最小宽度，
+     超出部分交给外层 .table-scroll 横向滑动 */
+  @media (max-width: 640px) {
+    table {
+      min-width: 24rem;
+    }
   }
 }
 

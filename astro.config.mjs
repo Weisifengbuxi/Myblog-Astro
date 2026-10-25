@@ -35,6 +35,7 @@ import { rehypeEncryptedBlock } from './src/lib/markdown/rehype-encrypted-block.
 import { rehypeEncryptedPost } from './src/lib/markdown/rehype-encrypted-post.ts';
 import { rehypeImagePlaceholder } from './src/lib/markdown/rehype-image-placeholder.ts';
 import { rehypeShokaAttrs } from './src/lib/markdown/rehype-shoka-attrs.ts';
+import { rehypeTableScroll } from './src/lib/markdown/rehype-table-scroll.ts';
 import { remarkEncryptedDirective } from './src/lib/markdown/remark-encrypted-directive.ts';
 import { remarkLinkEmbed } from './src/lib/markdown/remark-link-embed.ts';
 import { remarkIns, remarkMark } from './src/lib/markdown/remark-shoka-effects.ts';
@@ -231,6 +232,8 @@ const rehypePlugins = [
 ];
 if (contentConfig.enableShokaAttrs) rehypePlugins.push(rehypeShokaAttrs);
 rehypePlugins.push(rehypeImagePlaceholder);
+// 表格外包一层 .table-scroll，让 table 自身能撑满行宽（横向滚动交给外层）
+rehypePlugins.push(rehypeTableScroll);
 if (contentConfig.enableMath) rehypePlugins.push(rehypeKatex);
 // Encrypted block/post MUST be last rehype plugins — encrypt fully-rendered children
 if (contentConfig.enableEncryptedBlock) {
