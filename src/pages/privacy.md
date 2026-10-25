@@ -201,20 +201,87 @@ comments: false
     setText('userAgentBrowser', pick(browserRules, '未识别'));
 
     // --- network info: best-effort public lookup ----------------------------
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
-    fetch('https://ipapi.co/json/', { signal: controller.signal })
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
-      .then((d) => {
-        setText('userAgentIp', d.ip);
-        setText('userAgentCountry', d.country_name);
-        setText('userAgentProv', d.region);
-        setText('userAgentCity', d.city);
-        setText('userAgentISP', d.org);
-      })
-      .catch(() => {
-        // Keep the "未能获取" placeholders; the table explains this is expected.
-      })
-      .finally(() => clearTimeout(timer));
+    // 原来只用 ipapi.co：国内基本连不上（CORS 失败 / 被墙），表格里五行全是「未能获取」。
+    // 改成按顺序试探几个可用接口，谁先返回有效 IP 就用谁，全失败才保留占位文本。
+    const providers = [
+      {
+        url: 'https://myip.ipip.net/json',
+        map: (d) => {
+          const loc = d?.data?.location ?? [];
+          return { ip: d?.data?.ip, country: loc[0], prov: loc[1], city: loc[2], isp: loc[4] || loc[3] };
+        },
+      },
+      {
+        url: 'https://ipwho.is/',
+        map: (d) => ({
+          ip: d?.ip,
+          country: d?.country,
+          prov: d?.region,
+          city: d?.city,
+          isp: d?.connection?.isp || d?.connection?.org || d?.connection?.domain,
+        }),
+      },
+      {
+        url: 'https://ip.zxinc.org/api.php?type=json',
+        map: (d) => {
+          const raw = String(d?.data?.location ?? '');
+          const [place, isp] = raw.split(/\s+/);
+          const [country, prov, city] = place.split(/[–—-]/);
+          return { ip: d?.data?.myip, country, prov, city, isp: isp || d?.data?.local };
+        },
+      },
+      {
+        url: 'https://api.ip.sb/geoip',
+        map: (d) => ({
+          ip: d?.ip,
+          country: d?.country,
+          prov: d?.region,
+          city: d?.city,
+          isp: d?.isp || d?.organization,
+        }),
+      },
+    ];
+
+    // ipip 返回的是运营商域名（chinatelecom.com.cn），翻译成人话更好读
+    const ISP_NAMES = {
+      'chinatelecom.com.cn': '中国电信',
+      'chinamobile.com': '中国移动',
+      '10086.cn': '中国移动',
+      'chinaunicom.com': '中国联通',
+      'cernet.edu.cn': '中国教育网',
+      'aliyun.com': '阿里云',
+      'tencent.com': '腾讯云',
+    };
+    const friendlyIsp = (raw) => {
+      if (!raw) return '';
+      const key = String(raw).trim().toLowerCase();
+      return ISP_NAMES[key] || raw;
+    };
+
+    const fillNetwork = (d) => {
+      setText('userAgentIp', d.ip);
+      setText('userAgentCountry', d.country);
+      setText('userAgentProv', d.prov);
+      setText('userAgentCity', d.city);
+      setText('userAgentISP', friendlyIsp(d.isp));
+    };
+
+    (async () => {
+      for (const provider of providers) {
+        try {
+          const res = await fetch(provider.url, { signal: AbortSignal.timeout(4000) });
+          if (!res.ok) continue;
+          const data = await res.json();
+          const mapped = provider.map(data);
+          if (mapped?.ip) {
+            fillNetwork(mapped);
+            return;
+          }
+        } catch {
+          // 这个接口不可用，换下一个
+        }
+      }
+      // 全部失败时保留「未能获取」占位；表格下方已说明这是预期情况
+    })();
   })();
 </script>
