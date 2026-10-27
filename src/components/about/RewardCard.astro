@@ -6,12 +6,9 @@ import { rewardList, rewardQr } from './about-config';
  * 单独成组件是因为它不跟随卡片墙排布，而是放在「关于本站」正文**之后**，
  * 由 `AboutPage.astro` 渲染。
  *
- * 充电按钮与电池动画移植自旧博客（Hexo 版 about 页）：鼠标悬停/键盘聚焦时，
- * 粉色电量从左往右铺满、黄色电火花扫过；点击弹出两张收款码。
- *
+ * 按钮：悬停/键盘聚焦时电池从左往右充满、按钮本体扫过一道高光，点击弹出两张收款码。
  * 样式复用 about-cards.css 里的 `.ab-card` / `.ab-reward*` / `.ab-charge*`。
  */
-import RewardTube from './RewardTube.astro';
 ---
 
 <div class="ab ab-reward-standalone">
@@ -29,14 +26,23 @@ import RewardTube from './RewardTube.astro';
         aria-label="赞赏本站，为 TA 充电"
       >
         <span class="ab-charge-label">为 TA 充电</span>
-        <span class="ab-charge-flash" aria-hidden="true"></span>
+        <span class="ab-charge-icon" aria-hidden="true">
+          <svg viewBox="0 0 30 16" fill="none">
+            <rect
+              class="ab-charge-shell"
+              x="1"
+              y="1"
+              width="24"
+              height="14"
+              rx="4.4"
+              stroke="currentColor"
+              stroke-width="1.4"
+            ></rect>
+            <rect class="ab-charge-level" x="3.2" y="3.2" width="19.6" height="9.6" rx="2.6" fill="currentColor"></rect>
+            <rect x="27" y="5.4" width="2.6" height="5.2" rx="1.3" fill="currentColor"></rect>
+          </svg>
+        </span>
       </button>
-
-      <div class="ab-charge-tube" aria-hidden="true">
-        <RewardTube />
-        <div class="ab-charge-mask"><RewardTube /></div>
-        <div class="ab-charge-spark"><RewardTube /></div>
-      </div>
 
       <p class="ab-charge-count">共 <b>{rewardList.length}</b> 人</p>
     </div>
