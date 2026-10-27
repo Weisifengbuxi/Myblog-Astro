@@ -1062,6 +1062,7 @@
 .ab-charge-btn {
   position: relative;
   display: inline-flex;
+  flex: none;
   align-items: center;
   gap: 0.6rem;
   height: 2.6rem;
