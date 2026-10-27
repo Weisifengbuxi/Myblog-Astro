@@ -4,9 +4,16 @@
     "active_num": 14,
     "error_num": 3,
     "article_num": 259,
-    "last_updated_time": "2026-10-27 02:51:35"
+    "last_updated_time": "2026-10-27 11:15:31"
   },
   "article_data": [
+    {
+      "title": "iOS27.2支持禁止应用使用摇一摇广告了，不影响导航软件和视频软件",
+      "created": "2026-10-27 02:50",
+      "link": "https://blog.zhheo.com/p/wwo2eeec.html",
+      "author": "张洪Heo",
+      "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
+    },
     {
       "title": "EncoDeck 上手：Windows 上的多品牌耳机控制中心，不用再为切降噪拿起手机",
       "created": "2026-10-26 05:10",
@@ -361,13 +368,6 @@
       "title": "我与我的 OpenClaw 凉透了焦虑和解了",
       "created": "2026-08-27 03:13",
       "link": "https://blog.zhheo.com/p/npa0251o.html",
-      "author": "张洪Heo",
-      "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
-    },
-    {
-      "title": "ntfsmac 上手：不关 SIP 让 Mac 读写 NTFS 和 ext 硬盘",
-      "created": "2026-08-24 05:31",
-      "link": "https://blog.zhheo.com/p/ucrz6hhg.html",
       "author": "张洪Heo",
       "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
     },
