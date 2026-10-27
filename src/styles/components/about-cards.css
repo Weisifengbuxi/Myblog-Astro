@@ -1150,7 +1150,8 @@
 }
 
 .ab-charge-count {
-  margin: 0;
+  /* 文案在左，人数 + 按钮被推到右边，一左一右 */
+  margin: 0 0 0 auto;
   font-size: 0.82rem;
   color: hsl(var(--muted-foreground));
 }
