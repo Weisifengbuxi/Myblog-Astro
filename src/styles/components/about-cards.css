@@ -444,8 +444,11 @@
 @media (prefers-reduced-motion: no-preference) {
   html[data-motion="reduced"] .ab-skill-track {
     /* motion.css 用 !important 把动效压到 0.01ms / 播放 1 次，这里要压回去 */
+    /* biome-ignore lint/complexity/noImportantStyles: 必须盖过 motion.css 的 !important */
     animation-duration: 30s !important;
+    /* biome-ignore lint/complexity/noImportantStyles: 同上 */
     animation-iteration-count: infinite !important;
+    /* biome-ignore lint/complexity/noImportantStyles: 同上 */
     will-change: transform !important;
   }
 }
@@ -1045,6 +1048,281 @@
   margin-inline-start: auto;
   color: hsl(var(--muted-foreground));
   font-variant-numeric: tabular-nums;
+}
+
+/* ── 为 TA 充电（电池动画移植自旧博客 about 页）────────────────── */
+.ab-charge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.1rem;
+  margin-top: 1.1rem;
+}
+
+.ab-charge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 2.7rem;
+  padding: 0 1.15rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -8px color-mix(in oklab, hsl(var(--primary)) 70%, transparent);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ab-charge-btn:hover {
+  background: color-mix(in oklab, hsl(var(--primary)) 88%, #fff);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -10px color-mix(in oklab, hsl(var(--primary)) 80%, transparent);
+}
+
+.ab-charge-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ab-charge-btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* 闪电图标：两块 CSS 三角拼出来，和旧主题一致 */
+.ab-charge-flash {
+  position: relative;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: currentColor;
+  transform: rotate(-55deg);
+}
+
+.ab-charge-flash::after {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: -11px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 4px;
+  transform: rotate(180deg);
+}
+
+.ab-charge-tube {
+  position: relative;
+  width: 9.8rem;
+  height: 3.4rem;
+  color: hsl(var(--border));
+}
+
+.ab-charge-tube svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 电量：粉色描边从 0 铺满整根电池 */
+.ab-charge-mask {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  overflow: hidden;
+  color: hsl(var(--primary));
+  transition: width 0.5s ease;
+}
+
+.ab-charge-mask svg {
+  width: 9.8rem;
+  height: 3.4rem;
+}
+
+/* 电火花：一段黄色描边横向扫过 */
+.ab-charge-spark {
+  position: absolute;
+  top: 0;
+  left: -1rem;
+  width: 1.1rem;
+  height: 100%;
+  overflow: hidden;
+  color: #ffd52b;
+  opacity: 0;
+}
+
+.ab-charge-spark svg {
+  position: absolute;
+  top: 0;
+  left: 1rem;
+  width: 9.8rem;
+  height: 3.4rem;
+}
+
+.ab-charge:hover .ab-charge-mask,
+.ab-charge:focus-within .ab-charge-mask {
+  width: 9.8rem;
+}
+
+.ab-charge:hover .ab-charge-spark,
+.ab-charge:focus-within .ab-charge-spark {
+  opacity: 1;
+  animation: ab-charge-spark-move 1.1s linear infinite;
+}
+
+@keyframes ab-charge-spark-move {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(9.8rem);
+  }
+}
+
+.ab-charge-count {
+  margin: 0;
+  font-size: 0.82rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-charge-count b {
+  color: hsl(var(--primary));
+}
+
+/* 收款码对话框（<dialog> 原生居中，Esc 可关） */
+.ab-charge-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(38rem, calc(100vw - 1.5rem));
+  max-height: calc(100vh - 3rem);
+  /* 站点的全局样式把 dialog 的默认外边距清掉了，这里显式居中 */
+  margin: auto;
+  padding: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.45);
+}
+
+.ab-charge-dialog::backdrop {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.ab-charge-dialog[open] {
+  animation: ab-charge-pop 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes ab-charge-pop {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ab-charge-dialog-inner {
+  padding: 1.4rem 1.5rem 1.2rem;
+  text-align: center;
+}
+
+.ab-charge-dialog-tip {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+}
+
+.ab-charge-dialog-title {
+  margin: 0.45rem 0 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ab-charge-qr-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ab-charge-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ab-charge-qr a {
+  display: block;
+  border-radius: 0.6rem;
+}
+
+.ab-charge-qr a:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+}
+
+.ab-charge-qr img {
+  width: 100%;
+  max-width: 11.5rem;
+  aspect-ratio: 1;
+  height: auto;
+  object-fit: contain;
+  padding: 0.3rem;
+  border-radius: 0.6rem;
+  background: #fff;
+}
+
+.ab-charge-qr-label {
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.ab-charge-dialog-close {
+  margin-top: 1.1rem;
+  padding: 0.45rem 1.4rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 9999px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.ab-charge-dialog-close:hover {
+  background: hsl(var(--muted));
+}
+
+@media (max-width: 640px) {
+  .ab-charge-tube {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .ab-charge-qr-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ── 响应式：窄屏单列 ─────────────────────────────────────── */

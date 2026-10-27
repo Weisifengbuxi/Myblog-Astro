@@ -220,3 +220,14 @@ export const rewardList = [
   { name: '华', amount: 500, date: '2025-07-30' },
   { name: '睡觉哇', amount: 6, date: '2025-07-30' },
 ];
+
+/**
+ * 赞赏收款码 —— 点击「为 TA 充电」后弹出的两张二维码。
+ *
+ * 旧博客把图放在 GitHub 图床上再套 weserv 代理，这里改成自托管（public/img/reward/），
+ * 少一次跨域请求，也不依赖代理稳定性。换图直接替换这两个文件即可。
+ */
+export const rewardQr = [
+  { label: '微信支付', src: '/img/reward/wechat.jpg' },
+  { label: '支付宝', src: '/img/reward/alipay.jpg' },
+];

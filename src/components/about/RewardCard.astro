@@ -1,19 +1,46 @@
 ---
+import { rewardList, rewardQr } from './about-config';
 /**
- * 赞赏名单卡片。
+ * 赞赏名单卡片 + 「为 TA 充电」按钮。
  *
  * 单独成组件是因为它不跟随卡片墙排布，而是放在「关于本站」正文**之后**，
  * 由 `AboutPage.astro` 渲染。
  *
- * 样式复用 about-cards.css 里的 `.ab-card` / `.ab-reward*`。
+ * 充电按钮与电池动画移植自旧博客（Hexo 版 about 页）：鼠标悬停/键盘聚焦时，
+ * 粉色电量从左往右铺满、黄色电火花扫过；点击弹出两张收款码。
+ *
+ * 样式复用 about-cards.css 里的 `.ab-card` / `.ab-reward*` / `.ab-charge*`。
  */
-import { rewardList } from './about-config';
+import RewardTube from './RewardTube.astro';
 ---
 
 <div class="ab ab-reward-standalone">
   <section class="ab-card ab-span-24 ab-reward">
     <p class="ab-tips">赞赏名单</p>
     <p class="ab-reward-thanks">感谢因为有你们，让我更加有创作的动力。</p>
+
+    <div class="ab-charge">
+      <button
+        type="button"
+        class="ab-charge-btn"
+        id="ab-charge-btn"
+        aria-haspopup="dialog"
+        aria-controls="ab-charge-dialog"
+        aria-label="赞赏本站，为 TA 充电"
+      >
+        <span class="ab-charge-flash" aria-hidden="true"></span>
+        <span class="ab-charge-label">为 TA 充电</span>
+      </button>
+
+      <div class="ab-charge-tube" aria-hidden="true">
+        <RewardTube />
+        <div class="ab-charge-mask"><RewardTube /></div>
+        <div class="ab-charge-spark"><RewardTube /></div>
+      </div>
+
+      <p class="ab-charge-count">共 <b>{rewardList.length}</b> 人</p>
+    </div>
+
     <ul class="ab-reward-list">
       {
         rewardList.map((item) => (
@@ -27,3 +54,45 @@ import { rewardList } from './about-config';
     </ul>
   </section>
 </div>
+
+<dialog class="ab-charge-dialog" id="ab-charge-dialog" aria-labelledby="ab-charge-dialog-title">
+  <div class="ab-charge-dialog-inner">
+    <p class="ab-charge-dialog-tip">赞赏本站</p>
+    <h2 class="ab-charge-dialog-title" id="ab-charge-dialog-title">如果这些内容帮到了你，可以请我喝杯奶茶</h2>
+
+    <ul class="ab-charge-qr-list">
+      {
+        rewardQr.map((qr) => (
+          <li class="ab-charge-qr">
+            <a href={qr.src} target="_blank" rel="noopener noreferrer" aria-label={`${qr.label}收款码，点击查看原图`}>
+              <img src={qr.src} alt={`${qr.label}收款二维码`} width="340" height="340" loading="lazy" decoding="async" />
+            </a>
+            <span class="ab-charge-qr-label">{qr.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <button type="button" class="ab-charge-dialog-close" id="ab-charge-close">关闭</button>
+  </div>
+</dialog>
+
+<script is:inline>
+  // 用事件委托绑定，避免 View Transitions 换页后又要重新挂监听。
+  // Esc 关闭由 <dialog> 原生行为负责；点遮罩时事件目标是 dialog 本身。
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const dialog = document.getElementById('ab-charge-dialog');
+    if (!(dialog instanceof HTMLDialogElement)) return;
+
+    if (target.closest('#ab-charge-btn')) {
+      if (!dialog.open) dialog.showModal();
+      return;
+    }
+    if (target.closest('#ab-charge-close') || target === dialog) {
+      if (dialog.open) dialog.close();
+    }
+  });
+</script>
