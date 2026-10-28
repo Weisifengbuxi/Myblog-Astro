@@ -4,9 +4,16 @@
     "active_num": 14,
     "error_num": 3,
     "article_num": 259,
-    "last_updated_time": "2026-10-28 17:37:39"
+    "last_updated_time": "2026-10-28 22:00:07"
   },
   "article_data": [
+    {
+      "title": "PHP 性能优化，以及用 FastCGI 缓存加速 PHP 页面",
+      "created": "2026-10-28 16:00",
+      "link": "https://dusays.com/posts/895/",
+      "author": "Teacher Du",
+      "avatar": "https://cdn.dusays.com/favicon.ico"
+    },
     {
       "title": "iOS27.2支持禁止应用使用摇一摇广告了，不影响导航软件和视频软件",
       "created": "2026-10-27 02:50",
@@ -580,13 +587,6 @@
       "link": "https://blog.mcxiaochen.top/posts/p1cc5kvb/",
       "author": "辰渊尘",
       "avatar": "https://blog.mcxiaochen.top/favicon.ico"
-    },
-    {
-      "title": "给猫拍照的 3 个小技巧",
-      "created": "2026-06-30 16:00",
-      "link": "https://dusays.com/posts/875/",
-      "author": "Teacher Du",
-      "avatar": "https://cdn.dusays.com/favicon.ico"
     },
     {
       "title": "Subconverter 太臃肿？PHP 版轻量化替代来了！",
