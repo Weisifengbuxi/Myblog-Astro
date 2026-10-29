@@ -1,10 +1,10 @@
 {
   "statistical_data": {
     "friends_num": 17,
-    "active_num": 14,
-    "error_num": 3,
-    "article_num": 259,
-    "last_updated_time": "2026-10-28 22:00:07"
+    "active_num": 13,
+    "error_num": 4,
+    "article_num": 239,
+    "last_updated_time": "2026-10-29 03:27:44"
   },
   "article_data": [
     {
@@ -407,34 +407,6 @@
       "avatar": "https://cdn.dusays.com/favicon.ico"
     },
     {
-      "title": "从 iGame Center 到 Linux：Colorful CVN Z890 ARK FROZEN RGB 控制器逆向与 Qt 控制台实现",
-      "created": "2026-08-11 08:41",
-      "link": "https://blog.dimeta.top/archives/cong-igame-center-dao-linux-colorful-cvn-z890-ark-frozen-rgb-kong-zhi-qi-ni-xiang-yu-qt-kong-zhi-tai-shi-xian",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "把 SVP 真正接回 bilibili-linux：共享内存补帧、切换恢复与可上游合并的重构",
-      "created": "2026-08-11 08:36",
-      "link": "https://blog.dimeta.top/archives/bilibili-linux-svp-frame-interpolation",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "KDE 下区分多个 Electron 音频流：用 PipeWire 规则修正 Chromium 元数据",
-      "created": "2026-08-11 08:35",
-      "link": "https://blog.dimeta.top/archives/kde-xia-qu-fen-duo-ge-electron-yin-pin-liu-yong-pipewire-gui-ze-xiu-zheng-chromium-yuan-shu-ju",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "记18年的人生旅程：高考落幕，在遗憾、幸运与折腾中走向下一站",
-      "created": "2026-08-09 15:49",
-      "link": "https://blog.dimeta.top/archives/ji-18nian-de-ren-sheng-lu-cheng-gao-kao-luo-mu-zai-yi-han-xing-yun-yu-zhe-teng-zhong-zou-xiang-xia-yi-zhan",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "AxonHub - 多模型API智能路由网关",
       "created": "2026-08-06 17:12",
       "link": "https://blog.liushen.fun/posts/b404081c/",
@@ -442,39 +414,11 @@
       "avatar": "https://blog.liushen.fun/info/avatar.ico"
     },
     {
-      "title": "Arch Linux 下让 Sunshine 接管 SDDM：X11 捕获、服务交接与多显示器触控适配",
-      "created": "2026-08-05 16:31",
-      "link": "https://blog.dimeta.top/archives/arch-linux-sunshine-sddm-x11-multidisplay-touch",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "开发者必备工具集:这 30 个工具让我的效率提升了 300%",
       "created": "2026-08-05 16:00",
       "link": "https://dusays.com/posts/881/",
       "author": "Teacher Du",
       "avatar": "https://cdn.dusays.com/favicon.ico"
-    },
-    {
-      "title": "Arch Linux 下为 AUR 版 SVP 手动安装 RIFE Vulkan 引擎",
-      "created": "2026-08-05 14:11",
-      "link": "https://blog.dimeta.top/archives/arch-linux-svp-rife-vulkan-aur",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "Arch Linux 配置 Wake-on-LAN：Realtek RTL8125 用 NetworkManager 持久唤醒",
-      "created": "2026-08-05 13:21",
-      "link": "https://blog.dimeta.top/archives/arch-linux-wol-realtek-rtl8125-networkmanager",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "从 Windows HID 到 Linux 常驻服务：FK360 EL ARGB 数显驱动复盘",
-      "created": "2026-08-05 12:22",
-      "link": "https://blog.dimeta.top/archives/fk360el-argb-linux-hid-driver",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
     },
     {
       "title": "WordPress 性能优化实战:从 5 秒加载到 1 秒的蜕变",
@@ -708,13 +652,6 @@
       "avatar": "https://blog.yvyang.top/favicon.webp"
     },
     {
-      "title": "LXC 容器部署 OpenClaw 指南：硬核破解 Homebrew 的 Root 限制",
-      "created": "2026-03-08 08:25",
-      "link": "https://blog.dimeta.top/archives/lxc-rong-qi-bu-shu-openclaw-zhi-nan-ying-he-po-jie-homebrew-de-root-xian-zhi",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "免费域名升级玩法：用VPS8让根域名支持CNAME等高级解析",
       "created": "2026-03-07 00:17",
       "link": "https://blog.zrf.me/p/VPS8-Domains/",
@@ -741,13 +678,6 @@
       "link": "https://blog.mcxiaochen.top/posts/p403bf94e/",
       "author": "辰渊尘",
       "avatar": "https://blog.mcxiaochen.top/favicon.ico"
-    },
-    {
-      "title": "一次 Playwright + Docker 的踩坑记录",
-      "created": "2026-02-24 14:04",
-      "link": "https://blog.dimeta.top/archives/yi-ci-playwright-docker-de-cai-keng-ji-lu",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
     },
     {
       "title": "网站域名从blog.yvyang.fun迁移至blog.yvyang.top",
@@ -904,13 +834,6 @@
       "avatar": "https://blog.mcxiaochen.top/favicon.ico"
     },
     {
-      "title": "对化学反应平衡关于PH/C(x)/K计算的理解",
-      "created": "2025-11-09 10:30",
-      "link": "https://blog.dimeta.top/archives/dui-hua-xue-fan-ying-ping-heng-guan-yu-ph-c-x-kji-suan-de-li-jie",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "本站评论区表情包分享",
       "created": "2025-11-09 07:11",
       "link": "https://blog.yvyang.top/posts/34474/index.HTML",
@@ -958,13 +881,6 @@
       "link": "https://blog.anheyu.com/posts/5sQj",
       "author": "anzhiyu主题",
       "avatar": "https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"
-    },
-    {
-      "title": "KDE 下 WPS 双击文件打不开的问题及解决方案",
-      "created": "2025-10-26 05:09",
-      "link": "https://blog.dimeta.top/archives/kde-xia-wps-shuang-ji-wen-jian-da-bu-kai-de-wen-ti-ji-jie-jue-fang-an",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
     },
     {
       "title": "hexo 8.1.0 Released",
@@ -1086,32 +1002,11 @@
       "avatar": "https://blog.mcxiaochen.top/favicon.ico"
     },
     {
-      "title": "一次“简单”的部署：为 Venera Sub Web UI 踩过的那些坑",
-      "created": "2025-08-30 13:25",
-      "link": "https://blog.dimeta.top/archives/yi-ci-jian-dan-de-bu-shu-wei-venera-sub-web-ui-cai-guo-de-na-xie-keng",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "第三方1Panel应用商店不完全指北",
       "created": "2025-08-29 07:50",
       "link": "https://blog.liushen.fun/posts/470abaf8/",
       "author": "LiuShen",
       "avatar": "https://blog.liushen.fun/info/avatar.ico"
-    },
-    {
-      "title": "通过PID锁定PipeWire ID,以解决PipeWire元数据无法很好定位不同软件的问题",
-      "created": "2025-08-29 05:38",
-      "link": "https://blog.dimeta.top/archives/tong-guo-pidsuo-ding-pipewire-id-y",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "NAS用户的qBittorrent最优方案",
-      "created": "2025-08-28 15:54",
-      "link": "https://blog.dimeta.top/archives/nasyong-hu-de-qbittorrentzui-you-fang-an",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
     },
     {
       "title": "我的世界Java版1.8.9服务器模组推荐",
@@ -1135,13 +1030,6 @@
       "avatar": "https://blog.liushen.fun/info/avatar.ico"
     },
     {
-      "title": "我的 AdventureX2025 之旅：一次充满挑战、反思与成长的黑客松经历",
-      "created": "2025-08-01 04:51",
-      "link": "https://blog.dimeta.top/archives/wo-de-adventurex2025-zhi-lu-yi-ci-chong-man-tiao-zhan-fan-si-yu-cheng-chang-de-hei-ke-song-jing-li",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "Rewards - 一个高度可定制的赞赏展示页 为您的 Hexo 博客打造专属的动态赞赏墙",
       "created": "2025-07-29 12:28",
       "link": "https://blog.zrf.me/p/Rewards/",
@@ -1156,27 +1044,6 @@
       "avatar": "https://blog.yvyang.top/favicon.webp"
     },
     {
-      "title": "用一条命令快速查找并管理大文件：结合 find 和 fzf 的实用脚本",
-      "created": "2025-07-17 05:25",
-      "link": "https://blog.dimeta.top/archives/yong-yi-tiao-ming-ling-kuai-su-cha-zhao-bing-guan-li-da-wen-jian",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "秘制全局脚本解决部分网站锁区问题",
-      "created": "2025-07-07 06:26",
-      "link": "https://blog.dimeta.top/archives/clashquan-ju-jiao-ben-jie-jue-bu-fen-wang-zhan-suo-qu-wen-ti",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
-      "title": "Wayland下的Sunshine+虚拟屏幕配置",
-      "created": "2025-07-06 11:21",
-      "link": "https://blog.dimeta.top/archives/waylandxia-de-sunshine-xu-ni-ping-mu-pei-zhi",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
-    },
-    {
       "title": "免费开YPT虚拟卡，解锁AWS一年免费服务器 + Phala Cloud免费容器 + 光帆3个月3T流量(保姆级教程)",
       "created": "2025-07-02 12:28",
       "link": "https://blog.zrf.me/p/Notes-YPT-AWS/",
@@ -1189,13 +1056,6 @@
       "link": "https://blog.zrf.me/p/SubWeb/",
       "author": "周润发",
       "avatar": "https://blog.zrf.me/img/logo.webp"
-    },
-    {
-      "title": "Pve Lxc无特权容器开启Tun的通用方法",
-      "created": "2025-06-14 05:14",
-      "link": "https://blog.dimeta.top/archives/pve-lxcwu-te-quan-rong-qi-kai-qi-tunde-tong-yong-fang-fa",
-      "author": "洛元",
-      "avatar": "https://blog.dimeta.top/upload/avatar.jpg"
     },
     {
       "title": "ZRF.ME | GitHub 文件加速代理 - 开发者福音：为 GitHub 下载提速的极简加速工具",
