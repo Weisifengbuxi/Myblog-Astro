@@ -9,6 +9,29 @@ const config = commentConfig.twikoo;
 
 /** 探活超时：后端起不来时别让评论区一直转圈 */
 const BACKEND_PROBE_TIMEOUT_MS = 6000;
+/** 探活结果缓存时长：同一会话里翻文章不必每页都多打一次请求 */
+const BACKEND_PROBE_CACHE_MS = 5 * 60 * 1000;
+const BACKEND_PROBE_CACHE_KEY = 'twikoo-backend-reachable';
+
+function readProbeCache(): boolean | null {
+  try {
+    const raw = sessionStorage.getItem(BACKEND_PROBE_CACHE_KEY);
+    if (!raw) return null;
+    const { at, ok } = JSON.parse(raw) as { at: number; ok: boolean };
+    if (typeof at !== 'number' || Date.now() - at > BACKEND_PROBE_CACHE_MS) return null;
+    return Boolean(ok);
+  } catch {
+    return null;
+  }
+}
+
+function writeProbeCache(ok: boolean) {
+  try {
+    sessionStorage.setItem(BACKEND_PROBE_CACHE_KEY, JSON.stringify({ at: Date.now(), ok }));
+  } catch {
+    // 隐私模式下 sessionStorage 可能不可写，忽略即可
+  }
+}
 
 /**
  * 评论后端探活。
@@ -17,8 +40,13 @@ const BACKEND_PROBE_TIMEOUT_MS = 6000;
  * （例如后端部署被停用时返回 402 且没有 CORS 头，浏览器只报「请求被跨域策略拦截 status 0」），
  * 访客看到的那串技术错误既吓人又没信息量。所以先自己发一次 GET_CONFIG：
  * 拿不到响应、或拿到 402/5xx，就当作后端不可用，直接走组件自己的友好提示。
+ *
+ * 结果按会话缓存 5 分钟，避免每打开一篇文章就多一次请求（评论后端是按请求量计费的）。
  */
 async function isBackendReachable(envId: string): Promise<boolean> {
+  const cached = readProbeCache();
+  if (cached !== null) return cached;
+
   try {
     const res = await fetch(envId, {
       method: 'POST',
@@ -26,9 +54,11 @@ async function isBackendReachable(envId: string): Promise<boolean> {
       body: JSON.stringify({ event: 'GET_CONFIG' }),
       signal: AbortSignal.timeout(BACKEND_PROBE_TIMEOUT_MS),
     });
-    if (res.status === 402 || res.status >= 500) return false;
-    return true;
+    const ok = !(res.status === 402 || res.status >= 500);
+    writeProbeCache(ok);
+    return ok;
   } catch {
+    writeProbeCache(false);
     return false;
   }
 }
