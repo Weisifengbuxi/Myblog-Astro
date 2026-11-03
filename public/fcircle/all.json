@@ -4,9 +4,16 @@
     "active_num": 15,
     "error_num": 2,
     "article_num": 260,
-    "last_updated_time": "2026-11-03 13:14:23"
+    "last_updated_time": "2026-11-03 22:41:19"
   },
   "article_data": [
+    {
+      "title": "新机器交付前，我会先跑这 20 项检查",
+      "created": "2026-11-03 16:00",
+      "link": "https://dusays.com/posts/896/",
+      "author": "Teacher Du",
+      "avatar": "https://cdn.dusays.com/favicon.ico"
+    },
     {
       "title": "SwiftUI 如何适配 iPhoneDuo？回顾设计与开发遇到的那些坑",
       "created": "2026-11-03 04:29",
@@ -566,13 +573,6 @@
       "link": "https://kmar.top/posts/6fea76ad/",
       "author": "山岳库博",
       "avatar": "https://s21.ax1x.com/2025/09/01/pVcHzGt.png"
-    },
-    {
-      "title": "居家办公 5 个减少分心的动作",
-      "created": "2026-07-06 16:00",
-      "link": "https://dusays.com/posts/876/",
-      "author": "Teacher Du",
-      "avatar": "https://cdn.dusays.com/favicon.ico"
     },
     {
       "title": "HTools 部署教程：零成本搭建自己的开源工具导航站，Cloudflare Pages Functions + D1 保姆级教程",
