@@ -7,6 +7,32 @@ import themeStyles from '@/styles/components/twikoo.css?inline';
 // Config is module-level static data parsed from YAML at build time - won't change at runtime
 const config = commentConfig.twikoo;
 
+/** 探活超时：后端起不来时别让评论区一直转圈 */
+const BACKEND_PROBE_TIMEOUT_MS = 6000;
+
+/**
+ * 评论后端探活。
+ *
+ * Twikoo 的 `init()` 遇到网络/跨域失败不会抛异常，而是把它自己渲染成一行红字
+ * （例如后端部署被停用时返回 402 且没有 CORS 头，浏览器只报「请求被跨域策略拦截 status 0」），
+ * 访客看到的那串技术错误既吓人又没信息量。所以先自己发一次 GET_CONFIG：
+ * 拿不到响应、或拿到 402/5xx，就当作后端不可用，直接走组件自己的友好提示。
+ */
+async function isBackendReachable(envId: string): Promise<boolean> {
+  try {
+    const res = await fetch(envId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'GET_CONFIG' }),
+      signal: AbortSignal.timeout(BACKEND_PROBE_TIMEOUT_MS),
+    });
+    if (res.status === 402 || res.status >= 500) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function TwikooSkeleton() {
   return (
     <div className="twikoo-skeleton animate-pulse space-y-4 px-4" aria-hidden="true">
@@ -47,6 +73,16 @@ export default function Twikoo() {
       setStatus('loading');
       // Clear container to avoid duplicate init (Twikoo has no destroy/update API)
       containerRef.current.innerHTML = '';
+
+      // 后端不可用就先别挂 Twikoo，免得访客看到「请求被跨域策略拦截」这类原始报错
+      const reachable = await isBackendReachable(config.envId);
+      if (!active) return;
+      if (!reachable) {
+        console.warn('[Twikoo] Comment backend unreachable, showing fallback notice.');
+        setStatus('error');
+        return;
+      }
+
       const locale = getLocaleFromUrl(window.location.pathname);
       try {
         // 2.0 的包 `exports` 只放开 "."（→ dist/twikoo.min.js，加载时把自带样式注入 <head>），
