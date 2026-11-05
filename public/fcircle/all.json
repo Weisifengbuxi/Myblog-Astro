@@ -4,9 +4,16 @@
     "active_num": 15,
     "error_num": 2,
     "article_num": 260,
-    "last_updated_time": "2026-11-04 22:59:47"
+    "last_updated_time": "2026-11-05 04:10:53"
   },
   "article_data": [
+    {
+      "title": "外贸独立站询盘页面怎么设计：从接得住需求到拿得到询盘",
+      "created": "2026-11-04 09:30",
+      "link": "https://mfy-lifeline.com/posts/a0cdce66/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
     {
       "title": "新机器交付前，我会先跑这 20 项检查",
       "created": "2026-11-03 16:00",
@@ -106,16 +113,16 @@
       "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
-      "title": "外贸独立站的搜索框，正在偷偷吃掉你的谷歌排名",
+      "title": "外贸独立站不会写代码？我用 AI 编程代理从模板到上线搭了一遍",
       "created": "2026-10-23 13:00",
-      "link": "https://mfy-lifeline.com/posts/26e86d24/",
+      "link": "https://mfy-lifeline.com/posts/8d3c1d31/",
       "author": "Lifeline",
       "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
-      "title": "外贸独立站不会写代码？我用 AI 编程代理从模板到上线搭了一遍",
+      "title": "外贸独立站的搜索框，正在偷偷吃掉你的谷歌排名",
       "created": "2026-10-23 13:00",
-      "link": "https://mfy-lifeline.com/posts/8d3c1d31/",
+      "link": "https://mfy-lifeline.com/posts/26e86d24/",
       "author": "Lifeline",
       "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
@@ -237,13 +244,6 @@
       "link": "https://blog.zhheo.com/p/id68ti5q.html",
       "author": "张洪Heo",
       "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
-    },
-    {
-      "title": "我给外贸独立站做 AI 询盘助手时，怎么让 LLM 不胡说（RAG/提示工程/合规擦除实录）",
-      "created": "2026-10-12 04:00",
-      "link": "https://mfy-lifeline.com/posts/5242d200/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "Redis vs Valkey：性能实测对比 + 无缝迁移指南",
