@@ -227,8 +227,8 @@ export const uiStrings = {
   'footer.runningDays': '{days}일째 가동 중',
   'footer.wordUnit': '자',
   'footer.postUnit': '개',
-  'footer.randomVisit': '개왕',
-  'footer.randomVisitTitle': '개왕 · 무작위로 멤버 블로그 방문',
+  'nav.travellings': '개왕',
+  'nav.travellingsTitle': '개왕 · 무작위로 멤버 블로그 방문',
   // ── Analytics Stats ─────────────────────────────────────────
   'stats.pageviews': '조회수',
 

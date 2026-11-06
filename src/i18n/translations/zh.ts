@@ -227,8 +227,8 @@ export const uiStrings = {
   'footer.runningDays': '已运行 {days} 天',
   'footer.wordUnit': '字',
   'footer.postUnit': '篇',
-  'footer.randomVisit': '开往',
-  'footer.randomVisitTitle': '开往 · 随机拜访一位成员的博客',
+  'nav.travellings': '开往',
+  'nav.travellingsTitle': '开往 · 随机拜访一位成员的博客',
   // ── Analytics Stats ─────────────────────────────────────────
   'stats.pageviews': '访问量',
 

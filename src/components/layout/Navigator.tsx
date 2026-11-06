@@ -15,7 +15,7 @@ import { Icon } from '@iconify/react';
 import { filterNavItems } from '@lib/utils';
 import { memo, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { defaultLocale, localizedPath, resolveNavName, stripLocaleFromPath } from '@/i18n';
+import { defaultLocale, localizedPath, resolveNavName, stripLocaleFromPath, t } from '@/i18n';
 import DropdownNav from './DropdownNav';
 import LanguageSwitcher from './LanguageSwitcher';
 import { SearchTrigger } from './SearchTrigger';
@@ -192,6 +192,17 @@ const Navigator = memo(function Navigator({ currentPath, locale = defaultLocale 
       </nav>
 
       <div className="ml-auto flex items-center gap-2">
+        {/* 开往：随机拜访一位成员博客（移植自旧博客导航栏右侧的「开往」按钮） */}
+        <a
+          href="https://www.travellings.cn/go.html"
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          aria-label={t(locale, 'nav.travellingsTitle')}
+          title={t(locale, 'nav.travellingsTitle')}
+          className="size-10 flex-center cursor-pointer rounded-full transition-[background-color,scale] duration-200 ease-out-quart hover:bg-current/15 active:scale-90"
+        >
+          <Icon icon="ri:train-line" className="size-[1.15rem]" />
+        </a>
         <SearchTrigger />
         <div className="tablet:hidden flex-center">
           <LanguageSwitcher

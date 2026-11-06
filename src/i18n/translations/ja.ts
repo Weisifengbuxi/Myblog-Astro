@@ -229,8 +229,8 @@ export const uiStrings: UIStrings = {
   'footer.runningDays': '稼働して{days}日が経過',
   'footer.wordUnit': '文字',
   'footer.postUnit': '投稿',
-  'footer.randomVisit': '開往',
-  'footer.randomVisitTitle': '開往 · ランダムにメンバーのブログへ',
+  'nav.travellings': '開往',
+  'nav.travellingsTitle': '開往 · ランダムにメンバーのブログへ',
   // ── 解析の統計 ─────────────────────────────────────────
   'stats.pageviews': 'ページビュー',
 
