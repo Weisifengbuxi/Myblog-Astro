@@ -7,7 +7,19 @@
  * 部署与接入步骤见同目录 README.md。部署前只需要改下面这一行 ORIGIN。
  */
 
-/** Twikoo 后端真实地址：填 Vercel 项目自带的 *.vercel.app 域名，避免与前端域名互相指造成死循环 */
+/**
+ * Twikoo 后端真实地址。两种接法二选一，**别把 ORIGIN 写成 Worker 自己的入口域名**，
+ * 否则请求会在 Worker 上自己调自己，浏览器最终看到 508/522：
+ *
+ * 1) 前端 envId 直接用 Worker 的 workers.dev 地址（推荐，DNS 不用动）
+ *    → ORIGIN 填现有的 https://twikoo.weisifengbuxi.top
+ *    链路：浏览器 → workers.dev（Cloudflare）→ twikoo.weisifengbuxi.top（Vercel）
+ *
+ * 2) 前端 envId 仍用 twikoo.weisifengbuxi.top，并在 EdgeOne DNS 里把 twikoo
+ *    这条记录 CNAME 到 workers.dev（域名更好看，但要多改一条 DNS）
+ *    → ORIGIN 必须填 Vercel 项目自带的 https://twikoo-xxxx.vercel.app
+ *    链路：浏览器 → twikoo.weisifengbuxi.top（CNAME 到 Worker）→ vercel.app（Vercel）
+ */
 const ORIGIN = 'https://REPLACE_WITH_YOUR_TWIKOO_ORIGIN';
 
 const CORS_HEADERS = {

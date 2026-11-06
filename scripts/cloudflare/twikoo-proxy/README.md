@@ -12,8 +12,10 @@
 1. 注册/登录 <https://dash.cloudflare.com>（免费版即可），拿到你的 `账户名`。
 2. 打开 <https://dash.cloudflare.com/?to=/:account/workers-and-pages> → **Create** → **Worker** → 起名 `twikoo-proxy` → **Deploy**。
 3. 点 **Edit code**，把 `worker.js` 的内容整个粘进去。
-4. 把文件顶部的 `ORIGIN` 改成 Twikoo 的 Vercel 地址（Vercel 控制台 → twikoo 项目 → **Domains**，形如 `https://twikoo-xxxx.vercel.app`）。
-   **不要填 `twikoo.weisifengbuxi.top`**，否则会自己代理自己造成死循环。
+4. 设置 `ORIGIN`（看第三节选哪种接法，两种填法不同）：
+   - **接法 A（推荐）** 前端直接用 `workers.dev` 地址 → `ORIGIN` 填 `https://twikoo.weisifengbuxi.top` 即可；
+   - **接法 B** 前端仍用自定义域名（CNAME 到 Worker）→ `ORIGIN` 必须填 Vercel 项目自带的 `https://twikoo-xxxx.vercel.app`。
+   - 唯一红线：`ORIGIN` 不能等于 **Worker 自己的入口域名**，否则会自己代理自己，浏览器报 508/522。
 5. **Deploy**，记下地址：`https://twikoo-proxy.<你的账户名>.workers.dev`。
 
 命令行部署也可以（需要 Node）：
@@ -37,7 +39,7 @@ npx wrangler deploy
 
 ## 三、切换到代理地址（两种方式选一种）
 
-**方式 A（最省事，不改 DNS）**——直接把前端指向 Worker：
+**方式 A（最省事，不改 DNS）**——直接把前端指向 Worker，同时 `ORIGIN` 填现有自定义域名：
 
 ```yaml
 # config/site.yaml
@@ -45,10 +47,17 @@ comment:
   twikoo:
     envId: https://twikoo-proxy.<你的账户名>.workers.dev
 ```
+```js
+// worker.js
+const ORIGIN = 'https://twikoo.weisifengbuxi.top';
+```
+链路：浏览器 → workers.dev（Cloudflare）→ twikoo.weisifengbuxi.top（Vercel）。
 
-**方式 B（地址不变，推荐长期用）**——在 EdgeOne 的 DNS 里把 `twikoo` 记录改成 CNAME：
+**方式 B（地址不变）**——在 EdgeOne 的 DNS 里把 `twikoo` 记录改成 CNAME：
 `twikoo` → `twikoo-proxy.<你的账户名>.workers.dev`（不要开代理/加速，纯 CNAME）。
-这样 `https://twikoo.weisifengbuxi.top` 先到 Cloudflare，再到 Vercel，前端 `envId` 一行都不用改。
+前端 `envId` 保持不变，但 **`ORIGIN` 必须换成 `https://twikoo-xxxx.vercel.app`**
+（Vercel 项目 → Settings → Domains 里那个默认域名），否则 Worker 会指向自己。
+链路：浏览器 → twikoo.weisifengbuxi.top（CNAME 到 Worker）→ vercel.app（Vercel）。
 
 ## 四、验证
 
