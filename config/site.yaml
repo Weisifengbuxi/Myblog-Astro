@@ -1212,7 +1212,11 @@ comment:
   #   /posts/e4925c7a.html  ->  /post/e4925c7a
   # 可在 Twikoo 管理面板导出评论后批量替换，再导入。
   twikoo:
-    envId: https://twikoo.weisifengbuxi.top
+    # 走本站同源的 EdgeOne Pages Function 代理（functions/twikoo），不再直接打 Vercel：
+    # 1) 同源 → 没有跨域/混合内容问题；2) 源站被藏起来；
+    # 3) 绑定了 KV 到 RATE_LIMIT_KV 后可按 IP 限速，刷接口的流量到不了 Vercel。
+    # 直接填 Vercel 域名也能用，但那样没有这层保护。
+    envId: https://www.weisifengbuxi.top/twikoo
     lang: zh-CN
 
 # =============================================================================

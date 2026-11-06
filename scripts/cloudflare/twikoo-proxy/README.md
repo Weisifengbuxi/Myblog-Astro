@@ -1,5 +1,11 @@
 # Twikoo 反向代理（Cloudflare Worker 免费版）
 
+> 🚫 **本方案已停用（2026-11）**：`*.workers.dev` 在国内被 DNS 污染（阿里/腾讯 DoH 都返回
+> Facebook/Dropbox 的 IP，直连超时），国内访客连不上，所以前端不能指向 `workers.dev`。
+> 现在改用 **EdgeOne Pages Function** 做同源代理：见 [`functions/twikoo/`](../../../functions/twikoo/index.js)，
+> 前端 `envId` 是 `https://www.weisifengbuxi.top/twikoo`。
+> 保留这份 Worker 代码是为将来把域名 DNS 迁到 Cloudflare 时用（那时可以给 twikoo 子域开橙云代理）。
+
 给 `twikoo.weisifengbuxi.top`（Vercel 上的 Twikoo 后端）套一层 Cloudflare：
 挡爬虫、限速、隐藏源站，避免 Vercel Hobby 的 **Edge Requests 1M/月**额度被刷穿。
 
