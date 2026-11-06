@@ -1,0 +1,12 @@
+name = "twikoo-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# 速率限制（Cloudflare 免费版可用）：同一 IP 每 60 秒最多 60 次
+# 说明：这是 beta 绑定，字段名以 Cloudflare 当前文档为准；如果 wrangler 报错可以先删掉这段，
+# 改成在控制台 Worker → Settings → 绑定 里可视化添加。
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
