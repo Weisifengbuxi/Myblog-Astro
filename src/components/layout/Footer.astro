@@ -66,6 +66,45 @@ const startYear = siteConfig?.startYear ?? currentYear;
 
     </div>
 
+    <!-- 串门：虫洞（十年之约）+ 开往，点一下随机去一位成员博客 -->
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a
+        href="https://www.foreverblog.cn/go.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="虫洞 · 随机访问十年之约成员博客"
+        class="visit-wormhole inline-flex items-center"
+      >
+        <img
+          class="only-on-dark h-8 w-auto"
+          src="/img/wormhole/wormhole-on-dark.webp"
+          alt="十年之约虫洞"
+          height="32"
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="only-on-light h-8 w-auto"
+          src="/img/wormhole/wormhole-on-light.webp"
+          alt=""
+          height="32"
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+
+      <a
+        href="https://www.travellings.cn/go.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        title={t(locale, 'footer.randomVisitTitle')}
+        class="visit-pill"
+      >
+        <Icon name="ri:train-line" class="h-4 w-4" />
+        <span>{t(locale, 'footer.randomVisit')}</span>
+      </a>
+    </div>
+
     <!-- Copyright -->
     <div class="text-muted-foreground flex items-center gap-0.5 text-sm">
       <span class="opacity-75">©</span>
@@ -176,6 +215,57 @@ const startYear = siteConfig?.startYear ?? currentYear;
 </footer>
 
 <style>
+  /* 虫洞徽标有两套：浅色文字版（wormhole-on-dark）给深色主题，
+     深色文字版（wormhole-on-light）给浅色主题。默认是浅色主题，所以先藏浅色文字版。 */
+  .only-on-dark {
+    display: none;
+  }
+
+  :global(html.dark) .only-on-dark {
+    display: inline-block;
+  }
+
+  :global(html.dark) .only-on-light {
+    display: none;
+  }
+
+  .visit-wormhole {
+    opacity: 0.9;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .visit-wormhole:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .visit-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2rem;
+    padding: 0 0.85rem;
+    border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+    border-radius: 9999px;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.8rem;
+    line-height: 1;
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease,
+      background-color 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .visit-pill:hover {
+    color: hsl(var(--primary));
+    border-color: color-mix(in oklab, hsl(var(--primary)) 45%, transparent);
+    background-color: color-mix(in oklab, hsl(var(--primary)) 8%, transparent);
+    transform: translateY(-1px);
+  }
+
   .footer-link {
     opacity: 0.75;
     position: relative;

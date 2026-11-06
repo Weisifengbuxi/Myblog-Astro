@@ -228,7 +228,8 @@ export const uiStrings: UIStrings = {
   'footer.runningDays': 'Running for {days} days',
   'footer.wordUnit': 'words',
   'footer.postUnit': 'posts',
-
+  'footer.randomVisit': 'Travellings',
+  'footer.randomVisitTitle': 'Travellings · visit a random member blog',
   // ── Analytics Stats ─────────────────────────────────────────
   'stats.pageviews': 'Page views',
 
