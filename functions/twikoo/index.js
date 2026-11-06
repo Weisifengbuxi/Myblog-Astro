@@ -15,7 +15,9 @@
  *
  * 路由：/functions/twikoo/index.js → /twikoo，/functions/twikoo/[[default]].js → /twikoo/*。
  */
-const ORIGIN = 'https://twikoo.weisifengbuxi.top';
+/** 默认源站。想换后端（比如迁到 Netlify / 新 Vercel 项目）时，
+ *  不用改代码：在 EdgeOne Pages 项目里加个环境变量 TWIKOO_ORIGIN 即可覆盖。 */
+const DEFAULT_ORIGIN = 'https://twikoo.weisifengbuxi.top';
 
 const RATE_LIMIT_MAX = 60;
 const RATE_LIMIT_WINDOW_SECONDS = 60;
@@ -88,7 +90,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   try {
-    const upstream = await fetch(ORIGIN, { method: 'POST', headers, body: payload });
+    const origin = env?.TWIKOO_ORIGIN?.trim() || DEFAULT_ORIGIN;
+    const upstream = await fetch(origin, { method: 'POST', headers, body: payload });
     const outHeaders = new Headers(upstream.headers);
     for (const [key, value] of Object.entries(CORS_HEADERS)) outHeaders.set(key, value);
     outHeaders.delete('set-cookie');
