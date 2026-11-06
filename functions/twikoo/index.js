@@ -36,6 +36,25 @@ function json(body, status) {
   });
 }
 
+/** 允许调用的来源：本站两个域名；可用环境变量 TWIKOO_ALLOWED_ORIGINS（逗号分隔）覆盖 */
+const DEFAULT_ALLOWED_ORIGINS = ['https://www.weisifengbuxi.top', 'https://weisifengbuxi.top'];
+
+function isAllowedOrigin(request, env) {
+  const origin = request.headers.get('origin');
+  // 浏览器对 POST 一定会带 Origin；同源请求直接放行，没有 Origin 的一律拒绝
+  if (!origin) return false;
+  if (origin === new URL(request.url).origin) return true;
+
+  const configured = env?.TWIKOO_ALLOWED_ORIGINS;
+  const allowed = configured
+    ? configured
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : DEFAULT_ALLOWED_ORIGINS;
+  return allowed.includes(origin);
+}
+
 function clientIp(request) {
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) return forwarded.split(',')[0].trim();
@@ -69,6 +88,11 @@ export function onRequestGet() {
 }
 
 export async function onRequestPost({ request, env }) {
+  if (!isAllowedOrigin(request, env)) {
+    // 扫描器/脚本刷接口通常不带（或不带正确）Origin，直接挡在边缘，不打到源站
+    return json({ code: 403, message: '来源不被允许' }, 403);
+  }
+
   if (await isRateLimited(request, env)) {
     return json({ code: 429, message: '请求过于频繁，请稍后再试' }, 429);
   }
