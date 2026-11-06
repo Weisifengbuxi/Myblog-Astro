@@ -201,7 +201,8 @@ const Navigator = memo(function Navigator({ currentPath, locale = defaultLocale 
           title={t(locale, 'nav.travellingsTitle')}
           className="size-10 flex-center cursor-pointer rounded-full transition-[background-color,scale] duration-200 ease-out-quart hover:bg-current/15 active:scale-90"
         >
-          <Icon icon="ri:train-line" className="size-[1.15rem]" />
+          {/* 图标尺寸对齐旁边的搜索按钮（size-7） */}
+          <Icon icon="ri:train-line" className="size-7" />
         </a>
         <SearchTrigger />
         <div className="tablet:hidden flex-center">
