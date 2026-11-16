@@ -35,6 +35,7 @@ interface ContainerOptions {
 
 /** Maximum nesting depth for recursive container processing */
 const MAX_CONTAINER_DEPTH = 10;
+const NOTE_TYPES = '(?:default|primary|info|success|warning|danger)';
 
 /**
  * Process container syntax (:::, +++, ;;;) and Hexo tags in raw markdown text.
@@ -128,7 +129,7 @@ async function processContainers(text: string, opts: ContainerOptions = {}, _dep
     }
 
     // ::: note block
-    const noteMatch = containers && line.match(/^:::(\w+)(?:\s+(no-icon))?\s*$/);
+    const noteMatch = containers && line.match(new RegExp(`^:::(${NOTE_TYPES})(?:\\s+(no-icon))?\\s*$`));
     if (noteMatch) {
       await flushTabs();
       const style = noteMatch[1];
@@ -143,7 +144,7 @@ async function processContainers(text: string, opts: ContainerOptions = {}, _dep
             i++;
             break;
           }
-        } else if (/^:::(\w+)(?:\s+(no-icon))?\s*$/.test(lines[i])) {
+        } else if (new RegExp(`^:::${NOTE_TYPES}(?:\\s+(no-icon))?\\s*$`).test(lines[i])) {
           depth++;
         }
         innerLines.push(lines[i]);
