@@ -4,9 +4,16 @@
     "active_num": 14,
     "error_num": 3,
     "article_num": 241,
-    "last_updated_time": "2026-11-21 13:54:43"
+    "last_updated_time": "2026-11-21 22:36:07"
   },
   "article_data": [
+    {
+      "title": "凌晨一点，我在厨房开椰子",
+      "created": "2026-11-21 16:00",
+      "link": "https://dusays.com/posts/899/",
+      "author": "Teacher Du",
+      "avatar": "https://cdn.dusays.com/favicon.ico"
+    },
     {
       "title": "网站诊断：喂数据，验报告",
       "created": "2026-11-18 06:00",
@@ -466,13 +473,6 @@
       "title": "WordPress 性能优化实战:从 5 秒加载到 1 秒的蜕变",
       "created": "2026-07-30 16:00",
       "link": "https://dusays.com/posts/880/",
-      "author": "Teacher Du",
-      "avatar": "https://cdn.dusays.com/favicon.ico"
-    },
-    {
-      "title": "Hugo 静态博客从零部署:5 分钟搭建自己的个人网站",
-      "created": "2026-07-24 16:00",
-      "link": "https://dusays.com/posts/879/",
       "author": "Teacher Du",
       "avatar": "https://cdn.dusays.com/favicon.ico"
     },
