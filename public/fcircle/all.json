@@ -4,7 +4,7 @@
     "active_num": 15,
     "error_num": 2,
     "article_num": 261,
-    "last_updated_time": "2026-11-25 01:44:23"
+    "last_updated_time": "2026-11-25 16:26:30"
   },
   "article_data": [
     {
@@ -20,6 +20,20 @@
       "link": "https://dusays.com/posts/899/",
       "author": "Teacher Du",
       "avatar": "https://cdn.dusays.com/favicon.ico"
+    },
+    {
+      "title": "重复内容判定：为什么只换表述救不了页面",
+      "created": "2026-11-20 02:30",
+      "link": "https://mfy-lifeline.com/posts/a83e5f21/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
+    },
+    {
+      "title": "GSC里这三类搜索词，各拿什么页面接",
+      "created": "2026-11-19 09:00",
+      "link": "https://mfy-lifeline.com/posts/f7a3c9d1/",
+      "author": "Lifeline",
+      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "网站诊断：喂数据，验报告",
@@ -272,20 +286,6 @@
       "link": "https://blog.zhheo.com/p/b1p1a4z2.html",
       "author": "张洪Heo",
       "avatar": "https://img.zhheo.com/i/67d8fa75943e4.webp"
-    },
-    {
-      "title": "谷歌SEO新手该用哪些工具",
-      "created": "2026-10-17 14:10",
-      "link": "https://mfy-lifeline.com/posts/cf9e2cfd/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
-    },
-    {
-      "title": "老站做GEO，旧SEO内容要重写吗",
-      "created": "2026-10-17 08:30",
-      "link": "https://mfy-lifeline.com/posts/6de28ddf/",
-      "author": "Lifeline",
-      "avatar": "http://p2.music.126.net/x55FPD2xWTqmMIFjDKXogw==/109951163513084093.jpg?param=130y130"
     },
     {
       "title": "说说广场 API 0.31.0 版的调用代码说明",
